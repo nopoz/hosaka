@@ -46,16 +46,26 @@ function getRegistries() {
 function getTagCandidates(container, tags, logContainer, imageDigestMap = new Map()) {
     let filteredTags = tags;
 
+    logContainer.debug(`[TagFilter] Starting with ${tags.length} tags from registry`);
+    logContainer.debug(`[TagFilter] Current tag: ${container.image.tag.value}, semver: ${container.image.tag.semver}`);
+    logContainer.debug(`[TagFilter] includeTags: ${container.includeTags}, transformTags: ${container.transformTags}`);
+
     // Match include tag regex
     if (container.includeTags) {
         const includeTagsRegex = new RegExp(container.includeTags);
+        const beforeCount = filteredTags.length;
         filteredTags = filteredTags.filter((tag) => includeTagsRegex.test(tag));
+        logContainer.debug(`[TagFilter] After include regex: ${filteredTags.length} tags (was ${beforeCount})`);
+        if (filteredTags.length > 0 && filteredTags.length <= 10) {
+            logContainer.debug(`[TagFilter] Matching tags: ${filteredTags.join(', ')}`);
+        }
     }
 
     const matchingDigest = imageDigestMap?.get(container.image.digest.value);
-    
+
     if (matchingDigest) {
         filteredTags = tags.filter((tag) => matchingDigest.tags.includes(tag));
+        logContainer.debug(`[TagFilter] After digest map filter: ${filteredTags.length} tags`);
     } else {
         // Fallback exclusion of "latest" unless it matches `includeTags`
         if (container.includeTags && !new RegExp(container.includeTags).test('latest')) {
@@ -67,11 +77,13 @@ function getTagCandidates(container, tags, logContainer, imageDigestMap = new Ma
         logContainer.warn('No tags found after filtering. Check regex filters.');
     }
 
+    const beforeSemver = filteredTags.length;
     filteredTags = filteredTags
         .filter((tag) => parseSemver(transformTag(container.transformTags, tag)) !== null)
         .sort((t1, t2) =>
             isGreaterSemver(transformTag(container.transformTags, t2), transformTag(container.transformTags, t1)) ? 1 : -1
         );
+    logContainer.debug(`[TagFilter] After semver filter + sort: ${filteredTags.length} tags (was ${beforeSemver})`);
 
     return filteredTags;
 }
@@ -160,13 +172,15 @@ function pruneOldContainers(newContainers, containersFromTheStore) {
         // If there are no new containers for this key, check before removing
         if (newContainersForKey.length === 0) {
             for (const containerItem of containersInStore) {
-                // Don't delete containers that have update info - they might be in the process
-                // of being recreated (race condition during updates)
+                // Don't delete containers that have update info AND are still running -
+                // they might be in the process of being recreated (race condition during updates).
+                // Stopped/exited containers should be pruned even if they have update info.
                 const hasUpdateInfo = containerItem.updateKind &&
                                      containerItem.updateKind.remoteValue &&
                                      containerItem.updateAvailable;
-                if (hasUpdateInfo) {
-                    console.log(`Preserving container ${containerItem.id} for ${containerItem.name} - has pending update info`);
+                const isRunning = containerItem.status === 'running';
+                if (hasUpdateInfo && isRunning) {
+                    console.log(`Preserving container ${containerItem.id} for ${containerItem.name} - has pending update info and is still running`);
                     continue;
                 }
                 console.log(`Removing orphaned container ${containerItem.id} for ${containerItem.name}`);
