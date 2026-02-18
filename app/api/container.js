@@ -127,25 +127,35 @@ async function installContainer(req, res) {
 
     try {
         const trigger = initializeTrigger(triggerType, triggerConfig);
-        await trigger.install(container);
+        const result = await trigger.install(container);
 
-        // Set notification in container
-        container.notification = {
-            message: `Update for ${container.name} completed successfully.`,
-            level: 'success',
-        };
-        // Update the container in the store
-        storeContainer.updateContainer(container);
+        // Use the new container ID if the container was recreated during the update
+        const updatedContainerId = result?.newContainerId || id;
+        const updatedContainer = storeContainer.getContainer(updatedContainerId);
+
+        if (updatedContainer) {
+            updatedContainer.notification = {
+                message: `Update for ${updatedContainer.name} completed successfully.`,
+                level: 'success',
+            };
+            storeContainer.updateContainer(updatedContainer);
+        }
 
         res.status(200).json({ success: true });
     } catch (e) {
         console.error(`Error installing container ${id}: ${e.message}`);
 
-        container.notification = {
-            message: `Update for ${container.name} failed: ${e.message}`,
-            level: 'error',
-        };
-        storeContainer.updateContainer(container);
+        // Try to find the current container (may have a new ID after partial update)
+        const currentContainer = storeContainer.getContainer(id)
+            || storeContainer.getContainers({ name: container.name, watcher: container.watcher })[0];
+
+        if (currentContainer) {
+            currentContainer.notification = {
+                message: `Update for ${container.name} failed: ${e.message}`,
+                level: 'error',
+            };
+            storeContainer.updateContainer(currentContainer);
+        }
 
         res.status(500).json({
             error: `Error when installing container ${id} (${e.message})`,
