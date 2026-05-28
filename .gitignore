@@ -102,3 +102,12 @@ typings/
 # ignore Docker compose files in root
 docker-compose.yml
 
+# Ignore all top-level dotfiles and dot-directories by default.
+# Allowlist tracked ones below. Keeps local-only tooling, editor configs,
+# and assistant scratch dirs out of the repo without naming them.
+/.*
+!/.codeclimate.yml
+!/.dockerignore
+!/.github
+!/.gitignore
+!/.travis.yml
