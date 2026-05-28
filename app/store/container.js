@@ -13,6 +13,33 @@ const {
 let containers;
 
 /**
+ * How long a "success" notification is kept before it is considered stale.
+ * Success notifications are transient UI feedback for a completed update; they
+ * must not linger (or pin store rows) indefinitely.
+ */
+const SUCCESS_NOTIFICATION_TTL_MS = 10 * 60 * 1000;
+
+/**
+ * Drop stale success notifications from a container (mutates in place).
+ * Legacy success notifications without a timestamp are treated as stale.
+ * @param {Object} container
+ * @returns {Object} the same container
+ */
+function clearStaleNotification(container) {
+    const { notification } = container;
+    if (notification && notification.level === 'success') {
+        const age = notification.timestamp
+            ? Date.now() - notification.timestamp
+            : Number.POSITIVE_INFINITY;
+        if (age > SUCCESS_NOTIFICATION_TTL_MS) {
+            // eslint-disable-next-line no-param-reassign
+            delete container.notification;
+        }
+    }
+    return container;
+}
+
+/**
  * Create container collections.
  * @param db
  */
@@ -71,16 +98,11 @@ function updateContainer(container) {
 }
 
 /**
- * Get unique container key combining name, watcher, and registry.
- * @param {Object} container
- * @returns {String}
- */
-function getContainerKey(container) {
-    return `${container.name}-${container.watcher}-${container.image.registry.name}`;
-}
-
-/**
  * Get all (filtered) containers.
+ *
+ * The store is authoritative per watcher (reconciled each watch cycle), so it
+ * holds exactly one row per running container. No name-based deduplication is
+ * performed here; doing so could surface a stale row over the live one.
  * @param {Object} query
  * @returns {Array}
  */
@@ -94,104 +116,18 @@ function getContainers(query = {}) {
         return [];
     }
 
-    // Get and filter containers
-    const containerList = containers.find(filter).map((item) => validateContainer(item.data));
-    
-    // Only deduplicate if not filtering by specific criteria
-    if (!query.id && !query.watcher) {
-        const uniqueContainers = Object.values(
-            containerList.reduce((acc, container) => {
-                const key = getContainerKey(container);
-                const existing = acc[key];
-                
-                // If no existing container with this key, add this one
-                if (!existing) {
-                    acc[key] = container;
-                    return acc;
-                }
-                
-                // Use a clear, prioritized approach to select the best container:
-                
-                // 1. Prefer running containers over non-running
-                if (container.status === 'running' && existing.status !== 'running') {
-                    acc[key] = container;
-                    return acc;
-                }
-                
-                if (existing.status === 'running' && container.status !== 'running') {
-                    return acc; // Keep existing
-                }
-                
-                // 2. If update status differs, prefer containers that don't need updates
-                if (container.updateAvailable === false && existing.updateAvailable === true) {
-                    acc[key] = container;
-                    return acc;
-                }
-                
-                if (existing.updateAvailable === false && container.updateAvailable === true) {
-                    return acc; // Keep existing
-                }
-                
-                // 3. If both are running or both stopped and update status is the same,
-                // prefer the one with the newer version
-                if (container.image && existing.image) {
-                    // If tags are different, try to make an informed choice
-                    if (container.image.tag && existing.image.tag && 
-                        container.image.tag.value !== existing.image.tag.value) {
-                        
-                        // If both containers use semver tags, compare them properly
-                        if (container.image.tag.semver && existing.image.tag.semver) {
-                            // Choose the container with the more recent tag value
-                            // This is a simplistic approach; proper semver comparison would be better
-                            if (container.image.tag.value > existing.image.tag.value) {
-                                acc[key] = container;
-                            }
-                            return acc;
-                        }
-                    }
-                    
-                    // If we couldn't decide based on tags, use image ID as last resort
-                    // This assumes newer images have "greater" IDs (not always true but often works)
-                    if (container.image.id && existing.image.id && 
-                        container.image.id !== existing.image.id) {
-                        
-                        // If the container has been recently updated from the UI
-                        if (container.notification && 
-                            container.notification.level === 'success' && 
-                            container.notification.message && 
-                            container.notification.message.includes('completed successfully')) {
-                            acc[key] = container;
-                            return acc;
-                        }
-                        
-                        // Otherwise try to compare image IDs (imperfect but can help)
-                        if (container.image.id > existing.image.id) {
-                            acc[key] = container;
-                        }
-                    }
-                }
-                
-                return acc;
-            }, {})
-        );
-        return uniqueContainers.sort(
-            byValues([
-                [(container) => container.watcher, byString()],
-                [(container) => container.image.registry.name, byString()],
-                [(container) => container.name, byString()],
-                [(container) => container.image.tag.value, byString()],
-            ])
-        );
-    }
-    
-    // Return full list when filtering
+    // Get, validate and drop stale success notifications
+    const containerList = containers
+        .find(filter)
+        .map((item) => clearStaleNotification(validateContainer(item.data)));
+
     return containerList.sort(
         byValues([
             [(container) => container.watcher, byString()],
             [(container) => container.image.registry.name, byString()],
             [(container) => container.name, byString()],
             [(container) => container.image.tag.value, byString()],
-        ])
+        ]),
     );
 }
 
@@ -206,7 +142,7 @@ function getContainer(id) {
     });
 
     if (container !== null) {
-        return validateContainer(container.data);
+        return clearStaleNotification(validateContainer(container.data));
     }
     return undefined;
 }

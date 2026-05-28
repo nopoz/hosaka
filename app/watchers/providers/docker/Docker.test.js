@@ -576,15 +576,50 @@ test('watch should log error when an error occurs when listing containers fails'
     expect(spylog).toHaveBeenCalledWith('Error when trying to get the list of the containers to watch (Failure!!!)');
 });
 
-test('pruneOldContainers should prune old containers', () => {
-    const oldContainers = [{ id: 1 }, { id: 2 }];
-    const newContainers = [{ id: 1 }];
-    expect(Docker.__get__('getOldContainers')(newContainers, oldContainers)).toEqual([{ id: 2 }]);
+const stubLogger = { info: () => {}, debug: () => {}, warn: () => {} };
+
+test('carryUpdateState should transfer metadata and set success notification on target match', () => {
+    const carryUpdateState = Docker.__get__('carryUpdateState');
+    const oldRow = { includeTags: '^\\d+$', updateKind: { remoteValue: '2.0.0' } };
+    const newLive = { name: 'test', image: { tag: { value: '2.0.0' } } };
+    carryUpdateState(oldRow, newLive);
+    expect(newLive.includeTags).toEqual('^\\d+$');
+    expect(newLive.notification).toEqual(expect.objectContaining({ level: 'success' }));
 });
 
-test('pruneOldContainers should operate when lists are empty or undefined', () => {
-    expect(Docker.__get__('getOldContainers')([], [])).toEqual([]);
-    expect(Docker.__get__('getOldContainers')(undefined, undefined)).toEqual([]);
+test('carryUpdateState should not set notification when tag does not match target', () => {
+    const carryUpdateState = Docker.__get__('carryUpdateState');
+    const oldRow = { updateKind: { remoteValue: '2.0.0' } };
+    const newLive = { name: 'test', image: { tag: { value: '1.0.0' } } };
+    carryUpdateState(oldRow, newLive);
+    expect(newLive.notification).toBeUndefined();
+});
+
+test('reconcileStore should prune store rows that are no longer live', () => {
+    const reconcileStore = Docker.__get__('reconcileStore');
+    jest.spyOn(storeContainer, 'getContainers').mockReturnValue([
+        { id: '1', name: 'a' },
+        { id: '2', name: 'b' },
+    ]);
+    const spyDelete = jest.spyOn(storeContainer, 'deleteContainer').mockImplementation(() => {});
+    reconcileStore('local', [{ id: '1', name: 'a' }], stubLogger);
+    expect(spyDelete).toHaveBeenCalledWith('2');
+    expect(spyDelete).toHaveBeenCalledTimes(1);
+});
+
+test('reconcileStore should carry state forward on recreation then prune old row', () => {
+    const reconcileStore = Docker.__get__('reconcileStore');
+    jest.spyOn(storeContainer, 'getContainers').mockReturnValue([
+        {
+            id: 'old', name: 'a', updateKind: { remoteValue: '2.0.0' }, includeTags: 'x',
+        },
+    ]);
+    const spyDelete = jest.spyOn(storeContainer, 'deleteContainer').mockImplementation(() => {});
+    const live = { id: 'new', name: 'a', image: { tag: { value: '2.0.0' } } };
+    reconcileStore('local', [live], stubLogger);
+    expect(spyDelete).toHaveBeenCalledWith('old');
+    expect(live.includeTags).toEqual('x');
+    expect(live.notification.level).toEqual('success');
 });
 
 test('getRegistries should return all registered registries when called', () => {

@@ -137,6 +137,7 @@ async function installContainer(req, res) {
             updatedContainer.notification = {
                 message: `Update for ${updatedContainer.name} completed successfully.`,
                 level: 'success',
+                timestamp: Date.now(),
             };
             storeContainer.updateContainer(updatedContainer);
         }
@@ -422,207 +423,32 @@ function setupScriptHandlers(id, containerName) {
  * @param {Object} res
  */
 async function refreshContainer(req, res) {
-  const { name, watcher } = req.query;
+    const { name, watcher } = req.query;
+    const watcherName = (watcher || '').trim() || 'local';
 
-  // Normalize watcher name if empty (treat as local)
-  let watcherName = watcher || '';
-  if (!watcherName || watcherName.trim() === '') {
-    watcherName = 'local';
-  }
-
-  console.log(`Refreshing container ${name} (watcher: ${watcherName})`);
-
-  // Handle local watcher vs remote watcher instances
-  const watcherInstance = watcherName === 'local' ?
-    getWatchers()['watcher.docker.local'] :
-    getWatchers()[`watcher.docker.${watcherName}`];
-
-  if (!watcherInstance) {
-    return res.status(404).json({ error: `Watcher ${watcherName} not found` });
-  }
-
-  try {
-    // Get containers directly from Docker API (source of truth)
-    const dockerContainers = await watcherInstance.dockerApi.listContainers({
-      filters: {
-        name: [name]
-      }
-    });
-
-    if (dockerContainers.length === 0) {
-      return res.status(404).json({ error: `Container ${name} not found in Docker` });
+    const watcherInstance = getWatchers()[`watcher.docker.${watcherName}`];
+    if (!watcherInstance) {
+        return res.status(404).json({ error: `Watcher ${watcherName} not found` });
     }
 
-    // Find the running container
-    const runningContainer = dockerContainers.find(c =>
-      c.State === 'running' &&
-      c.Names.some(n => n.replace('/', '') === name)
-    );
+    try {
+        // Re-list live containers for this watcher. getContainers() reconciles the
+        // store against Docker (carrying update state across any recreation), so a
+        // refresh is just: rebuild the live list, then re-watch the matching one.
+        const liveContainers = await watcherInstance.getContainers();
+        const liveContainer = liveContainers.find((c) => c.name === name);
 
-    if (!runningContainer) {
-      return res.status(404).json({ error: `No running container named ${name} found` });
-    }
-
-    // Get all existing containers with this name from our store
-    const existingContainers = storeContainer.getContainers({
-      name: name
-    }).filter(c => {
-      const cWatcher = c.watcher || '';
-      return watcherName === 'local' ?
-        (!cWatcher || cWatcher === 'local') :
-        (cWatcher === watcherName);
-    });
-
-    // Find the container in store with update information
-    // Note: Don't require 'result' as it may not be set yet after an update
-    const containerWithUpdateInfo = existingContainers.find(c =>
-      c.updateKind && c.updateKind.remoteValue
-    );
-
-    console.log(`Found ${existingContainers.length} existing containers in store`);
-    console.log(`Container with update info: ${containerWithUpdateInfo ? containerWithUpdateInfo.id : 'none'}`);
-    console.log(`Running container from Docker: ${runningContainer.Id}`);
-
-    // Check if the running container already exists in our store
-    const existingRunningContainer = existingContainers.find(c => c.id === runningContainer.Id);
-
-    let updatedContainer;
-
-    if (existingRunningContainer) {
-      // Container exists in store - try watchContainer first, fallback to addImageDetailsToContainer
-      console.log(`Container ${runningContainer.Id} exists in store, attempting to refresh`);
-
-      // Prepare the container with any update info we need to preserve
-      const containerToWatch = { ...existingRunningContainer };
-
-      // If this container doesn't have update info but another one does, transfer it
-      if ((!containerToWatch.updateKind || !containerToWatch.updateKind.remoteValue) &&
-          containerWithUpdateInfo && containerWithUpdateInfo.id !== existingRunningContainer.id) {
-        console.log(`Transferring update info from ${containerWithUpdateInfo.id} to ${existingRunningContainer.id}`);
-        containerToWatch.updateKind = containerWithUpdateInfo.updateKind;
-        containerToWatch.result = containerWithUpdateInfo.result;
-        transferContainerMetadata(containerWithUpdateInfo, containerToWatch);
-      }
-
-      // Check if the existing container has a valid image structure
-      const hasValidImage = existingRunningContainer.image &&
-                           existingRunningContainer.image.tag &&
-                           existingRunningContainer.image.registry;
-
-      if (hasValidImage) {
-        // Use watchContainer with skipRegistryCheck=true to avoid rate limiting
-        try {
-          const containerReport = await watcherInstance.watchContainer(containerToWatch, true);
-          updatedContainer = containerReport.container;
-        } catch (watchError) {
-          console.warn(`watchContainer failed: ${watchError.message}, falling back to addImageDetailsToContainer`);
-          updatedContainer = null;
+        if (!liveContainer) {
+            return res.status(404).json({ error: `Container ${name} not found in Docker` });
         }
-      }
 
-      // If watchContainer failed or container was invalid, rebuild from Docker
-      if (!updatedContainer || updatedContainer.error) {
-        console.log(`Rebuilding container ${runningContainer.Id} from Docker data`);
-        updatedContainer = await watcherInstance.addImageDetailsToContainer(runningContainer);
-
-        if (updatedContainer) {
-          // Transfer update info
-          if (containerWithUpdateInfo) {
-            updatedContainer.updateKind = containerWithUpdateInfo.updateKind;
-            updatedContainer.result = containerWithUpdateInfo.result;
-            transferContainerMetadata(containerWithUpdateInfo, updatedContainer);
-          }
-          // Save to store
-          updatedContainer = storeContainer.updateContainer(updatedContainer);
-        }
-      }
-
-      // Check if we should mark as updated (tag matches remote value)
-      if (updatedContainer && updatedContainer.updateKind && updatedContainer.updateKind.remoteValue) {
-        const currentTag = updatedContainer.image?.tag?.value;
-        if (currentTag === updatedContainer.updateKind.remoteValue) {
-          console.log(`Container ${name} is now at target version ${currentTag}`);
-          updatedContainer.updateAvailable = false;
-          updatedContainer.updateKind.localValue = currentTag;
-        }
-      }
-
-    } else {
-      // This is a new container (container was recreated with new ID)
-      console.log(`Container ${runningContainer.Id} is new, building from Docker data`);
-
-      // Use addImageDetailsToContainer to properly build the container object
-      updatedContainer = await watcherInstance.addImageDetailsToContainer(runningContainer);
-
-      if (!updatedContainer) {
-        return res.status(500).json({ error: `Failed to get container details for ${name}` });
-      }
-
-      // Transfer update info from old container if available
-      if (containerWithUpdateInfo) {
-        console.log(`Transferring update info from old container ${containerWithUpdateInfo.id}`);
-
-        updatedContainer.updateKind = containerWithUpdateInfo.updateKind;
-        updatedContainer.result = containerWithUpdateInfo.result;
-
-        // Transfer metadata
-        transferContainerMetadata(containerWithUpdateInfo, updatedContainer);
-
-        // Check if we should mark as updated
-        if (updatedContainer.updateKind && updatedContainer.updateKind.remoteValue) {
-          const currentTag = updatedContainer.image?.tag?.value;
-          if (currentTag === updatedContainer.updateKind.remoteValue) {
-            console.log(`New container is at target version ${currentTag}`);
-            updatedContainer.updateAvailable = false;
-            updatedContainer.updateKind.localValue = currentTag;
-          }
-        }
-      }
-
-      // Save the new container to store
-      updatedContainer = storeContainer.insertContainer(updatedContainer);
+        const containerReport = await watcherInstance.watchContainer(liveContainer);
+        return res.status(200).json(containerReport.container);
+    } catch (error) {
+        console.error(`Error refreshing container ${name}:`, error);
+        return res.status(500).json({ error: `Error refreshing container: ${error.message}` });
     }
-
-    // Add success notification
-    if (updatedContainer && !updatedContainer.notification) {
-      updatedContainer.notification = {
-        message: `Update for ${name} completed successfully.`,
-        level: 'success'
-      };
-      updatedContainer = storeContainer.updateContainer(updatedContainer);
-    }
-
-    // Clean up old containers with different IDs
-    for (const existingContainer of existingContainers) {
-      if (updatedContainer && existingContainer.id !== updatedContainer.id) {
-        console.log(`Removing outdated container ${existingContainer.id}`);
-        storeContainer.deleteContainer(existingContainer.id);
-      }
-    }
-
-    // Return the updated container
-    res.status(200).json(updatedContainer);
-
-  } catch (error) {
-    console.error(`Error refreshing container ${name}:`, error);
-    res.status(500).json({ error: `Error refreshing container: ${error.message}` });
-  }
 }
-
-/**
- * Transfer metadata from source container to target container.
- * @param {Object} source - Source container with metadata
- * @param {Object} target - Target container to receive metadata
- */
-function transferContainerMetadata(source, target) {
-  const metadataFields = ['includeTags', 'excludeTags', 'transformTags', 'linkTemplate', 'link'];
-  for (const field of metadataFields) {
-    if (source[field] !== null && source[field] !== undefined) {
-      target[field] = source[field];
-    }
-  }
-}
-
 
 /**
  * Initialize the router.

@@ -261,13 +261,10 @@ async function init() {
 
     // Register authentications
     await registerAuthentications();
-
-    // Gracefully exit when possible
-    process.on('SIGINT', deregisterAll);
-    process.on('SIGTERM', deregisterAll);
 }
 
 module.exports = {
     init,
     getState,
+    deregisterAll,
 };

@@ -114,178 +114,73 @@ function getRegistry(registryName) {
 }
 
 /**
- * Get old containers to prune.
- * @param {Array} newContainers
- * @param {Array} containersFromTheStore
- * @returns {Array}
+ * Carry non-derived state from an old (about to be pruned) store row to the
+ * new live container that replaced it after a recreation (image update).
+ *
+ * Only fields that are NOT computed by the model are transferred:
+ * - user/label metadata (filled only when the live container lacks it);
+ * - a transient success notification, when the new tag matches the update
+ *   target the old row was tracking.
+ * `updateAvailable` / `updateKind` are computed getters (see model/container.js)
+ * and self-correct from the new image tag + result, so they are never set here.
+ *
+ * @param {Object} oldRow - the previous store row (different container id)
+ * @param {Object} newLive - the freshly built live container (mutated in place)
  */
-function getOldContainers(newContainers, containersFromTheStore) {
-    if (!containersFromTheStore || !newContainers) {
-        return [];
-    }
-    return containersFromTheStore.filter((containerFromStore) => {
-        const isContainerStillToWatch = newContainers
-            .find((newContainer) => 
-                newContainer.id === containerFromStore.id ||
-                (newContainer.name === containerFromStore.name && 
-                 newContainer.watcher === containerFromStore.watcher &&
-                 newContainer.image.registry.name === containerFromStore.image.registry.name)
-            );
-        return isContainerStillToWatch === undefined;
+function carryUpdateState(oldRow, newLive) {
+    const metadataFields = ['includeTags', 'excludeTags', 'transformTags', 'linkTemplate'];
+    metadataFields.forEach((field) => {
+        if ((newLive[field] === undefined || newLive[field] === null)
+            && oldRow[field] !== undefined && oldRow[field] !== null) {
+            newLive[field] = oldRow[field];
+        }
     });
+
+    const target = oldRow.updateKind && oldRow.updateKind.remoteValue;
+    if (target && newLive.image && newLive.image.tag && newLive.image.tag.value === target) {
+        newLive.notification = {
+            message: `Update for ${newLive.name} completed successfully.`,
+            level: 'success',
+            timestamp: Date.now(),
+        };
+    }
+    return newLive;
 }
 
 /**
- * Prune old containers from the store with enhanced protection for updated containers.
- * @param newContainers - Array of containers from Docker API
- * @param containersFromTheStore - Array of containers from the store
+ * Reconcile the store for this watcher against the live Docker state.
+ *
+ * The set of live container ids reported by the host is authoritative: any
+ * store row for this watcher whose id is not live is removed. When a removed
+ * row was replaced by a recreated container with the same name but a new id
+ * (an image update), its non-derived state is carried over to the live row
+ * before the old row is deleted.
+ *
+ * @param {String} watcherName
+ * @param {Array} liveContainers - live containers built from the Docker API
+ * @param {Object} logger
  */
-function pruneOldContainers(newContainers, containersFromTheStore) {
-    console.log(`Pruning old containers (${newContainers.length} new, ${containersFromTheStore.length} in store)`);
+function reconcileStore(watcherName, liveContainers, logger) {
+    const storeRows = storeContainer.getContainers({ watcher: watcherName });
+    const liveIds = new Set(liveContainers.map((c) => c.id));
 
-    // Group containers by name+watcher for easier processing
-    const storeContainersByKey = {};
-    const newContainersByKey = {};
-    
-    // Group store containers
-    for (const container of containersFromTheStore) {
-        const key = `${container.name}_${container.watcher || 'local'}`;
-        if (!storeContainersByKey[key]) {
-            storeContainersByKey[key] = [];
+    storeRows.forEach((row) => {
+        if (liveIds.has(row.id)) {
+            return;
         }
-        storeContainersByKey[key].push(container);
-    }
-    
-    // Group new containers
-    for (const container of newContainers) {
-        const key = `${container.name}_${container.watcher || 'local'}`;
-        if (!newContainersByKey[key]) {
-            newContainersByKey[key] = [];
+        // Row is gone from Docker. If a live container shares its name, this is
+        // a recreation (new id) => carry state forward before pruning the old row.
+        const replacement = liveContainers.find(
+            (c) => c.name === row.name && c.id !== row.id,
+        );
+        if (replacement) {
+            logger.info(`Container ${row.name} recreated (${row.id} -> ${replacement.id})`);
+            carryUpdateState(row, replacement);
+        } else {
+            logger.debug(`Pruning stale container ${row.id} (${row.name})`);
         }
-        newContainersByKey[key].push(container);
-    }
-    
-    // Process each group of containers
-    for (const [key, containersInStore] of Object.entries(storeContainersByKey)) {
-        const newContainersForKey = newContainersByKey[key] || [];
-        
-        // If there are no new containers for this key, check before removing
-        if (newContainersForKey.length === 0) {
-            for (const containerItem of containersInStore) {
-                // Don't delete containers that have update info AND are still running -
-                // they might be in the process of being recreated (race condition during updates).
-                // Stopped/exited containers should be pruned even if they have update info.
-                const hasUpdateInfo = containerItem.updateKind &&
-                                     containerItem.updateKind.remoteValue &&
-                                     containerItem.updateAvailable;
-                const isRunning = containerItem.status === 'running';
-                if (hasUpdateInfo && isRunning) {
-                    console.log(`Preserving container ${containerItem.id} for ${containerItem.name} - has pending update info and is still running`);
-                    continue;
-                }
-                console.log(`Removing orphaned container ${containerItem.id} for ${containerItem.name}`);
-                storeContainer.deleteContainer(containerItem.id);
-            }
-            continue;
-        }
-        
-        // If there's only one store container, and it has update info but isn't in newContainers,
-        // we need to transfer its info to one of the new containers before deleting
-        if (containersInStore.length === 1 && 
-            containersInStore[0].updateKind && 
-            containersInStore[0].result && 
-            !newContainersForKey.some(c => c.id === containersInStore[0].id)) {
-            
-            const oldContainer = containersInStore[0];
-            const newContainer = newContainersForKey[0]; // Use the first new container
-            
-            // Check if the new container might be an update of the old one
-            if (oldContainer.image && newContainer.image && 
-                oldContainer.image.tag && newContainer.image.tag &&
-                oldContainer.image.tag.value !== newContainer.image.tag.value) {
-                
-                console.log(`Found version change for ${oldContainer.name}: ${oldContainer.image.tag.value} -> ${newContainer.image.tag.value}`);
-                
-                // Transfer update info
-                newContainer.updateKind = {
-                    ...oldContainer.updateKind,
-                    localValue: newContainer.image.tag.value
-                };
-                
-                newContainer.result = oldContainer.result;
-                
-                // Reset update status if the tag matches target
-                if (newContainer.image.tag.value === oldContainer.updateKind.remoteValue) {
-                    newContainer.updateAvailable = false;
-                } else {
-                    newContainer.updateAvailable = true;
-                }
-                
-                // Add success notification
-                newContainer.notification = {
-                    message: `Update for ${newContainer.name} completed successfully.`,
-                    level: 'success'
-                };
-                
-                // Transfer tag filtering metadata
-                // Only copy non-null properties to avoid overwriting with null
-                if (oldContainer.includeTags !== null && oldContainer.includeTags !== undefined) {
-                    newContainer.includeTags = oldContainer.includeTags;
-                }
-                if (oldContainer.excludeTags !== null && oldContainer.excludeTags !== undefined) {
-                    newContainer.excludeTags = oldContainer.excludeTags;
-                }
-                if (oldContainer.transformTags !== null && oldContainer.transformTags !== undefined) {
-                    newContainer.transformTags = oldContainer.transformTags;
-                }
-                if (oldContainer.linkTemplate !== null && oldContainer.linkTemplate !== undefined) {
-                    newContainer.linkTemplate = oldContainer.linkTemplate;
-                }
-                
-                // Save the updated new container
-                storeContainer.updateContainer(newContainer);
-            }
-        }
-        
-        // Create a set to track containers we want to keep (don't delete)
-        const containersToKeep = new Set();
-        
-        // First pass - identify containers to keep
-        for (const containerItem of containersInStore) {
-            // Check if this container exists in the new containers
-            const stillExists = newContainersForKey.some(c => c.id === containerItem.id);
-            
-            // Protection logic - retain containers with success notifications even if not found in Docker
-            // unless there's another container with the same name that matches the target version
-            const hasSuccessNotification = containerItem.notification && 
-                                          containerItem.notification.level === 'success' &&
-                                          containerItem.notification.message &&
-                                          containerItem.notification.message.includes('completed successfully');
-                                          
-            // Find if there's a matching target version container
-            const matchesTargetVersion = containerItem.updateKind && 
-                                        newContainersForKey.some(c => 
-                                            c.image.tag && 
-                                            containerItem.updateKind.remoteValue === c.image.tag.value);
-            
-            if (stillExists || (hasSuccessNotification && !matchesTargetVersion)) {
-                // Keep this container
-                containersToKeep.add(containerItem.id);
-                
-                if (hasSuccessNotification && !stillExists) {
-                    console.log(`Protecting container ${containerItem.id} with success notification for ${containerItem.name}`);
-                }
-            }
-        }
-        
-        // Second pass - delete containers not in our keep set
-        for (const containerItem of containersInStore) {
-            if (!containersToKeep.has(containerItem.id)) {
-                console.log(`Removing old container ${containerItem.id} for ${containerItem.name}`);
-                storeContainer.deleteContainer(containerItem.id);
-            }
-        }
-    }
+        storeContainer.deleteContainer(row.id);
+    });
 }
 
 function getContainerName(container) {
@@ -369,6 +264,8 @@ class Docker extends Component {
      * Init the Watcher.
      */
     init() {
+        this.stopped = false;
+        this.eventReconnectDelay = 0;
         this.initWatcher();
         if (this.configuration.watchdigest !== undefined) {
             this.log.warn('WUD_WATCHER_{watcher_name}_WATCHDIGEST environment variable is deprecated and won\'t be supported in upcoming versions');
@@ -440,6 +337,7 @@ class Docker extends Component {
      * @returns {Promise<void>}
      */
     async deregisterComponent() {
+        this.stopped = true;
         if (this.watchCron) {
             this.watchCron.stop();
             delete this.watchCron;
@@ -451,10 +349,43 @@ class Docker extends Component {
             clearTimeout(this.listenDockerEventsTimeout);
             delete this.watchCronDebounced;
         }
+        if (this.eventReconnectTimeout) {
+            clearTimeout(this.eventReconnectTimeout);
+            this.eventReconnectTimeout = undefined;
+        }
+        if (this.eventStream) {
+            try {
+                this.eventStream.destroy();
+            } catch (e) {
+                this.log.debug(`Error destroying event stream (${e.message})`);
+            }
+            this.eventStream = undefined;
+        }
         if (this.triggerWatchListener) {
             event.unregisterTriggerWatch(this.triggerWatchListener);
             delete this.triggerWatchListener;
         }
+    }
+
+    /**
+     * Schedule a reconnection to the Docker event stream with capped backoff.
+     * Important for remote watchers (TCP): if the stream drops, status updates
+     * stop silently until the next cron without this.
+     * @return {void}
+     */
+    scheduleEventReconnect() {
+        if (this.stopped || this.eventReconnectTimeout) {
+            return;
+        }
+        this.eventReconnectDelay = Math.min(
+            (this.eventReconnectDelay || 0) === 0 ? 1000 : this.eventReconnectDelay * 2,
+            60000,
+        );
+        this.log.warn(`Docker event stream lost; reconnecting in ${this.eventReconnectDelay}ms`);
+        this.eventReconnectTimeout = setTimeout(() => {
+            this.eventReconnectTimeout = undefined;
+            this.listenDockerEvents();
+        }, this.eventReconnectDelay);
     }
 
     /**
@@ -482,9 +413,29 @@ class Docker extends Component {
             if (err) {
                 this.log.warn(`Unable to listen to Docker events [${err.message}]`);
                 this.log.debug(err);
-            } else {
-                stream.on('data', (chunk) => this.onDockerEvent(chunk));
+                this.scheduleEventReconnect();
+                return;
             }
+
+            // Track the stream so it can be torn down on deregister / reconnect
+            this.eventStream = stream;
+
+            // Connection (re)established: reset backoff and resync to catch any
+            // create/destroy missed while disconnected.
+            if (this.eventReconnectDelay) {
+                this.eventReconnectDelay = 0;
+                if (this.watchCronDebounced) {
+                    this.watchCronDebounced();
+                }
+            }
+
+            stream.on('data', (chunk) => this.onDockerEvent(chunk));
+            stream.on('error', (streamErr) => {
+                this.log.warn(`Docker event stream error [${streamErr.message}]`);
+                this.scheduleEventReconnect();
+            });
+            stream.on('end', () => this.scheduleEventReconnect());
+            stream.on('close', () => this.scheduleEventReconnect());
         });
     }
 
@@ -625,68 +576,10 @@ async watchContainer(container, skipRegistryCheck = false) {
         const dockerContainer = await this.dockerApi.getContainer(container.id).inspect();
         
         if (dockerContainer.State.Status !== 'running') {
-            logContainer.info(`Container ${container.id} is not running, checking for replacement`);
-            
-            // Check if there's a replacement container running with same name
-            const containers = await this.dockerApi.listContainers({
-                filters: {
-                    name: [container.name],
-                    status: ['running']
-                }
-            });
-
-            const replacement = containers.find(c => 
-                c.Names.some(n => n.replace('/', '') === container.name)
-            );
-
-            if (replacement) {
-                logContainer.info(`Found replacement container ${replacement.Id} for ${container.name}`);
-                
-                // Get the full details for the replacement container
-                const replacementContainer = await this.addImageDetailsToContainer(replacement);
-                
-                // Check if this is an update scenario - old container has update information
-                if (container.updateAvailable && container.updateKind) {
-                    logContainer.info(`Detected container update from ${container.id} to ${replacement.Id}`);
-                    
-                    // If the old container had an update available and this is a new container
-                    // with a different image ID, this is likely the update that was applied
-                    if (replacementContainer && 
-                        replacementContainer.image.id !== container.image.id) {
-                        
-                        logContainer.info(`Transferring update info to replacement container`);
-                        
-                        // Transfer update info to the new container and reset update flags
-                        replacementContainer.updateKind = {
-                            ...container.updateKind,
-                            localValue: container.updateKind.remoteValue
-                        };
-                        replacementContainer.updateAvailable = false;
-                        
-                        // Add a success notification
-                        replacementContainer.notification = {
-                            message: `Update for ${container.name} completed successfully.`,
-                            level: 'success'
-                        };
-                        
-                        // Copy other relevant fields
-                        if (container.result) {
-                            replacementContainer.result = container.result;
-                        }
-                        if (container.link) {
-                            replacementContainer.link = container.link;
-                        }
-                        if (container.linkTemplate) {
-                            replacementContainer.linkTemplate = container.linkTemplate;
-                        }
-                    }
-                }
-                
-                // Process the replacement container
-                return this.watchContainer(replacementContainer, skipRegistryCheck);
-            }
-
-            logContainer.info(`No replacement found, removing container ${container.id}`);
+            // The container is no longer running. Remove it from the store; if it
+            // was recreated under a new id (an update), the next watch cycle's
+            // reconciliation carries its state forward to the live container.
+            logContainer.info(`Container ${container.id} is not running, removing from store`);
             storeContainer.deleteContainer(container.id);
             return { container: null, changed: false };
         }
@@ -751,19 +644,13 @@ async watchContainer(container, skipRegistryCheck = false) {
             this.log.debug(`Container: ${c.name} (${c.id}) - ${c.status}`);
         });
 
-        // Prune old containers from the store
+        // Reconcile the store against live Docker state (authoritative per watcher)
         try {
-            const containersFromTheStore = storeContainer.getContainers({ watcher: this.name });
-            const storeContainerCount = containersFromTheStore.length;
-            this.log.debug(`Found ${storeContainerCount} containers in store`);
-            
-            pruneOldContainers(containersWithImage, containersFromTheStore);
-            
-            // Verify store state after pruning
-            const afterPruneCount = storeContainer.getContainers({ watcher: this.name }).length;
-            this.log.debug(`After pruning: ${afterPruneCount} containers in store`);
+            reconcileStore(this.name, containersWithImage, this.log);
+            const afterCount = storeContainer.getContainers({ watcher: this.name }).length;
+            this.log.debug(`After reconcile: ${afterCount} containers in store`);
         } catch (e) {
-            this.log.warn(`Error when trying to prune the old containers (${e.message})`);
+            this.log.warn(`Error when trying to reconcile the store (${e.message})`);
         }
 
         // Update metrics

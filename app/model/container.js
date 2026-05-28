@@ -59,6 +59,7 @@ const schema = joi.object({
     notification: joi.object({
         message: joi.string().min(1).required(),
         level: joi.string().valid('info', 'success', 'error').required(),
+        timestamp: joi.number(),
     }).optional(),
 });
 

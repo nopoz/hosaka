@@ -21,7 +21,10 @@ if (configurationToValidate.error) {
 const configuration = configurationToValidate.value;
 
 // Loki DB
-const db = new Loki(`${configuration.path}/${configuration.file}`, { autosave: true });
+const db = new Loki(`${configuration.path}/${configuration.file}`, {
+    autosave: true,
+    autosaveInterval: 5000,
+});
 
 function createCollections() {
     app.createCollections(db);
@@ -61,6 +64,26 @@ async function init() {
 }
 
 /**
+ * Flush the store to disk.
+ * Call this on shutdown so the last writes are not lost when the process exits
+ * before the next autosave tick.
+ * @returns {Promise<void>}
+ */
+async function flush() {
+    return new Promise((resolve, reject) => {
+        db.saveDatabase((err) => {
+            if (err) {
+                log.warn(`Error when flushing store to disk (${err.message})`);
+                reject(err);
+            } else {
+                log.info('Store flushed to disk');
+                resolve();
+            }
+        });
+    });
+}
+
+/**
  * Get configuration.
  * @returns {*}
  */
@@ -70,5 +93,6 @@ function getConfiguration() {
 
 module.exports = {
     init,
+    flush,
     getConfiguration,
 };
