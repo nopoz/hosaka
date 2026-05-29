@@ -32,7 +32,6 @@ const configurationValid = {
     watchatstart: true,
 };
 
-jest.mock('request-promise-native');
 
 beforeEach(() => {
     jest.resetAllMocks();

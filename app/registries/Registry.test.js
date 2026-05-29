@@ -1,6 +1,6 @@
 const log = require('../log');
 
-jest.mock('request-promise-native');
+jest.mock('../request');
 jest.mock('../prometheus/registry', () => ({
     getSummaryTags: () => ({
         observe: () => {},

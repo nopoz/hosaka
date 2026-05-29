@@ -1,8 +1,8 @@
-const rp = require('request-promise-native');
+const rp = require('../../../request');
 const Quay = require('./Quay');
 const log = require('../../../log');
 
-jest.mock('request-promise-native');
+jest.mock('../../../request');
 rp.mockImplementation(() => ({
     token: 'token',
 }));

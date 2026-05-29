@@ -1,4 +1,4 @@
-const rp = require('request-promise-native');
+const rp = require('../../../request');
 const Hub = require('./Hub');
 
 const hub = new Hub();
@@ -8,7 +8,7 @@ hub.configuration = {
     url: 'https://registry-1.docker.io',
 };
 
-jest.mock('request-promise-native');
+jest.mock('../../../request');
 
 test('validatedConfiguration should initialize when configuration is valid', () => {
     expect(hub.validateConfiguration({

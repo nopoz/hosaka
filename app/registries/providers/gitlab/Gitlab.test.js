@@ -1,4 +1,4 @@
-const rp = require('request-promise-native');
+const rp = require('../../../request');
 const Gitlab = require('./Gitlab');
 
 const gitlab = new Gitlab();
@@ -8,7 +8,7 @@ gitlab.configuration = {
     token: 'abcdef',
 };
 
-jest.mock('request-promise-native');
+jest.mock('../../../request');
 
 test('validatedConfiguration should initialize when configuration is valid', () => {
     expect(gitlab.validateConfiguration({

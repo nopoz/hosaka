@@ -1,6 +1,6 @@
 const ECR = require('aws-sdk/clients/ecr');
 require('aws-sdk/lib/maintenance_mode_message').suppress = true; // Disable aws sdk maintenance mode message at startup
-const rp = require('request-promise-native');
+const rp = require('../../../request');
 const Registry = require('../../Registry');
 
 const ECR_PUBLIC_GALLERY_HOSTNAME = 'public.ecr.aws';

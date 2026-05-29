@@ -1,4 +1,4 @@
-const rp = require('request-promise-native');
+const rp = require('../request');
 const log = require('../log');
 const Component = require('../registry/Component');
 const { getSummaryTags } = require('../prometheus/registry');

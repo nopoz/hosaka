@@ -17,7 +17,7 @@ ecr.configuration = {
     region: 'region',
 };
 
-jest.mock('request-promise-native');
+jest.mock('../../../request');
 
 test('validatedConfiguration should initialize when configuration is valid', () => {
     expect(ecr.validateConfiguration({

@@ -1,7 +1,7 @@
 const { ValidationError } = require('joi');
-const rp = require('request-promise-native');
+const rp = require('../../../request');
 
-jest.mock('request-promise-native');
+jest.mock('../../../request');
 const Apprise = require('./Apprise');
 
 const apprise = new Apprise();

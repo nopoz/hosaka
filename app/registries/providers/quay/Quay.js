@@ -1,4 +1,4 @@
-const rp = require('request-promise-native');
+const rp = require('../../../request');
 const Registry = require('../../Registry');
 
 /**
