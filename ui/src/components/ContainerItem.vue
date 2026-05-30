@@ -1,44 +1,43 @@
 <template>
   <v-card>
-    <v-app-bar
+    <v-toolbar
       flat
-      dense
-      tile
+      density="compact"
       @click="collapseDetail()"
       style="cursor: pointer"
     >
       <v-toolbar-title class="text-body-3">
-        <v-chip label color="info" outlined disabled
-          ><v-icon left v-if="$vuetify.breakpoint.mdAndUp">mdi-update</v-icon
+        <v-chip label color="info" variant="outlined" disabled
+          ><v-icon start v-if="$vuetify.display.mdAndUp">mdi-update</v-icon
           >{{ container.watcher }}
         </v-chip>
         /
-        <span v-if="$vuetify.breakpoint.mdAndUp && !selfhstContainerIconUrl">
-          <v-chip label color="info" outlined disabled
-            ><v-icon left v-if="$vuetify.breakpoint.mdAndUp">{{
+        <span v-if="$vuetify.display.mdAndUp && !selfhstContainerIconUrl">
+          <v-chip label color="info" variant="outlined" disabled
+            ><v-icon start v-if="$vuetify.display.mdAndUp">{{
               registryIcon
             }}</v-icon
             >{{ container.image.registry.name }}
           </v-chip>
           /
         </span>
-        <v-chip label color="info" outlined disabled>
-          <span v-if="$vuetify.breakpoint.mdAndUp">
+        <v-chip label color="info" variant="outlined" disabled>
+          <span v-if="$vuetify.display.mdAndUp">
             <img
               :src="selfhstContainerIconUrl"
               style="width: 24px; height: 24px"
-              class="v-icon v-icon--left"
+              class="v-icon v-icon--start"
               v-if="isSelfhstContainerIcon"
             />
-            <v-icon left v-else>
+            <v-icon start v-else>
               {{ containerIcon }}
             </v-icon>
           </span>
           {{ container.displayName }}
         </v-chip>
-        <span v-if="$vuetify.breakpoint.mdAndUp">
+        <span v-if="$vuetify.display.mdAndUp">
           :
-          <v-chip label outlined color="info" disabled>
+          <v-chip label variant="outlined" color="info" disabled>
             {{ container.image.tag.value }}
           </v-chip>
         </span>
@@ -48,110 +47,109 @@
         v-if="(container.install === true || container.install === 'multiple') && container.updateAvailable"
         label
         color="success"
-        outlined
+        variant="outlined"
         @click.stop="installContainer"
         class="mr-1"
       >
         Update
       </v-chip>
-      <v-tooltip bottom v-if="$vuetify.breakpoint.mdAndUp">
-        <template v-slot:activator="{ on, attrs }">
+      <v-tooltip location="bottom" v-if="$vuetify.display.mdAndUp">
+        <template v-slot:activator="{ props }">
           <v-chip
             v-if="container.updateAvailable"
             label
-            outlined
+            variant="outlined"
             :color="newVersionClass"
-            v-bind="attrs"
-            v-on="on"
+            v-bind="props"
             @click="
               copyToClipboard('container new version', newVersion);
               $event.stopImmediatePropagation();
             "
           >
             {{ newVersion }}
-            <v-icon right small>mdi-clipboard-outline</v-icon>
+            <v-icon end size="small">mdi-clipboard-outline</v-icon>
           </v-chip>
         </template>
         <span class="text-caption">Copy to clipboard</span>
       </v-tooltip>
       <v-icon>{{ showDetail ? "mdi-chevron-up" : "mdi-chevron-down" }}</v-icon>
-    </v-app-bar>
+    </v-toolbar>
     <v-expand-transition>
       <div v-show="showDetail">
-        <v-tabs
-          :icons-and-text="$vuetify.breakpoint.mdAndUp"
-          fixed-tabs
-          v-model="tab"
-          ref="tabs"
-        >
+        <v-tabs fixed-tabs v-model="tab" ref="tabs">
           <v-tab>
-            <span v-if="$vuetify.breakpoint.mdAndUp">Container</span>
+            <span v-if="$vuetify.display.mdAndUp">Container</span>
             <img
               :src="selfhstContainerIconUrl"
               style="width: 24px; height: 24px"
-              class="v-icon v-icon--left"
+              class="v-icon v-icon--start"
               v-if="isSelfhstContainerIcon"
             />
-            <v-icon left v-else>
+            <v-icon start v-else>
               {{ containerIcon }}
             </v-icon>
           </v-tab>
           <v-tab>
-            <span v-if="$vuetify.breakpoint.mdAndUp">Image</span>
+            <span v-if="$vuetify.display.mdAndUp">Image</span>
             <v-icon>mdi-package-variant-closed</v-icon>
           </v-tab>
           <v-tab v-if="container.result">
-            <span v-if="$vuetify.breakpoint.mdAndUp">Update</span>
+            <span v-if="$vuetify.display.mdAndUp">Update</span>
             <v-icon>mdi-package-down</v-icon>
           </v-tab>
           <v-tab v-if="container.error">
-            <span v-if="$vuetify.breakpoint.mdAndUp">Error</span>
+            <span v-if="$vuetify.display.mdAndUp">Error</span>
             <v-icon>mdi-alert</v-icon>
           </v-tab>
         </v-tabs>
 
-        <v-tabs-items v-model="tab">
-          <v-tab-item>
+        <v-window v-model="tab">
+          <v-window-item>
             <container-detail :container="container" />
-          </v-tab-item>
-          <v-tab-item>
+          </v-window-item>
+          <v-window-item>
             <container-image :image="container.image" />
-          </v-tab-item>
-          <v-tab-item v-if="container.result">
+          </v-window-item>
+          <v-window-item v-if="container.result">
             <container-update
               :result="container.result"
               :semver="container.image.tag.semver"
               :update-kind="container.updateKind"
               :update-available="container.updateAvailable"
             />
-          </v-tab-item>
-          <v-tab-item v-if="container.error">
+          </v-window-item>
+          <v-window-item v-if="container.error">
             <container-error :error="container.error" />
-          </v-tab-item>
-        </v-tabs-items>
+          </v-window-item>
+        </v-window>
 
         <v-card-actions>
           <v-row>
             <v-col class="text-center">
               <v-dialog v-model="dialogDelete" width="500" v-if="deleteEnabled">
-                <template v-slot:activator="{ on, attrs }">
-                  <v-btn small color="error" outlined v-bind="attrs" v-on="on">
+                <template v-slot:activator="{ props }">
+                  <v-btn
+                    size="small"
+                    color="error"
+                    variant="outlined"
+                    v-bind="props"
+                  >
                     Delete
-                    <v-icon right>mdi-delete</v-icon>
+                    <v-icon end>mdi-delete</v-icon>
                   </v-btn>
                 </template>
 
                 <v-card class="text-center">
-                  <v-app-bar color="error" dark flat dense>
+                  <v-toolbar color="error" theme="dark" flat density="compact">
                     <v-toolbar-title class="text-body-1">
                       Delete the container?
                     </v-toolbar-title>
-                  </v-app-bar>
+                  </v-toolbar>
                   <v-card-subtitle class="text-body-2">
                     <v-row class="mt-2" no-gutters>
                       <v-col>
                         Delete
-                        <span class="font-weight-bold error--text">{{
+                        <span class="font-weight-bold text-error">{{
                           container.name
                         }}</span>
                         from the list?
@@ -163,13 +161,17 @@
                     </v-row>
                     <v-row>
                       <v-col class="text-center">
-                        <v-btn outlined @click="dialogDelete = false" small>
+                        <v-btn
+                          variant="outlined"
+                          @click="dialogDelete = false"
+                          size="small"
+                        >
                           Cancel
                         </v-btn>
                         &nbsp;
                         <v-btn
                           color="error"
-                          small
+                          size="small"
                           @click="
                             dialogDelete = false;
                             deleteContainer();
@@ -188,33 +190,38 @@
       </div>
     </v-expand-transition>
     <script-output-dialog
-    ref="scriptOutput"
-    v-model="showScriptOutput"
-    :container-id="container.id"
-    @update-complete="handleUpdateComplete"
-    @dialog-closed="handleDialogClosed"
+      ref="scriptOutput"
+      v-model="showScriptOutput"
+      :container-id="container.id"
+      @update-complete="handleUpdateComplete"
+      @dialog-closed="handleDialogClosed"
     />
-  <v-dialog
-    v-if="showUpdateProgress" 
-    v-model="showUpdateProgress"
-    persistent
-    max-width="400px"
-  >
-    <v-card>
-      <v-card-text class="pa-4">
-        <div class="d-flex align-center mb-3">
-          <v-progress-circular
-            indeterminate
-            color="primary"
-            size="24"
-            class="mr-3"
-          ></v-progress-circular>
-          <span class="text-body-1">Waiting for container update to complete...</span>
-        </div>
-        <div class="text-caption grey--text">
-          The script has completed successfully. Waiting for the container to finish updating before refreshing the view.
-        </div>
-      </v-card-text>
+    <v-dialog
+      v-if="showUpdateProgress"
+      v-model="showUpdateProgress"
+      persistent
+      max-width="400px"
+    >
+      <v-card>
+        <v-card-text class="pa-4">
+          <div class="d-flex align-center mb-3">
+            <v-progress-circular
+              indeterminate
+              color="primary"
+              size="24"
+              class="mr-3"
+            ></v-progress-circular>
+            <span class="text-body-1"
+              >Waiting for container update to complete...</span
+            >
+          </div>
+          <div class="text-caption text-grey">
+            The script has completed successfully. Waiting for the container to
+            finish updating before refreshing the view.
+          </div>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
   </v-card>
 </template>
 
@@ -225,6 +232,7 @@ import ContainerImage from "@/components/ContainerImage";
 import ContainerUpdate from "@/components/ContainerUpdate";
 import ContainerError from "@/components/ContainerError";
 import { getRegistryProviderIcon } from "@/services/registry";
+import { date, short } from "@/filters";
 import ScriptOutputDialog from './ScriptOutputDialog.vue';
 
 export default {
@@ -247,7 +255,6 @@ export default {
       showDetail: false,
       dialogDelete: false,
       tab: 0,
-      deleteEnabled: false,
       showScriptOutput: false,
       updateInProgress: false,
       showUpdateProgress: false,
@@ -258,6 +265,14 @@ export default {
     };
   },
   computed: {
+    // Reactive: $serverConfig is populated asynchronously by App.vue once
+    // authenticated, which can happen after this row has already mounted (e.g.
+    // a hard load of /containers). Reading it as a computed avoids the crash and
+    // reveals the Delete control once the feature flag arrives.
+    deleteEnabled() {
+      return this.$serverConfig?.feature?.delete ?? false;
+    },
+
     containerIcon() {
       let icon = this.container.displayIcon;
       icon = icon
@@ -317,13 +332,13 @@ export default {
         this.container.result.created &&
         this.container.image.created !== this.container.result.created
       ) {
-        newVersion = this.$options.filters.date(this.container.result.created);
+        newVersion = date(this.container.result.created);
       }
       if (this.container.updateKind) {
         newVersion = this.container.updateKind.remoteValue;
       }
       if (this.container.updateKind.kind === "digest") {
-        newVersion = this.$options.filters.short(newVersion, 15);
+        newVersion = short(newVersion, 15);
       }
       return newVersion;
     },
@@ -359,19 +374,19 @@ export default {
             'Pragma': 'no-cache'
           }
         });
-        
+
         if (response.data && !response.data.updateAvailable) {
           // Container update detected
           this.showUpdateProgress = false;
           clearInterval(this.updateCheckInterval);
-          
+
           // Show success message
-          this.$root.$emit('notify', 
-            'Container update completed successfully. Refreshing view...', 
-            'success', 
-            3000
-          );
-          
+          this.$bus.emit('notify', {
+            message: 'Container update completed successfully. Refreshing view...',
+            level: 'success',
+            timeout: 3000,
+          });
+
           // Brief delay then refresh
           setTimeout(() => {
             window.location.replace(window.location.href);
@@ -438,18 +453,18 @@ export default {
     async pollForContainerUpdate() {
         this.pollAttempts = 0;
         this.maxPollAttempts = 10;
-        
+
         // Clear any existing interval
         if (this.pollInterval) {
             clearInterval(this.pollInterval);
         }
-        
+
         this.pollInterval = setInterval(async () => {
             this.pollAttempts++;
             console.log(`Polling for container update (attempt ${this.pollAttempts}/${this.maxPollAttempts})`);
-            
+
             try {
-                // Instead of polling the old container directly, 
+                // Instead of polling the old container directly,
                 // first check if there's a container with the same name
                 const allContainersResponse = await axios.get('/api/containers', {
                     headers: {
@@ -458,32 +473,32 @@ export default {
                         'Expires': '0'
                     }
                 });
-                
+
                 // Find our container by name and watcher
-                const updatedContainer = allContainersResponse.data.find(c => 
-                    c.name === this.container.name && 
+                const updatedContainer = allContainersResponse.data.find(c =>
+                    c.name === this.container.name &&
                     c.watcher === this.container.watcher
                 );
-                
+
                 // If we found a container with the same name but different ID, it was updated
                 if (updatedContainer && updatedContainer.id !== this.container.id) {
                     console.log('Container recreated with new ID, refreshing page');
                     this.finishUpdate(true);
                     return;
                 }
-                
+
                 // If we're still looking at the same container ID, check if its image changed
                 if (updatedContainer && updatedContainer.id === this.container.id) {
                     // Check if the image has changed
-                    if (updatedContainer.image && 
-                        this.container.image && 
+                    if (updatedContainer.image &&
+                        this.container.image &&
                         updatedContainer.image.id !== this.container.image.id) {
-                        
+
                         console.log('Container image updated, refreshing page');
                         this.finishUpdate(true);
                         return;
                     }
-                    
+
                     // Check if the updateAvailable flag has been reset to false
                     if (this.container.updateAvailable && !updatedContainer.updateAvailable) {
                         console.log('Container update status reset, refreshing page');
@@ -491,7 +506,7 @@ export default {
                         return;
                     }
                 }
-                
+
                 // After max attempts, give up and just refresh the page
                 if (this.pollAttempts >= this.maxPollAttempts) {
                     console.log('Max poll attempts reached, forcing refresh');
@@ -513,25 +528,25 @@ export default {
             clearInterval(this.pollInterval);
             this.pollInterval = null;
         }
-        
+
         // Hide progress indicator
         this.showUpdateProgress = false;
-        
+
         // Show appropriate notification
         if (updateDetected) {
-            this.$root.$emit('notify', 
-                'Container update detected! Refreshing view...',
-                'success',
-                3000
-            );
+            this.$bus.emit('notify', {
+                message: 'Container update detected! Refreshing view...',
+                level: 'success',
+                timeout: 3000,
+            });
         } else {
-            this.$root.$emit('notify', 
-                'Container update completed, refreshing view...',
-                'info',
-                3000
-            );
+            this.$bus.emit('notify', {
+                message: 'Container update completed, refreshing view...',
+                level: 'info',
+                timeout: 3000,
+            });
         }
-        
+
         // Refresh the page to show updated state
         setTimeout(() => {
             window.location.replace(window.location.href);
@@ -553,8 +568,8 @@ export default {
     },
 
     copyToClipboard(kind, value) {
-      this.$clipboard(value);
-      this.$root.$emit("notify", `${kind} copied to clipboard`);
+      navigator.clipboard.writeText(value);
+      this.$bus.emit("notify", { message: `${kind} copied to clipboard` });
     },
 
     collapseDetail() {
@@ -563,8 +578,8 @@ export default {
         this.showDetail = !this.showDetail;
       }
 
-      // Hack because of a render bu on tabs inside a collapsible element
-      this.$refs.tabs.onResize();
+      // Hack because of a render bug on tabs inside a collapsible element
+      this.$refs.tabs?.onResize?.();
     },
 
     normalizeFontawesome(iconString, prefix) {
@@ -573,7 +588,11 @@ export default {
 
     async installContainer() {
       if (this.container.install === 'multiple') {
-        this.$root.$emit('notify', 'Multiple install triggers configured.', 'error', 5000);
+        this.$bus.emit('notify', {
+          message: 'Multiple install triggers configured.',
+          level: 'error',
+          timeout: 5000,
+        });
         return;
       }
 
@@ -587,16 +606,24 @@ export default {
 
       try {
         this.showScriptOutput = true;
-        this.$root.$emit('notify', `Update started for ${this.container.displayName}.`, 'info', 5000);
+        this.$bus.emit('notify', {
+          message: `Update started for ${this.container.displayName}.`,
+          level: 'info',
+          timeout: 5000,
+        });
 
         await axios.post(`/api/containers/${this.container.id}/install`);
-        
+
       } catch (error) {
         console.error('Install error:', error);
         this.updateInProgress = false;
         this.showScriptOutput = false;
         const errorMessage = error.response?.data?.error || error.message || 'Unknown error';
-        this.$root.$emit('notify', `Failed to install ${this.container.displayName}: ${errorMessage}`, 'error', 5000);
+        this.$bus.emit('notify', {
+          message: `Failed to install ${this.container.displayName}: ${errorMessage}`,
+          level: 'error',
+          timeout: 5000,
+        });
       }
     },
 
@@ -604,7 +631,7 @@ export default {
       if (this.$refs.scriptOutput?.eventSource) {
         this.$refs.scriptOutput.disconnectEventStream();
       }
-      
+
       try {
         // Trigger a watch before refreshing
         await axios.post('/api/containers/watch');
@@ -612,16 +639,16 @@ export default {
       } catch (error) {
         console.error('Error triggering watch:', error);
       }
-      
+
       // Force reload bypassing cache
       window.location.replace(window.location.href);
     }
 },
   mounted() {
-    this.deleteEnabled = this.$serverConfig.feature.delete;
-    this.$root.$on('refresh-containers', this.refreshContainer);
+    this.$bus.on('refresh-containers', this.refreshContainer);
   },
-    beforeDestroy() {
+    beforeUnmount() {
+        this.$bus.off('refresh-containers', this.refreshContainer);
         if (this.checkInterval) {
             clearInterval(this.checkInterval);
         }

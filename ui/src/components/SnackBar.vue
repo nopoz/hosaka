@@ -1,14 +1,14 @@
 <template>
   <v-snackbar
-    :value="show"
+    :model-value="show"
     :timeout="computedTimeout"
     :color="computedColor"
-    @input="closeSnackbar"
-    outlined
+    @update:model-value="closeSnackbar"
+    variant="outlined"
   >
     {{ message }}
-    <template v-slot:action="{ attrs }">
-      <v-btn text v-bind="attrs" @click="closeSnackbar">Close</v-btn>
+    <template v-slot:actions>
+      <v-btn variant="text" @click="closeSnackbar">Close</v-btn>
     </template>
   </v-snackbar>
 </template>
@@ -52,7 +52,7 @@ export default {
   },
   methods: {
     closeSnackbar() {
-      this.$root.$emit("notify:close");
+      this.$bus.emit("notify:close");
     },
   },
 };

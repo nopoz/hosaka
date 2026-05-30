@@ -14,6 +14,7 @@
 <script>
 import ConfigurationItem from "@/components/ConfigurationItem";
 import { getAllTriggers } from "@/services/trigger";
+import bus from "@/event-bus";
 
 export default {
   data() {
@@ -30,11 +31,10 @@ export default {
       const triggers = await getAllTriggers();
       next((vm) => (vm.triggers = triggers));
     } catch (e) {
-      this.$root.$emit(
-        "notify",
-        `Error when trying to load the triggers (${e.message})`,
-        "error",
-      );
+      bus.emit("notify", {
+        message: `Error when trying to load the triggers (${e.message})`,
+        level: "error",
+      });
     }
     next();
   },

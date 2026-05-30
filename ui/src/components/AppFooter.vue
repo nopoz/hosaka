@@ -1,5 +1,5 @@
 <template>
-  <v-footer app padless dark height="30px">
+  <v-footer app theme="dark" height="30px" class="pa-0">
     <v-col cols="12" class="text-center text-caption pa-0">
       {{ new Date().getFullYear() }} — WUD (version {{ version }})
     </v-col>
@@ -21,11 +21,10 @@ export default {
       const appInfos = await getAppInfos();
       this.version = appInfos.version || "unknown";
     } catch (e) {
-      this.$root.$emit(
-        "notify",
-        `Error when trying to get app version (${e.message})`,
-        "error",
-      );
+      this.$bus.emit("notify", {
+        message: `Error when trying to get app version (${e.message})`,
+        level: "error",
+      });
     }
   },
 };

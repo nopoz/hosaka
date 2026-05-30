@@ -20,17 +20,15 @@
     </v-row>
 
     <v-fade-transition group hide-on-leave mode="in-out">
-      <template v-for="container in containersFiltered">
-        <v-row :key="container.id">
-          <v-col class="pt-2 pb-2">
-            <container-item
-              :container="container"
-              @delete-container="deleteContainer(container)"
-              @container-deleted="removeContainerFromList(container)"
-            />
-          </v-col>
-        </v-row>
-      </template>
+      <v-row v-for="container in containersFiltered" :key="container.id">
+        <v-col class="pt-2 pb-2">
+          <container-item
+            :container="container"
+            @delete-container="deleteContainer(container)"
+            @container-deleted="removeContainerFromList(container)"
+          />
+        </v-col>
+      </v-row>
     </v-fade-transition>
     <v-row v-if="containersFiltered.length === 0">
       <v-card-subtitle class="text-h6">No containers found</v-card-subtitle>
@@ -42,6 +40,7 @@
 import ContainerItem from "@/components/ContainerItem";
 import ContainerFilter from "@/components/ContainerFilter";
 import { deleteContainer, getAllContainers } from "@/services/container";
+import bus from "@/event-bus";
 
 export default {
   components: {
@@ -156,11 +155,10 @@ export default {
         await deleteContainer(container.id);
         this.removeContainerFromList(container);
       } catch (e) {
-        this.$root.$emit(
-          "notify",
-          `Error when trying to delete the container (${e.message})`,
-          "error",
-        );
+        this.$bus.emit("notify", {
+          message: `Error when trying to delete the container (${e.message})`,
+          level: "error",
+        });
       }
     },
   },
@@ -188,11 +186,10 @@ export default {
         vm.containers = containers;
       });
     } catch (e) {
-      this.$root.$emit(
-        "notify",
-        `Error when trying to get the containers (${e.message})`,
-        "error",
-      );
+      bus.emit("notify", {
+        message: `Error when trying to get the containers (${e.message})`,
+        level: "error",
+      });
     }
     next();
   },

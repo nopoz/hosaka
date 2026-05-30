@@ -11,6 +11,7 @@
 <script>
 import ConfigurationItem from "@/components/ConfigurationItem";
 import { getLog } from "@/services/log";
+import bus from "@/event-bus";
 
 export default {
   components: {
@@ -39,11 +40,10 @@ export default {
       const log = await getLog();
       next((vm) => (vm.log = log));
     } catch (e) {
-      this.$root.$emit(
-        "notify",
-        `Error when trying to load the log configuration (${e.message})`,
-        "error",
-      );
+      bus.emit("notify", {
+        message: `Error when trying to load the log configuration (${e.message})`,
+        level: "error",
+      });
     }
     next();
   },

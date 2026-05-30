@@ -16,6 +16,7 @@
 <script>
 import ConfigurationItem from "@/components/ConfigurationItem";
 import { getAllAuthentications } from "@/services/authentication";
+import bus from "@/event-bus";
 
 export default {
   data() {
@@ -32,11 +33,10 @@ export default {
       const authentications = await getAllAuthentications();
       next((vm) => (vm.authentications = authentications));
     } catch (e) {
-      this.$root.$emit(
-        "notify",
-        `Error when trying to load the authentications (${e.message})`,
-        "error",
-      );
+      bus.emit("notify", {
+        message: `Error when trying to load the authentications (${e.message})`,
+        level: "error",
+      });
     }
     next();
   },

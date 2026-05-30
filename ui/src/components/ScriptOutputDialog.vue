@@ -5,12 +5,13 @@
     @click:outside="close"
     persistent
   >
-    <v-card dark>
+    <v-card theme="dark">
       <div style="background-color: #1E1E1E;">
         <div class="d-flex justify-end pa-2" style="background-color: #2D2D2D;">
           <v-btn
             icon
-            x-small
+            size="x-small"
+            variant="text"
             @click="close"
             v-if="!isComplete && !error"
           >
@@ -19,7 +20,7 @@
         </div>
 
         <v-card-text class="pa-2">
-          <pre ref="logContainer" class="log-output"><template v-for="(log, index) in logs"><span :key="index" :class="getLogClass(log)">{{log.message}}</span></template><template v-if="error">
+          <pre ref="logContainer" class="log-output"><span v-for="(log, index) in logs" :key="index" :class="getLogClass(log)">{{log.message}}</span><template v-if="error">
 <span class="error-text">Error: {{ error }}</span></template><template v-if="isComplete && scriptExitCode === 0">
 <span class="success-text">Script executed successfully</span></template></pre>
         </v-card-text>
@@ -43,7 +44,7 @@ export default {
   name: 'ScriptOutputDialog',
   
   props: {
-    value: {
+    modelValue: {
       type: Boolean,
       default: false
     },
@@ -71,16 +72,16 @@ export default {
   computed: {
     dialogVisible: {
       get() {
-        return this.value;
+        return this.modelValue;
       },
       set(value) {
-        this.$emit('input', value);
+        this.$emit('update:modelValue', value);
       }
     }
   },
 
   watch: {
-    value(newVal) {
+    modelValue(newVal) {
       if (newVal) {
         // Clear everything first
         this.resetState();
@@ -301,7 +302,7 @@ export default {
     }
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     this.disconnectEventStream();
   }
 };
@@ -327,7 +328,7 @@ export default {
 }
 
 /* Clean slate - remove Vuetify's color overrides */
-.log-output >>> .v-application {
+.log-output :deep(.v-application) {
   color: inherit !important;
 }
 
@@ -376,11 +377,11 @@ export default {
 }
 
 /* Override Vuetify's default card background */
-::v-deep .v-card {
+:deep(.v-card) {
   background-color: #1E1E1E !important;
 }
 
-::v-deep .v-card > .v-card__text {
+:deep(.v-card > .v-card-text) {
   padding: 8px;
 }
 </style>

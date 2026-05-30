@@ -14,6 +14,7 @@
 <script>
 import ConfigurationItem from "@/components/ConfigurationItem";
 import { getAllWatchers } from "@/services/watcher";
+import bus from "@/event-bus";
 
 export default {
   data() {
@@ -30,11 +31,10 @@ export default {
       const watchers = await getAllWatchers();
       next((vm) => (vm.watchers = watchers));
     } catch (e) {
-      this.$root.$emit(
-        "notify",
-        `Error when trying to load the watchers (${e.message})`,
-        "error",
-      );
+      bus.emit("notify", {
+        message: `Error when trying to load the watchers (${e.message})`,
+        level: "error",
+      });
     }
     next();
   },

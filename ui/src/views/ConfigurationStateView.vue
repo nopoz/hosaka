@@ -11,6 +11,7 @@
 <script>
 import ConfigurationItem from "@/components/ConfigurationItem";
 import { getStore } from "@/services/store";
+import bus from "@/event-bus";
 
 export default {
   components: {
@@ -36,11 +37,10 @@ export default {
       const state = await getStore();
       next((vm) => (vm.state = state));
     } catch (e) {
-      this.$root.$emit(
-        "notify",
-        `Error when trying to load the state configuration (${e.message})`,
-        "error",
-      );
+      bus.emit("notify", {
+        message: `Error when trying to load the state configuration (${e.message})`,
+        level: "error",
+      });
     }
     next();
   },

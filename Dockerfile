@@ -31,7 +31,10 @@ COPY app/package*.json ./
 RUN npm ci --omit=dev --omit=optional --no-audit --no-fund --no-update-notifier
 
 # Frontend Build Stage
-FROM base as ui-builder
+# Vite + vite-plugin-pwa service-worker minification needs a global Web Crypto,
+# which is only available unflagged from Node 19+. Build the UI on Node 20; the
+# release/backend stages stay on the Node 18 base.
+FROM node:20-alpine as ui-builder
 
 # Set working directory to UI folder
 WORKDIR /home/node/ui

@@ -1,28 +1,26 @@
 <template>
   <v-card>
-    <v-app-bar flat dense tile @click="collapse()" style="cursor: pointer">
+    <v-toolbar flat density="compact" @click="collapse()" style="cursor: pointer">
       <v-toolbar-title class="text-capitalize text-body-1">{{
         displayName
       }}</v-toolbar-title>
       <v-spacer />
       <v-icon>{{ item.icon }}</v-icon>
       <v-icon>{{ showDetail ? "mdi-chevron-up" : "mdi-chevron-down" }}</v-icon>
-    </v-app-bar>
+    </v-toolbar>
     <v-expand-transition>
       <v-card-text v-show="showDetail">
-        <v-list dense v-if="configurationItems.length > 0">
+        <v-list density="compact" v-if="configurationItems.length > 0">
           <v-list-item
             v-for="configurationItem in configurationItems"
             :key="configurationItem.key"
           >
-            <v-list-item-content>
-              <v-list-item-title class="text-capitalize">{{
-                configurationItem.key
-              }}</v-list-item-title>
-              <v-list-item-subtitle>
-                {{ configurationItem.value | formatValue }}
-              </v-list-item-subtitle>
-            </v-list-item-content>
+            <v-list-item-title class="text-capitalize">{{
+              configurationItem.key
+            }}</v-list-item-title>
+            <v-list-item-subtitle>
+              {{ formatValue(configurationItem.value) }}
+            </v-list-item-subtitle>
           </v-list-item>
         </v-list>
         <span v-else>Default configuration</span>
@@ -73,8 +71,6 @@ export default {
     collapse() {
       this.showDetail = !this.showDetail;
     },
-  },
-  filters: {
     formatValue(value) {
       return value ? value : "<empty>";
     },
