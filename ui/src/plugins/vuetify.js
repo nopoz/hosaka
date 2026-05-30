@@ -19,6 +19,9 @@ const colors = {
   secondary: "#0096C7",
   accent: "#06D6A0",
   error: "#E53935",
+  // Prerelease is the least-severe update rung; cyan keeps it distinct from
+  // the info-blue metadata chips and the major/minor/patch severity colors.
+  prerelease: "#00BCD4",
 };
 
 export default createVuetify({
