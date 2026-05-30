@@ -137,6 +137,11 @@ export default {
       if (this.sortSelected === "update-type") {
         return containers.sort((a, b) => rank(a) - rank(b) || byName(a, b));
       }
+      if (this.sortSelected === "watcher") {
+        return containers.sort(
+          (a, b) => a.watcher.localeCompare(b.watcher) || byName(a, b),
+        );
+      }
       return containers.sort(byName);
     },
   },

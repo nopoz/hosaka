@@ -127,6 +127,7 @@ export default {
       sortOptions: [
         { title: "Name", value: "name" },
         { title: "Update type", value: "update-type" },
+        { title: "Watcher", value: "watcher" },
       ],
     };
   },
