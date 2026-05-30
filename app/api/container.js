@@ -2,6 +2,11 @@ const express = require('express');
 const nocache = require('nocache');
 const storeContainer = require('../store/container');
 const registry = require('../registry');
+const {
+    registerContainerAdded,
+    registerContainerUpdated,
+    registerContainerRemoved,
+} = require('../event');
 const { getServerConfiguration, getTriggerConfigurations } = require('../configuration');
 const HttpTrigger = require('../triggers/providers/http/Http');
 const ScriptTrigger = require('../triggers/providers/script/Script');
@@ -56,6 +61,22 @@ function getTriggersWithInstall() {
 }
 
 /**
+ * Resolve the install flag shared by the REST list and the SSE stream.
+ * @returns {boolean|String} true, false, or 'multiple'.
+ */
+function getInstallEnabled() {
+    const triggersWithInstall = getTriggersWithInstall();
+    if (triggersWithInstall.length === 1) {
+        return true;
+    }
+    if (triggersWithInstall.length > 1) {
+        console.warn('Multiple triggers have install enabled; install action will be disabled.');
+        return 'multiple';
+    }
+    return false;
+}
+
+/**
  * Get all containers with 'install' flags.
  * @param {Object} req
  * @param {Object} res
@@ -71,15 +92,7 @@ function getContainers(req, res) {
         'Expires': '0'
     });
 
-    const triggersWithInstall = getTriggersWithInstall();
-    let installEnabled = false;
-
-    if (triggersWithInstall.length === 1) {
-        installEnabled = true;
-    } else if (triggersWithInstall.length > 1) {
-        installEnabled = 'multiple';
-        console.warn('Multiple triggers have install enabled; install action will be disabled.');
-    }
+    const installEnabled = getInstallEnabled();
 
     const containersWithInstallFlag = containers.map((container) => ({
         ...container,
@@ -415,6 +428,66 @@ function setupScriptHandlers(id, containerName) {
     return { onOutput, onComplete };
 }
 
+// Connected SSE clients for the live container stream. A single set of store
+// event handlers (registered once in init) fans out to every client, so the
+// number of EventEmitter listeners stays constant regardless of open tabs.
+const streamClients = new Set();
+
+/**
+ * Send a container event to every connected SSE client.
+ * @param {String} eventName added | updated | removed
+ * @param {Object} container
+ */
+function broadcastContainerEvent(eventName, container) {
+    if (streamClients.size === 0) {
+        return;
+    }
+    const payload = JSON.stringify({ ...container, install: getInstallEnabled() });
+    streamClients.forEach((client) => {
+        try {
+            client.write(`event: ${eventName}\ndata: ${payload}\n\n`);
+        } catch (e) {
+            console.warn(`Error writing to container stream: ${e.message}`);
+        }
+    });
+}
+
+/**
+ * SSE endpoint streaming live container add/update/remove events. The client
+ * keeps its list in sync without polling or full-page reloads; on (re)connect it
+ * re-fetches the full list to recover any events missed while disconnected.
+ * @param {Object} req
+ * @param {Object} res
+ */
+function streamContainers(req, res) {
+    res.writeHead(200, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+        'X-Accel-Buffering': 'no' // Disable nginx buffering
+    });
+    res.write(': connected\n\n');
+
+    streamClients.add(res);
+
+    // Heartbeat keeps the connection alive through idle proxy timeouts.
+    const heartbeat = setInterval(() => {
+        try {
+            res.write(': ping\n\n');
+        } catch (e) {
+            console.warn(`Error writing container stream heartbeat: ${e.message}`);
+        }
+    }, 25000);
+
+    const cleanup = () => {
+        clearInterval(heartbeat);
+        streamClients.delete(res);
+    };
+
+    req.on('close', cleanup);
+    req.on('error', cleanup);
+}
+
 /**
  * Force refresh a container's status and image information directly from Docker.
  * This is a more aggressive refresh that ensures the container shows the correct
@@ -455,8 +528,14 @@ async function refreshContainer(req, res) {
  * @returns {Router}
  */
 function init() {
+    // Bridge store events to all connected SSE clients (registered once).
+    registerContainerAdded((container) => broadcastContainerEvent('added', container));
+    registerContainerUpdated((container) => broadcastContainerEvent('updated', container));
+    registerContainerRemoved((container) => broadcastContainerEvent('removed', container));
+
     router.use(nocache());
     router.get('/', getContainers);
+    router.get('/stream', streamContainers);
     router.post('/watch', watchContainers);
     router.get('/:id', getContainer);
     router.delete('/:id', deleteContainer);
