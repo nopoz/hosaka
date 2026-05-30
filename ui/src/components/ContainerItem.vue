@@ -196,32 +196,6 @@
       @update-complete="handleUpdateComplete"
       @dialog-closed="handleDialogClosed"
     />
-    <v-dialog
-      v-if="showUpdateProgress"
-      v-model="showUpdateProgress"
-      persistent
-      max-width="400px"
-    >
-      <v-card>
-        <v-card-text class="pa-4">
-          <div class="d-flex align-center mb-3">
-            <v-progress-circular
-              indeterminate
-              color="primary"
-              size="24"
-              class="mr-3"
-            ></v-progress-circular>
-            <span class="text-body-1"
-              >Waiting for container update to complete...</span
-            >
-          </div>
-          <div class="text-caption text-grey">
-            The script has completed successfully. Waiting for the container to
-            finish updating before refreshing the view.
-          </div>
-        </v-card-text>
-      </v-card>
-    </v-dialog>
   </v-card>
 </template>
 
@@ -257,11 +231,6 @@ export default {
       tab: 0,
       showScriptOutput: false,
       updateInProgress: false,
-      showUpdateProgress: false,
-      updateCheckInterval: null,
-      pollInterval: null,
-      pollAttempts: 0,
-      maxPollAttempts: 30
     };
   },
   computed: {
@@ -368,201 +337,45 @@ export default {
     },
   },
 
-  methods: {
-    async checkContainerUpdate() {
-      try {
-        const response = await axios.get(`/api/containers/${this.container.id}`, {
-          headers: {
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache'
-          }
-        });
-
-        if (response.data && !response.data.updateAvailable) {
-          // Container update detected
-          this.showUpdateProgress = false;
-          clearInterval(this.updateCheckInterval);
-
-          // Show success message
-          this.$bus.emit('notify', {
-            message: 'Container update completed successfully. Refreshing view...',
-            level: 'success',
-            timeout: 3000,
-          });
-
-          // Brief delay then refresh
-          setTimeout(() => {
-            window.location.replace(window.location.href);
-          }, 2000);
-        }
-      } catch (error) {
-        console.error('Error checking container update:', error);
-      }
+  watch: {
+    // Pin this row in the parent list while the install dialog is open so a
+    // mid-script container recreation (new id over SSE) cannot remove/remount
+    // the row and destroy the dialog. Released when the dialog closes.
+    showScriptOutput(open) {
+      this.$bus.emit(open ? "container-busy" : "container-idle", {
+        name: this.container.name,
+        watcher: this.container.watcher,
+      });
     },
+  },
 
+  methods: {
     async handleUpdateComplete() {
-        console.log('[ContainerItem] Update completed');
         this.showScriptOutput = false;
-        this.showUpdateProgress = true;
+        this.updateInProgress = false;
 
         try {
-            // Wait a bit for the container to fully restart
-            await new Promise(resolve => setTimeout(resolve, 2000));
-
-            // Clear any existing notifications
+            // Clear the install notification, then re-watch the container so the
+            // backend emits its new state. The live SSE stream delivers the
+            // refreshed row to the list, so no poll or page reload is needed.
             if (this.container.notification) {
                 await axios.post(`/api/containers/${this.container.id}/clear-notification`);
             }
-
-            // Use the refresh endpoint to update container state from Docker
-            // This now uses watchContainer with skipRegistryCheck=true (no rate limiting)
-            console.log(`Triggering direct container refresh for ${this.container.name}`);
-            const refreshResponse = await axios.post('/api/containers/refresh', null, {
+            await axios.post('/api/containers/refresh', null, {
                 params: {
                     name: this.container.name,
-                    watcher: this.container.watcher
-                }
+                    watcher: this.container.watcher,
+                },
             });
-
-            const refreshedContainer = refreshResponse.data;
-            console.log('Refresh response:', refreshedContainer);
-
-            // Check if the refresh detected the update
-            const updateDetected =
-                // Container was recreated with new ID
-                (refreshedContainer.id !== this.container.id) ||
-                // Container image changed
-                (refreshedContainer.image?.id !== this.container.image?.id) ||
-                // Update flag was reset to false
-                (this.container.updateAvailable && !refreshedContainer.updateAvailable);
-
-            if (updateDetected) {
-                console.log('Update detected from refresh response, finishing update');
-                this.finishUpdate(true);
-            } else {
-                // Refresh didn't detect the update yet - poll as fallback
-                // This handles edge cases where Docker is still processing
-                console.log('Update not detected from refresh, starting poll as fallback');
-                this.pollForContainerUpdate();
-            }
         } catch (error) {
             console.error('Error during update completion:', error);
-            // On error, try polling as fallback
-            console.log('Refresh failed, trying poll as fallback');
-            this.pollForContainerUpdate();
         }
-    },
-
-    async pollForContainerUpdate() {
-        this.pollAttempts = 0;
-        this.maxPollAttempts = 10;
-
-        // Clear any existing interval
-        if (this.pollInterval) {
-            clearInterval(this.pollInterval);
-        }
-
-        this.pollInterval = setInterval(async () => {
-            this.pollAttempts++;
-            console.log(`Polling for container update (attempt ${this.pollAttempts}/${this.maxPollAttempts})`);
-
-            try {
-                // Instead of polling the old container directly,
-                // first check if there's a container with the same name
-                const allContainersResponse = await axios.get('/api/containers', {
-                    headers: {
-                        'Cache-Control': 'no-cache, no-store, must-revalidate',
-                        'Pragma': 'no-cache',
-                        'Expires': '0'
-                    }
-                });
-
-                // Find our container by name and watcher
-                const updatedContainer = allContainersResponse.data.find(c =>
-                    c.name === this.container.name &&
-                    c.watcher === this.container.watcher
-                );
-
-                // If we found a container with the same name but different ID, it was updated
-                if (updatedContainer && updatedContainer.id !== this.container.id) {
-                    console.log('Container recreated with new ID, refreshing page');
-                    this.finishUpdate(true);
-                    return;
-                }
-
-                // If we're still looking at the same container ID, check if its image changed
-                if (updatedContainer && updatedContainer.id === this.container.id) {
-                    // Check if the image has changed
-                    if (updatedContainer.image &&
-                        this.container.image &&
-                        updatedContainer.image.id !== this.container.image.id) {
-
-                        console.log('Container image updated, refreshing page');
-                        this.finishUpdate(true);
-                        return;
-                    }
-
-                    // Check if the updateAvailable flag has been reset to false
-                    if (this.container.updateAvailable && !updatedContainer.updateAvailable) {
-                        console.log('Container update status reset, refreshing page');
-                        this.finishUpdate(true);
-                        return;
-                    }
-                }
-
-                // After max attempts, give up and just refresh the page
-                if (this.pollAttempts >= this.maxPollAttempts) {
-                    console.log('Max poll attempts reached, forcing refresh');
-                    this.finishUpdate(false);
-                }
-            } catch (error) {
-                console.error('Error polling for container update:', error);
-                // Don't give up on errors, keep trying until max attempts
-                if (this.pollAttempts >= this.maxPollAttempts) {
-                    this.finishUpdate(false);
-                }
-            }
-        }, 3000);
-    },
-
-    finishUpdate(updateDetected) {
-        // Clean up polling
-        if (this.pollInterval) {
-            clearInterval(this.pollInterval);
-            this.pollInterval = null;
-        }
-
-        // Hide progress indicator
-        this.showUpdateProgress = false;
-
-        // Show appropriate notification
-        if (updateDetected) {
-            this.$bus.emit('notify', {
-                message: 'Container update detected! Refreshing view...',
-                level: 'success',
-                timeout: 3000,
-            });
-        } else {
-            this.$bus.emit('notify', {
-                message: 'Container update completed, refreshing view...',
-                level: 'info',
-                timeout: 3000,
-            });
-        }
-
-        // Refresh the page to show updated state
-        setTimeout(() => {
-            window.location.replace(window.location.href);
-        }, 1000);
     },
 
     handleDialogClosed({ success }) {
-        console.log('[ContainerItem] Dialog closed with success:', success);
         if (!success) {
-            this.stopPolling();
             this.updateInProgress = false;
             this.showScriptOutput = false;
-            this.showUpdateProgress = false;
         }
     },
 
@@ -636,15 +449,11 @@ export default {
       }
 
       try {
-        // Trigger a watch before refreshing
+        // Trigger a watch; the resulting store updates arrive over the SSE stream.
         await axios.post('/api/containers/watch');
-        await new Promise(resolve => setTimeout(resolve, 2000));
       } catch (error) {
         console.error('Error triggering watch:', error);
       }
-
-      // Force reload bypassing cache
-      window.location.replace(window.location.href);
     }
 },
   mounted() {

@@ -58,6 +58,8 @@ export default {
       updateKindSelected: "",
       updateAvailableSelected: false,
       sortSelected: "name",
+      eventSource: null,
+      busyKeys: new Set(),
     };
   },
 
@@ -192,6 +194,78 @@ export default {
     removeContainerFromList(container) {
       this.containers = this.containers.filter((c) => c.id !== container.id);
     },
+    // Identity that survives a container recreation (id changes, name+watcher
+    // does not). Used to pin a row while its install dialog is open.
+    containerKey(container) {
+      return `${container.watcher}::${container.name}`;
+    },
+    // Insert or replace a container pushed over the SSE stream. A recreated
+    // container arrives with a new id, so fall back to name+watcher matching.
+    upsertContainer(container) {
+      const byId = this.containers.findIndex((c) => c.id === container.id);
+      if (byId !== -1) {
+        this.containers.splice(byId, 1, container);
+        return;
+      }
+      const byName = this.containers.findIndex(
+        (c) => c.name === container.name && c.watcher === container.watcher,
+      );
+      if (byName !== -1) {
+        this.containers.splice(byName, 1, container);
+        return;
+      }
+      this.containers.push(container);
+    },
+    connectStream() {
+      this.eventSource = new EventSource("/api/containers/stream");
+      // On (re)connect, resync the full list to recover any missed events.
+      this.eventSource.onopen = async () => {
+        try {
+          this.containers = await getAllContainers();
+        } catch (e) {
+          console.error("Error resyncing containers:", e);
+        }
+      };
+      // A row with an open install dialog is pinned: skip stream-driven churn
+      // (the script recreates the container, which would otherwise remove/
+      // remount the row and destroy the dialog mid-run). State is resynced when
+      // the dialog closes (onContainerIdle).
+      const onUpsert = (event) => {
+        const container = JSON.parse(event.data);
+        if (this.busyKeys.has(this.containerKey(container))) {
+          return;
+        }
+        this.upsertContainer(container);
+      };
+      this.eventSource.addEventListener("added", onUpsert);
+      this.eventSource.addEventListener("updated", onUpsert);
+      this.eventSource.addEventListener("removed", (event) => {
+        const container = JSON.parse(event.data);
+        if (this.busyKeys.has(this.containerKey(container))) {
+          return;
+        }
+        this.removeContainerFromList(container);
+      });
+    },
+    disconnectStream() {
+      if (this.eventSource) {
+        this.eventSource.close();
+        this.eventSource = null;
+      }
+    },
+    onContainerBusy({ name, watcher }) {
+      this.busyKeys.add(`${watcher}::${name}`);
+    },
+    async onContainerIdle({ name, watcher }) {
+      this.busyKeys.delete(`${watcher}::${name}`);
+      // Pull the latest state the row missed while it was pinned (the recreated
+      // container has a new id and updated version).
+      try {
+        this.containers = await getAllContainers();
+      } catch (e) {
+        console.error("Error resyncing containers:", e);
+      }
+    },
     async deleteContainer(container) {
       try {
         await deleteContainer(container.id);
@@ -203,6 +277,18 @@ export default {
         });
       }
     },
+  },
+
+  mounted() {
+    this.connectStream();
+    this.$bus.on("container-busy", this.onContainerBusy);
+    this.$bus.on("container-idle", this.onContainerIdle);
+  },
+
+  beforeUnmount() {
+    this.disconnectStream();
+    this.$bus.off("container-busy", this.onContainerBusy);
+    this.$bus.off("container-idle", this.onContainerIdle);
   },
 
   async beforeRouteEnter(to, from, next) {
