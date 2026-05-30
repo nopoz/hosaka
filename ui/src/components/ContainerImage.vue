@@ -1,115 +1,106 @@
 <template>
-  <v-list dense>
+  <v-list density="compact">
     <v-list-item>
-      <v-list-item-avatar>
+      <template #prepend>
         <v-icon color="secondary">mdi-identifier</v-icon>
-      </v-list-item-avatar>
-      <v-list-item-content>
-        <v-list-item-title>
-          Id
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn
-                icon
-                x-small
-                v-bind="attrs"
-                v-on="on"
-                @click="copyToClipboard('image id', image.id)"
-              >
-                <v-icon>mdi-clipboard</v-icon>
-              </v-btn>
-            </template>
-            <span class="text-caption">Copy to clipboard</span>
-          </v-tooltip>
-        </v-list-item-title>
-        <v-list-item-subtitle>{{ image.id }}</v-list-item-subtitle>
-      </v-list-item-content>
+      </template>
+      <v-list-item-title>
+        Id
+        <v-tooltip location="bottom">
+          <template v-slot:activator="{ props }">
+            <v-btn
+              icon
+              size="x-small"
+              variant="text"
+              v-bind="props"
+              @click="copyToClipboard('image id', image.id)"
+            >
+              <v-icon>mdi-clipboard</v-icon>
+            </v-btn>
+          </template>
+          <span class="text-caption">Copy to clipboard</span>
+        </v-tooltip>
+      </v-list-item-title>
+      <v-list-item-subtitle>{{ image.id }}</v-list-item-subtitle>
     </v-list-item>
     <v-list-item>
-      <v-list-item-avatar>
+      <template #prepend>
         <v-icon color="secondary">mdi-pencil</v-icon>
-      </v-list-item-avatar>
-      <v-list-item-content>
-        <v-list-item-title>Name</v-list-item-title>
-        <v-list-item-subtitle>{{ image.name }}</v-list-item-subtitle>
-      </v-list-item-content>
+      </template>
+      <v-list-item-title>Name</v-list-item-title>
+      <v-list-item-subtitle>{{ image.name }}</v-list-item-subtitle>
     </v-list-item>
     <v-list-item>
-      <v-list-item-avatar>
+      <template #prepend>
         <v-icon color="secondary">{{ registryIcon }}</v-icon>
-      </v-list-item-avatar>
-      <v-list-item-content>
-        <v-list-item-title>Registry</v-list-item-title>
-        <v-list-item-subtitle>{{ image.registry.name }}</v-list-item-subtitle>
-      </v-list-item-content>
+      </template>
+      <v-list-item-title>Registry</v-list-item-title>
+      <v-list-item-subtitle>{{ image.registry.name }}</v-list-item-subtitle>
     </v-list-item>
     <v-list-item>
-      <v-list-item-avatar>
+      <template #prepend>
         <v-icon color="secondary">mdi-tag</v-icon>
-      </v-list-item-avatar>
-      <v-list-item-content>
-        <v-list-item-title>
-          Tag &nbsp;<v-chip v-if="image.tag.semver" x-small label outlined
-            >semver</v-chip
-          >
-        </v-list-item-title>
-        <v-list-item-subtitle>
-          {{ image.tag.value }}
-        </v-list-item-subtitle>
-      </v-list-item-content>
+      </template>
+      <v-list-item-title>
+        Tag &nbsp;<v-chip
+          v-if="image.tag.semver"
+          size="x-small"
+          label
+          variant="outlined"
+          >semver</v-chip
+        >
+      </v-list-item-title>
+      <v-list-item-subtitle>
+        {{ image.tag.value }}
+      </v-list-item-subtitle>
     </v-list-item>
     <v-list-item v-if="image.digest.value">
-      <v-list-item-avatar>
+      <template #prepend>
         <v-icon color="secondary">mdi-function-variant</v-icon>
-      </v-list-item-avatar>
-      <v-list-item-content>
-        <v-list-item-title>
-          Digest
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn
-                icon
-                x-small
-                v-bind="attrs"
-                v-on="on"
-                @click="copyToClipboard('image digest', image.digest.value)"
-              >
-                <v-icon>mdi-clipboard</v-icon>
-              </v-btn>
-            </template>
-            <span class="text-caption">Copy to clipboard</span>
-          </v-tooltip>
-        </v-list-item-title>
-        <v-list-item-subtitle>
-          {{ image.digest.value }}
-        </v-list-item-subtitle>
-      </v-list-item-content>
+      </template>
+      <v-list-item-title>
+        Digest
+        <v-tooltip location="bottom">
+          <template v-slot:activator="{ props }">
+            <v-btn
+              icon
+              size="x-small"
+              variant="text"
+              v-bind="props"
+              @click="copyToClipboard('image digest', image.digest.value)"
+            >
+              <v-icon>mdi-clipboard</v-icon>
+            </v-btn>
+          </template>
+          <span class="text-caption">Copy to clipboard</span>
+        </v-tooltip>
+      </v-list-item-title>
+      <v-list-item-subtitle>
+        {{ image.digest.value }}
+      </v-list-item-subtitle>
     </v-list-item>
     <v-list-item>
-      <v-list-item-avatar>
+      <template #prepend>
         <v-icon color="secondary">{{ osIcon }}</v-icon>
-      </v-list-item-avatar>
-      <v-list-item-content>
-        <v-list-item-title>OS / Architecture</v-list-item-title>
-        <v-list-item-subtitle
-          >{{ image.os }} / {{ image.architecture }}</v-list-item-subtitle
-        >
-      </v-list-item-content>
+      </template>
+      <v-list-item-title>OS / Architecture</v-list-item-title>
+      <v-list-item-subtitle
+        >{{ image.os }} / {{ image.architecture }}</v-list-item-subtitle
+      >
     </v-list-item>
     <v-list-item v-if="image.created">
-      <v-list-item-avatar>
+      <template #prepend>
         <v-icon color="secondary">mdi-calendar</v-icon>
-      </v-list-item-avatar>
-      <v-list-item-content>
-        <v-list-item-title>Created</v-list-item-title>
-        <v-list-item-subtitle>{{ image.created | date }}</v-list-item-subtitle>
-      </v-list-item-content>
+      </template>
+      <v-list-item-title>Created</v-list-item-title>
+      <v-list-item-subtitle>{{ date(image.created) }}</v-list-item-subtitle>
     </v-list-item>
   </v-list>
 </template>
 
 <script>
 import { getRegistryProviderIcon } from "@/services/registry";
+import { date } from "@/filters";
 
 export default {
   props: {
@@ -141,9 +132,10 @@ export default {
   },
 
   methods: {
+    date,
     copyToClipboard(kind, value) {
-      this.$clipboard(value);
-      this.$root.$emit("notify", `${kind} copied to clipboard`);
+      navigator.clipboard.writeText(value);
+      this.$bus.emit("notify", { message: `${kind} copied to clipboard` });
     },
   },
 };

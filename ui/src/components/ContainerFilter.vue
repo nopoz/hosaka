@@ -2,7 +2,7 @@
   <v-container
     fluid
     class="ma-0 mb-3"
-    :class="$vuetify.breakpoint.mdAndUp ? 'pa-0' : ''"
+    :class="$vuetify.display.mdAndUp ? 'pa-0' : ''"
   >
     <v-row dense>
       <v-col>
@@ -10,11 +10,11 @@
           :hide-details="true"
           v-model="watcherSelected"
           :items="watchers"
-          @change="emitWatcherChanged"
+          @update:model-value="emitWatcherChanged"
           :clearable="true"
           label="Watcher"
-          outlined
-          dense
+          variant="outlined"
+          density="compact"
         ></v-select>
       </v-col>
       <v-col>
@@ -22,11 +22,11 @@
           :hide-details="true"
           v-model="registrySelected"
           :items="registries"
-          @change="emitRegistryChanged"
+          @update:model-value="emitRegistryChanged"
           :clearable="true"
           label="Registry"
-          outlined
-          dense
+          variant="outlined"
+          density="compact"
         ></v-select>
       </v-col>
       <v-col>
@@ -34,21 +34,22 @@
           :hide-details="true"
           v-model="updateKindSelected"
           :items="updateKinds"
-          @change="emitUpdateKindChanged"
+          @update:model-value="emitUpdateKindChanged"
           :clearable="true"
           label="Update kind"
-          outlined
-          dense
+          variant="outlined"
+          density="compact"
         ></v-select>
       </v-col>
       <v-col>
         <v-switch
           class="switch-top"
+          color="secondary"
           label="Update available"
-          @change="emitUpdateAvailableChanged"
-          :value="updateAvailable"
+          @update:model-value="emitUpdateAvailableChanged"
+          :model-value="updateAvailable"
           :hide-details="true"
-          dense
+          density="compact"
         />
       </v-col>
       <v-col class="text-right">
@@ -127,14 +128,13 @@ export default {
       this.isRefreshing = true;
       try {
         const body = await refreshAllContainers();
-        this.$root.$emit("notify", `All containers refreshed`);
+        this.$bus.emit("notify", { message: `All containers refreshed` });
         this.$emit("refresh-all-containers", body);
       } catch (e) {
-        this.$root.$emit(
-          "notify",
-          `Error when trying to refresh all containers (${e.message})`,
-          "error",
-        );
+        this.$bus.emit("notify", {
+          message: `Error when trying to refresh all containers (${e.message})`,
+          level: "error",
+        });
       } finally {
         this.isRefreshing = false;
       }

@@ -7,9 +7,9 @@
       :timeout="snackbarTimeout"
     />
 
-    <navigation-drawer v-if="authenticated" />
-
     <app-bar v-if="authenticated" :user="user" />
+
+    <navigation-drawer v-if="authenticated" />
 
     <!-- Sizes your content based upon application components -->
     <v-main>
@@ -25,7 +25,6 @@
 </template>
 
 <script>
-import Vue from "vue";
 import NavigationDrawer from "@/components/NavigationDrawer";
 import AppBar from "@/components/AppBar";
 import SnackBar from "@/components/SnackBar";
@@ -78,10 +77,9 @@ export default {
 
     /**
      * Display a notification.
-     * @param message
-     * @param level
+     * @param {{message: string, level?: string, timeout?: number}} payload
      */
-    notify(message, level = "info", timeout = 5000) {
+    notify({ message, level = "info", timeout = 5000 } = {}) {
       this.snackbarMessage = message;
       this.snackbarLevel = level;
       this.snackbarShow = true;
@@ -103,19 +101,27 @@ export default {
   },
 
   /**
-   * Listen to root events.
-   * @returns {Promise<void>}
+   * Listen to application events.
    */
-  async beforeMount() {
-    this.$root.$on("authenticated", this.onAuthenticated);
-    this.$root.$on("notify", this.notify);
-    this.$root.$on("notify:close", this.notifyClose);
+  mounted() {
+    this.$bus.on("authenticated", this.onAuthenticated);
+    this.$bus.on("notify", this.notify);
+    this.$bus.on("notify:close", this.notifyClose);
+  },
+
+  /**
+   * Stop listening to application events.
+   */
+  unmounted() {
+    this.$bus.off("authenticated", this.onAuthenticated);
+    this.$bus.off("notify", this.notify);
+    this.$bus.off("notify:close", this.notifyClose);
   },
 
   async beforeUpdate() {
     if (this.authenticated && !this.$serverConfig) {
       const server = await getServer();
-      Vue.prototype.$serverConfig = server.configuration;
+      this.$serverConfig = server.configuration;
     }
   },
 };

@@ -23,6 +23,7 @@ import ConfigurationItem from "@/components/ConfigurationItem";
 import { getServer } from "@/services/server";
 import { getLog } from "@/services/log";
 import { getStore } from "@/services/store";
+import bus from "@/event-bus";
 
 export default {
   components: {
@@ -71,11 +72,10 @@ export default {
         vm.log = log;
       });
     } catch (e) {
-      this.$root.$emit(
-        "notify",
-        `Error when trying to load the state configuration (${e.message})`,
-        "error",
-      );
+      bus.emit("notify", {
+        message: `Error when trying to load the state configuration (${e.message})`,
+        level: "error",
+      });
     }
     next();
   },

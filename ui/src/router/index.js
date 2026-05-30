@@ -1,8 +1,6 @@
-import Vue from "vue";
-import VueRouter from "vue-router";
+import { createRouter, createWebHistory } from "vue-router";
 import { getUser } from "@/services/auth";
-
-Vue.use(VueRouter);
+import bus from "@/event-bus";
 
 const routes = [
   {
@@ -47,9 +45,8 @@ const routes = [
   },
 ];
 
-const router = new VueRouter({
-  mode: "history",
-  base: process.env.BASE_URL,
+const router = createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes,
 });
 
@@ -70,7 +67,7 @@ async function applyAuthNavigationGuard(to, from, next) {
     // User is authenticated => go to route
     if (user !== undefined) {
       // Notify authenticated
-      router.app.$root.$emit("authenticated", user);
+      bus.emit("authenticated", user);
 
       // Next route in param? redirect
       if (to.query.next) {

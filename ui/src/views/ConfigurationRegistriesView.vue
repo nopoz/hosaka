@@ -16,6 +16,7 @@
 <script>
 import ConfigurationItem from "@/components/ConfigurationItem";
 import { getAllRegistries, getRegistryProviderIcon } from "@/services/registry";
+import bus from "@/event-bus";
 
 export default {
   data() {
@@ -38,11 +39,10 @@ export default {
         .sort((r1, r2) => r1.name.localeCompare(r2.name));
       next((vm) => (vm.registries = registriesWithIcons));
     } catch (e) {
-      this.$root.$emit(
-        "notify",
-        `Error when trying to load the registries (${e.message})`,
-        "error",
-      );
+      bus.emit("notify", {
+        message: `Error when trying to load the registries (${e.message})`,
+        level: "error",
+      });
     }
     next();
   },

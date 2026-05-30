@@ -1,17 +1,25 @@
-import Vue from "vue";
+import { createApp, reactive } from "vue";
 import App from "./App.vue";
 import vuetify from "./plugins/vuetify";
-import clipboard from "./plugins/clipboard";
 import router from "./router";
-import { registerFilters } from "./filters";
-import "./registerServiceWorker";
+import bus from "./event-bus";
 
-Vue.config.productionTip = false;
-registerFilters();
+const app = createApp(App);
 
-new Vue({
-  vuetify,
-  clipboard,
-  router,
-  render: (h) => h(App),
-}).$mount("#app");
+// Live, reactive $serverConfig accessible as `this.$serverConfig` in any
+// component. App.vue assigns it once authenticated; the getter/setter keep all
+// existing `this.$serverConfig` read/write sites working under Vue 3.
+const state = reactive({ serverConfig: undefined });
+Object.defineProperty(app.config.globalProperties, "$serverConfig", {
+  get: () => state.serverConfig,
+  set: (value) => {
+    state.serverConfig = value;
+  },
+});
+
+// Shared event bus (mitt) replacing the Vue 2 `$root` event bus.
+app.config.globalProperties.$bus = bus;
+
+app.use(router);
+app.use(vuetify);
+app.mount("#app");

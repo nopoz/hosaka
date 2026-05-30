@@ -10,21 +10,37 @@ import "@fortawesome/fontawesome-free/css/all.css";
 // Simple icons
 import "simple-icons-font/font/simple-icons.min.css";
 
-import Vue from "vue";
-import Vuetify from "vuetify/lib/framework";
+// Vuetify
+import "vuetify/styles";
+import { createVuetify } from "vuetify";
 
-Vue.use(Vuetify);
+const colors = {
+  primary: "#00355E",
+  secondary: "#0096C7",
+  accent: "#06D6A0",
+  error: "#E53935",
+};
 
-export default new Vuetify({
+export default createVuetify({
   theme: {
+    defaultTheme: "dark",
     themes: {
       light: {
-        primary: "#00355E",
-        secondary: "#0096C7",
-        accent: "#06D6A0",
-        error: "#E53935",
+        dark: false,
+        colors,
       },
-      dark: {},
+      dark: {
+        dark: true,
+        colors: {
+          ...colors,
+          surface: "#1E1E1E",
+          "surface-light": "#272727",
+          "surface-bright": "#BDBDBD",
+        },
+      },
     },
+  },
+  icons: {
+    defaultSet: "mdi",
   },
 });

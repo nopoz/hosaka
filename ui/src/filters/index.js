@@ -1,5 +1,3 @@
-import Vue from "vue";
-
 /**
  * Truncate an id to x chars.
  * @param fullId
@@ -31,12 +29,4 @@ function date(dateStr) {
   return new Intl.DateTimeFormat([], options).format(date);
 }
 
-/**
- * Register all filters.
- */
-function registerFilters() {
-  Vue.filter("short", short);
-  Vue.filter("date", date);
-}
-
-export { registerFilters };
+export { short, date };

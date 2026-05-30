@@ -1,7 +1,7 @@
 <template>
-  <v-app-bar app flat dark tile clipped-left dense>
+  <v-app-bar flat tile density="compact" theme="dark" color="#272727">
     <v-app-bar-nav-icon>
-      <v-img :src="logo" alt="logo" max-width="48px" />
+      <v-img :src="logo" alt="logo" width="48" height="48" />
     </v-app-bar-nav-icon>
 
     <v-toolbar-title
@@ -10,18 +10,16 @@
       >{{ viewName }}</v-toolbar-title
     >
     <v-spacer />
-    <v-menu left bottom v-if="user && user.username !== 'anonymous'">
-      <template v-slot:activator="{ on, attrs }">
-        <v-btn v-bind="attrs" v-on="on" text small class="text-lowercase">
+    <v-menu location="bottom end" v-if="user && user.username !== 'anonymous'">
+      <template v-slot:activator="{ props }">
+        <v-btn v-bind="props" variant="text" size="small" class="text-lowercase">
           {{ user.username }}
           &nbsp;
-          <v-icon dense>mdi-account</v-icon>
+          <v-icon size="small">mdi-account</v-icon>
         </v-btn>
       </template>
-      <v-list dense>
-        <v-list-item @click="logout">
-          <v-list-item-content class="text-body-2">Log out</v-list-item-content>
-        </v-list-item>
+      <v-list density="compact">
+        <v-list-item @click="logout" class="text-body-2" title="Log out" />
       </v-list>
     </v-menu>
   </v-app-bar>
@@ -64,11 +62,10 @@ export default {
           });
         }
       } catch (e) {
-        this.$root.$emit(
-          "notify",
-          `Error when trying to logout (${e.message})`,
-          "error",
-        );
+        this.$bus.emit("notify", {
+          message: `Error when trying to logout (${e.message})`,
+          level: "error",
+        });
       }
     },
   },
