@@ -359,6 +359,9 @@ export default {
           case "patch":
             color = "success";
             break;
+          case "prerelease":
+            color = "prerelease";
+            break;
         }
       }
       return color;

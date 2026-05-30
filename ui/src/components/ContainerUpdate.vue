@@ -53,6 +53,11 @@
           <v-icon v-else-if="updateKind.semverDiff === 'major'" color="error"
             >mdi-alert-decagram</v-icon
           >
+          <v-icon
+            v-else-if="updateKind.semverDiff === 'prerelease'"
+            color="prerelease"
+            >mdi-information-outline</v-icon
+          >
           <v-icon v-else color="warning">mdi-alert</v-icon>
         </template>
         <v-list-item-title>Update kind</v-list-item-title>
