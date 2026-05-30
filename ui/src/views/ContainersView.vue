@@ -10,17 +10,19 @@
           :update-kinds="updateKinds"
           :update-kind-selected-init="updateKindSelected"
           :updateAvailable="updateAvailableSelected"
+          :sort-selected-init="sortSelected"
           @registry-changed="onRegistryChanged"
           @watcher-changed="onWatcherChanged"
           @update-available-changed="onUpdateAvailableChanged"
           @update-kind-changed="onUpdateKindChanged"
+          @sort-changed="onSortChanged"
           @refresh-all-containers="onRefreshAllContainers"
         />
       </v-col>
     </v-row>
 
     <v-fade-transition group hide-on-leave mode="in-out">
-      <v-row v-for="container in containersFiltered" :key="container.id">
+      <v-row v-for="container in containersSorted" :key="container.id">
         <v-col class="pt-2 pb-2">
           <container-item
             :container="container"
@@ -30,7 +32,7 @@
         </v-col>
       </v-row>
     </v-fade-transition>
-    <v-row v-if="containersFiltered.length === 0">
+    <v-row v-if="containersSorted.length === 0">
       <v-card-subtitle class="text-h6">No containers found</v-card-subtitle>
     </v-row>
   </v-container>
@@ -55,6 +57,7 @@ export default {
       watcherSelected: "",
       updateKindSelected: "",
       updateAvailableSelected: false,
+      sortSelected: "name",
     };
   },
 
@@ -109,6 +112,33 @@ export default {
           this.updateAvailableSelected ? container.updateAvailable : true,
         );
     },
+    containersSorted() {
+      const byName = (a, b) =>
+        (a.displayName || a.name).localeCompare(b.displayName || b.name);
+      const rank = (container) => {
+        if (
+          container.updateAvailable &&
+          container.updateKind &&
+          container.updateKind.kind === "tag"
+        ) {
+          switch (container.updateKind.semverDiff) {
+            case "major":
+              return 0;
+            case "minor":
+              return 1;
+            case "patch":
+              return 2;
+          }
+        }
+        return 3;
+      };
+      // Sort a copy: the computed must not mutate the source array in place.
+      const containers = [...this.containersFiltered];
+      if (this.sortSelected === "update-type") {
+        return containers.sort((a, b) => rank(a) - rank(b) || byName(a, b));
+      }
+      return containers.sort(byName);
+    },
   },
 
   methods: {
@@ -128,6 +158,10 @@ export default {
       this.updateKindSelected = updateKindSelected;
       this.updateQueryParams();
     },
+    onSortChanged(sortSelected) {
+      this.sortSelected = sortSelected;
+      this.updateQueryParams();
+    },
     updateQueryParams() {
       const query = {};
       if (this.registrySelected) {
@@ -141,6 +175,9 @@ export default {
       }
       if (this.updateAvailableSelected) {
         query["update-available"] = this.updateAvailableSelected;
+      }
+      if (this.sortSelected && this.sortSelected !== "name") {
+        query["sort"] = this.sortSelected;
       }
       this.$router.push({ query });
     },
@@ -168,6 +205,7 @@ export default {
     const watcherSelected = to.query["watcher"];
     const updateKindSelected = to.query["update-kind"];
     const updateAvailable = to.query["update-available"];
+    const sortSelected = to.query["sort"];
     try {
       const containers = await getAllContainers();
       next((vm) => {
@@ -182,6 +220,9 @@ export default {
         }
         if (updateAvailable) {
           vm.updateAvailableSelected = updateAvailable.toLowerCase() === "true";
+        }
+        if (sortSelected) {
+          vm.sortSelected = sortSelected;
         }
         vm.containers = containers;
       });

@@ -42,6 +42,17 @@
         ></v-select>
       </v-col>
       <v-col>
+        <v-select
+          :hide-details="true"
+          v-model="sortSelected"
+          :items="sortOptions"
+          @update:model-value="emitSortChanged"
+          label="Sort"
+          variant="outlined"
+          density="compact"
+        ></v-select>
+      </v-col>
+      <v-col>
         <v-switch
           class="switch-top"
           color="secondary"
@@ -100,6 +111,10 @@ export default {
       type: Boolean,
       required: true,
     },
+    sortSelectedInit: {
+      type: String,
+      required: true,
+    },
   },
 
   data() {
@@ -108,6 +123,11 @@ export default {
       registrySelected: "",
       watcherSelected: "",
       updateKindSelected: "",
+      sortSelected: "name",
+      sortOptions: [
+        { title: "Name", value: "name" },
+        { title: "Update type", value: "update-type" },
+      ],
     };
   },
 
@@ -123,6 +143,9 @@ export default {
     },
     emitUpdateAvailableChanged() {
       this.$emit("update-available-changed");
+    },
+    emitSortChanged() {
+      this.$emit("sort-changed", this.sortSelected);
     },
     async refreshAllContainers() {
       this.isRefreshing = true;
@@ -145,6 +168,7 @@ export default {
     this.registrySelected = this.registrySelectedInit;
     this.watcherSelected = this.watcherSelectedInit;
     this.updateKindSelected = this.updateKindSelectedInit;
+    this.sortSelected = this.sortSelectedInit;
   },
 };
 </script>
