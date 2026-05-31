@@ -5,8 +5,7 @@ import bus from "@/event-bus";
 const routes = [
   {
     path: "/",
-    name: "home",
-    component: () => import("../views/HomeView.vue"),
+    redirect: "/containers",
   },
   {
     path: "/login",

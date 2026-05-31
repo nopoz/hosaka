@@ -7,16 +7,15 @@
     theme="dark"
     color="#363636"
   >
-    <v-toolbar flat class="ma-0 pa-0">
-      <v-app-bar-nav-icon @click.stop="onNavIconClick">
-        <v-icon>{{ navIcon }}</v-icon>
+    <!-- Desktop only: the rail toggle. On mobile the drawer is a temporary
+         overlay opened/closed by the AppBar hamburger, so an in-drawer toggle
+         would be a duplicate of it. -->
+    <v-toolbar v-if="$vuetify.display.mdAndUp" flat class="ma-0 pa-0">
+      <v-app-bar-nav-icon class="menu-toggle" @click.stop="onNavIconClick">
+        <v-icon>mdi-menu</v-icon>
       </v-app-bar-nav-icon>
-      <v-toolbar-title v-if="!isRail" class="text-body-1">WUD</v-toolbar-title>
     </v-toolbar>
     <v-list nav class="pt-0 pb-0">
-      <v-list-item to="/" key="home" class="mb-0" prepend-icon="mdi-home">
-        <v-list-item-title>Home</v-list-item-title>
-      </v-list-item>
       <v-list-item
         to="/containers"
         key="containers"
@@ -28,28 +27,7 @@
 
       <v-divider key="divider" class="mb-0" />
 
-      <v-list-group v-if="!isRail" value="configuration">
-        <template v-slot:activator="{ props }">
-          <v-list-item
-            v-bind="props"
-            prepend-icon="mdi-cogs"
-            title="Configuration"
-          />
-        </template>
-        <v-list-item
-          v-for="configurationItem in configurationItemsSorted"
-          :key="configurationItem.to"
-          :to="configurationItem.to"
-          :prepend-icon="configurationItem.icon"
-          class="mb-0 pl-8"
-        >
-          <v-list-item-title class="text-capitalize"
-            >{{ configurationItem.name }}
-          </v-list-item-title>
-        </v-list-item>
-      </v-list-group>
       <v-list-item
-        v-else
         v-for="configurationItem in configurationItemsSorted"
         :key="configurationItem.to"
         :to="configurationItem.to"
@@ -157,12 +135,6 @@ export default {
     isRail() {
       return this.$vuetify.display.mdAndUp && this.mini;
     },
-    navIcon() {
-      if (this.$vuetify.display.smAndDown) {
-        return "mdi-close";
-      }
-      return this.mini ? "mdi-menu" : "mdi-close";
-    },
   },
 
   watch: {
@@ -196,3 +168,11 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+/* Suppress the toggle's hover/active overlay so it doesn't leave a lingering
+   grey circle after a tap (matches the AppBar hamburger). */
+.menu-toggle :deep(.v-btn__overlay) {
+  opacity: 0 !important;
+}
+</style>
