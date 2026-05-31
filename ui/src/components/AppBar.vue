@@ -1,5 +1,11 @@
 <template>
   <v-app-bar flat tile density="compact" theme="dark" color="#272727">
+    <v-app-bar-nav-icon
+      v-if="$vuetify.display.smAndDown"
+      @click.stop="$emit('toggle-drawer')"
+    >
+      <v-icon>mdi-menu</v-icon>
+    </v-app-bar-nav-icon>
     <v-app-bar-nav-icon>
       <v-img :src="logo" alt="logo" width="48" height="48" />
     </v-app-bar-nav-icon>
@@ -35,6 +41,7 @@ export default {
       required: true,
     },
   },
+  emits: ["toggle-drawer"],
   data() {
     return {
       logo,

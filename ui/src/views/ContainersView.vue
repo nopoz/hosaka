@@ -21,17 +21,19 @@
       </v-col>
     </v-row>
 
-    <v-fade-transition group hide-on-leave mode="in-out">
-      <v-row v-for="container in containersSorted" :key="container.id">
-        <v-col class="pt-2 pb-2">
-          <container-item
-            :container="container"
-            @delete-container="deleteContainer(container)"
-            @container-deleted="removeContainerFromList(container)"
-          />
-        </v-col>
-      </v-row>
-    </v-fade-transition>
+    <v-row
+      v-for="container in containersSorted"
+      :key="container.id"
+      no-gutters
+    >
+      <v-col :class="$vuetify.display.smAndDown ? 'py-1' : 'pt-2 pb-2'">
+        <container-item
+          :container="container"
+          @delete-container="deleteContainer(container)"
+          @container-deleted="removeContainerFromList(container)"
+        />
+      </v-col>
+    </v-row>
     <v-row v-if="containersSorted.length === 0">
       <v-card-subtitle class="text-h6">No containers found</v-card-subtitle>
     </v-row>
@@ -201,30 +203,51 @@ export default {
     },
     // Insert or replace a container pushed over the SSE stream. A recreated
     // container arrives with a new id, so fall back to name+watcher matching.
+    // A watch cycle emits an `updated` event for every container it re-saves,
+    // even when nothing changed; replacing the row with an equal-but-new object
+    // would re-render that (heavy) row for nothing, so a burst of such events
+    // blocks the main thread. Skip the splice when the payload is unchanged.
     upsertContainer(container) {
       const byId = this.containers.findIndex((c) => c.id === container.id);
       if (byId !== -1) {
-        this.containers.splice(byId, 1, container);
+        if (JSON.stringify(this.containers[byId]) !== JSON.stringify(container)) {
+          this.containers.splice(byId, 1, container);
+        }
         return;
       }
       const byName = this.containers.findIndex(
         (c) => c.name === container.name && c.watcher === container.watcher,
       );
       if (byName !== -1) {
-        this.containers.splice(byName, 1, container);
+        if (JSON.stringify(this.containers[byName]) !== JSON.stringify(container)) {
+          this.containers.splice(byName, 1, container);
+        }
         return;
       }
       this.containers.push(container);
     },
+    // Resync the full list from the API while keeping the existing object
+    // reference for any container whose data is unchanged. Replacing the whole
+    // array with fresh objects forces every (heavy) row to re-render, which
+    // blocks the main thread for seconds with a large list; reusing references
+    // means only genuinely-changed rows re-render.
+    async resyncContainers() {
+      try {
+        const fresh = await getAllContainers();
+        const prevById = new Map(this.containers.map((c) => [c.id, c]));
+        this.containers = fresh.map((f) => {
+          const prev = prevById.get(f.id);
+          return prev && JSON.stringify(prev) === JSON.stringify(f) ? prev : f;
+        });
+      } catch (e) {
+        console.error("Error resyncing containers:", e);
+      }
+    },
     connectStream() {
       this.eventSource = new EventSource("/api/containers/stream");
       // On (re)connect, resync the full list to recover any missed events.
-      this.eventSource.onopen = async () => {
-        try {
-          this.containers = await getAllContainers();
-        } catch (e) {
-          console.error("Error resyncing containers:", e);
-        }
+      this.eventSource.onopen = () => {
+        this.resyncContainers();
       };
       // A row with an open install dialog is pinned: skip stream-driven churn
       // (the script recreates the container, which would otherwise remove/
@@ -260,11 +283,7 @@ export default {
       this.busyKeys.delete(`${watcher}::${name}`);
       // Pull the latest state the row missed while it was pinned (the recreated
       // container has a new id and updated version).
-      try {
-        this.containers = await getAllContainers();
-      } catch (e) {
-        console.error("Error resyncing containers:", e);
-      }
+      await this.resyncContainers();
     },
     async deleteContainer(container) {
       try {
