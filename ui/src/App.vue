@@ -7,9 +7,9 @@
       :timeout="snackbarTimeout"
     />
 
-    <app-bar v-if="authenticated" :user="user" />
+    <app-bar v-if="authenticated" :user="user" @toggle-drawer="drawer = !drawer" />
 
-    <navigation-drawer v-if="authenticated" />
+    <navigation-drawer v-if="authenticated" v-model="drawer" />
 
     <!-- Sizes your content based upon application components -->
     <v-main>
@@ -20,7 +20,7 @@
       </v-row>
     </v-main>
 
-    <app-footer v-if="authenticated" />
+    <app-footer v-if="authenticated && $vuetify.display.mdAndUp" />
   </v-app>
 </template>
 
@@ -44,6 +44,8 @@ export default {
       snackbarShow: false,
       snackbarLevel: "info",
       user: undefined,
+      // Mobile nav drawer open state (ignored on desktop where it is permanent).
+      drawer: false,
     };
   },
   computed: {
@@ -130,5 +132,26 @@ export default {
 <style scoped>
 .main-background {
   /* background-color: #f5f5f5; */
+}
+</style>
+
+<style>
+/* On mobile, pin the app shell to the dynamic viewport and scroll inside
+   v-main instead of the document. A document (body) scroll makes the browser
+   chrome (address bar) collapse/expand at the scroll extremes, and Vuetify's
+   layout reacts to that viewport resize, which stalls the scroll. An inner
+   scroll container keeps the chrome static, so scrolling stays smooth. */
+@media (max-width: 959.98px) {
+  html,
+  body {
+    height: 100%;
+    overflow: hidden;
+  }
+  .v-main {
+    height: 100dvh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
 }
 </style>

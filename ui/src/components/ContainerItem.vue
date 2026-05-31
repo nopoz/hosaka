@@ -1,6 +1,8 @@
 <template>
   <v-card>
+    <!-- Desktop: single dense toolbar row with full chip set. -->
     <v-toolbar
+      v-if="$vuetify.display.mdAndUp"
       flat
       density="compact"
       @click="collapseDetail()"
@@ -8,13 +10,13 @@
     >
       <v-toolbar-title class="text-body-3">
         <v-chip label color="info" variant="outlined" disabled
-          ><v-icon start v-if="$vuetify.display.mdAndUp">mdi-update</v-icon
+          ><v-icon start>mdi-update</v-icon
           >{{ container.watcher }}
         </v-chip>
         /
-        <span v-if="$vuetify.display.mdAndUp && !selfhstContainerIconUrl">
+        <span v-if="!selfhstContainerIconUrl">
           <v-chip label color="info" variant="outlined" disabled
-            ><v-icon start v-if="$vuetify.display.mdAndUp">{{
+            ><v-icon start>{{
               registryIcon
             }}</v-icon
             >{{ container.image.registry.name }}
@@ -22,25 +24,21 @@
           /
         </span>
         <v-chip label color="info" variant="outlined" disabled>
-          <span v-if="$vuetify.display.mdAndUp">
-            <img
-              :src="selfhstContainerIconUrl"
-              style="width: 24px; height: 24px"
-              class="v-icon v-icon--start"
-              v-if="isSelfhstContainerIcon"
-            />
-            <v-icon start v-else>
-              {{ containerIcon }}
-            </v-icon>
-          </span>
+          <img
+            :src="selfhstContainerIconUrl"
+            style="width: 24px; height: 24px"
+            class="v-icon v-icon--start"
+            v-if="isSelfhstContainerIcon"
+          />
+          <v-icon start v-else>
+            {{ containerIcon }}
+          </v-icon>
           {{ container.displayName }}
         </v-chip>
-        <span v-if="$vuetify.display.mdAndUp">
-          :
-          <v-chip label variant="outlined" color="info" disabled>
-            {{ container.image.tag.value }}
-          </v-chip>
-        </span>
+        :
+        <v-chip label variant="outlined" color="info" disabled>
+          {{ container.image.tag.value }}
+        </v-chip>
       </v-toolbar-title>
       <v-spacer />
       <v-chip
@@ -53,7 +51,7 @@
       >
         Update
       </v-chip>
-      <v-tooltip location="bottom" v-if="$vuetify.display.mdAndUp">
+      <v-tooltip location="bottom">
         <template v-slot:activator="{ props }">
           <v-chip
             v-if="container.updateAvailable"
@@ -74,6 +72,58 @@
       </v-tooltip>
       <v-icon>{{ showDetail ? "mdi-chevron-up" : "mdi-chevron-down" }}</v-icon>
     </v-toolbar>
+
+    <!-- Mobile: a purpose-built two-line row. Line 1 (name) toggles the detail;
+         line 2 surfaces the target version and a finger-sized Update button kept
+         clear of the expand chevron so it can't be mis-tapped. -->
+    <div v-else class="mobile-header">
+      <div
+        class="d-flex align-center px-3 py-2"
+        @click="collapseDetail()"
+        style="cursor: pointer"
+      >
+        <img
+          :src="selfhstContainerIconUrl"
+          style="width: 20px; height: 20px"
+          class="mr-2 flex-shrink-0"
+          v-if="isSelfhstContainerIcon"
+        />
+        <v-icon v-else size="small" color="info" class="mr-2 flex-shrink-0">
+          {{ containerIcon }}
+        </v-icon>
+        <span class="text-info text-truncate flex-grow-1">
+          {{ container.displayName }}
+        </span>
+        <v-icon class="ml-2 flex-shrink-0">{{
+          showDetail ? "mdi-chevron-up" : "mdi-chevron-down"
+        }}</v-icon>
+      </div>
+      <div
+        v-if="container.updateAvailable"
+        class="d-flex align-center px-3 pb-2"
+      >
+        <span class="text-caption text-truncate">
+          <span class="text-medium-emphasis">{{
+            container.image.tag.value
+          }}</span>
+          <v-icon size="x-small" :color="newVersionClass" class="mx-1"
+            >mdi-arrow-right</v-icon
+          >
+          <span :class="'text-' + newVersionClass">{{ newVersion }}</span>
+        </span>
+        <v-spacer />
+        <v-btn
+          v-if="(container.install === true || container.install === 'multiple')"
+          color="success"
+          variant="tonal"
+          size="small"
+          class="ml-2 flex-shrink-0"
+          @click.stop="installContainer"
+        >
+          Update
+        </v-btn>
+      </div>
+    </div>
     <v-expand-transition>
       <div v-show="showDetail">
         <v-tabs fixed-tabs v-model="tab" ref="tabs">
@@ -264,7 +314,6 @@ export default {
     },
 
     isSelfhstContainerIcon() {
-      console.log(this.container.displayIcon);
       return (
         this.container.displayIcon.startsWith("sh-") ||
         this.container.displayIcon.startsWith("sh:")
@@ -461,9 +510,6 @@ export default {
   },
     beforeUnmount() {
         this.$bus.off('refresh-containers', this.refreshContainer);
-        if (this.checkInterval) {
-            clearInterval(this.checkInterval);
-        }
     }
 };
 </script>

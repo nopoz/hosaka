@@ -1,47 +1,66 @@
 <template>
-  <v-container
-    fluid
-    class="ma-0 mb-3"
-    :class="$vuetify.display.mdAndUp ? 'pa-0' : ''"
-  >
-    <v-row dense>
-      <v-col>
+  <v-container fluid class="ma-0 mb-3 pa-0">
+    <!-- Mobile: collapse the filters behind a toggle so the bar is a single
+         compact row by default; keep Watch now always reachable. -->
+    <div v-if="$vuetify.display.smAndDown" class="d-flex align-center mb-2">
+      <v-btn variant="tonal" size="small" @click.stop="showFilters = !showFilters">
+        <v-icon start>mdi-filter-variant</v-icon>
+        Filters
+        <v-icon end>{{
+          showFilters ? "mdi-chevron-up" : "mdi-chevron-down"
+        }}</v-icon>
+      </v-btn>
+      <v-spacer />
+      <v-btn
+        color="secondary"
+        size="small"
+        @click.stop="refreshAllContainers"
+        :loading="isRefreshing"
+      >
+        Watch now
+        <v-icon end>mdi-refresh</v-icon>
+      </v-btn>
+    </div>
+
+    <v-expand-transition>
+      <v-row dense v-show="$vuetify.display.mdAndUp || showFilters">
+      <v-col cols="6" sm="4" md="2">
         <v-select
           :hide-details="true"
           v-model="watcherSelected"
-          :items="watchers"
+          :items="withEmptyOption(watchers)"
           @update:model-value="emitWatcherChanged"
-          :clearable="true"
+          :clearable="$vuetify.display.mdAndUp"
           label="Watcher"
           variant="outlined"
           density="compact"
         ></v-select>
       </v-col>
-      <v-col>
+      <v-col cols="6" sm="4" md="2">
         <v-select
           :hide-details="true"
           v-model="registrySelected"
-          :items="registries"
+          :items="withEmptyOption(registries)"
           @update:model-value="emitRegistryChanged"
-          :clearable="true"
+          :clearable="$vuetify.display.mdAndUp"
           label="Registry"
           variant="outlined"
           density="compact"
         ></v-select>
       </v-col>
-      <v-col>
+      <v-col cols="6" sm="4" md="2">
         <v-select
           :hide-details="true"
           v-model="updateKindSelected"
-          :items="updateKinds"
+          :items="withEmptyOption(updateKinds)"
           @update:model-value="emitUpdateKindChanged"
-          :clearable="true"
+          :clearable="$vuetify.display.mdAndUp"
           label="Update kind"
           variant="outlined"
           density="compact"
         ></v-select>
       </v-col>
-      <v-col>
+      <v-col cols="6" sm="4" md="2">
         <v-select
           :hide-details="true"
           v-model="sortSelected"
@@ -52,7 +71,7 @@
           density="compact"
         ></v-select>
       </v-col>
-      <v-col>
+      <v-col cols="6" sm="4" md="2" class="d-flex align-center">
         <v-switch
           class="switch-top"
           color="secondary"
@@ -63,7 +82,13 @@
           density="compact"
         />
       </v-col>
-      <v-col class="text-right">
+      <v-col
+        v-if="$vuetify.display.mdAndUp"
+        cols="6"
+        sm="4"
+        md="2"
+        class="text-right d-flex align-center justify-end"
+      >
         <v-btn
           color="secondary"
           @click.stop="refreshAllContainers"
@@ -72,9 +97,9 @@
           Watch now
           <v-icon> mdi-refresh</v-icon>
         </v-btn>
-        <br />
       </v-col>
-    </v-row>
+      </v-row>
+    </v-expand-transition>
   </v-container>
 </template>
 
@@ -120,6 +145,7 @@ export default {
   data() {
     return {
       isRefreshing: false,
+      showFilters: false,
       registrySelected: "",
       watcherSelected: "",
       updateKindSelected: "",
@@ -133,6 +159,12 @@ export default {
   },
 
   methods: {
+    // Mobile has no clear (X) button on the selects; prepend an empty option so
+    // the user can pick the blank row to reset a filter (matches the unselected
+    // empty state). Desktop keeps the native clear button and the plain list.
+    withEmptyOption(items) {
+      return this.$vuetify.display.smAndDown ? ["", ...items] : items;
+    },
     emitRegistryChanged() {
       this.$emit("registry-changed", this.registrySelected);
     },

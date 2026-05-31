@@ -1,7 +1,9 @@
 <template>
   <v-dialog
     v-model="dialogVisible"
-    max-width="800px"
+    width="70%"
+    max-width="1000px"
+    :fullscreen="$vuetify.display.smAndDown"
     @click:outside="close"
     persistent
   >
@@ -20,15 +22,22 @@
         </div>
 
         <v-card-text class="pa-2">
-          <pre ref="logContainer" class="log-output"><span v-for="(log, index) in logs" :key="index" :class="getLogClass(log)">{{log.message}}</span><template v-if="error">
-<span class="error-text">Error: {{ error }}</span></template><template v-if="isComplete && scriptExitCode === 0">
-<span class="success-text">Script executed successfully</span></template></pre>
+          <div ref="logContainer" class="log-output log-wrap" :style="logStyle">
+            <template v-for="(line, index) in displayLines" :key="index">
+              <hr v-if="line.kind === 'rule'" class="log-rule" />
+              <div v-else-if="line.kind === 'title'" class="log-title">{{ line.text }}</div>
+              <div v-else class="log-line" :class="line.cls">{{ line.text }}</div>
+            </template>
+            <div v-if="error" class="log-line error-text">Error: {{ error }}</div>
+            <div v-if="isComplete && scriptExitCode === 0" class="log-line success-text">Script executed successfully</div>
+          </div>
         </v-card-text>
 
         <v-card-actions v-if="isComplete || error || scriptExitCode !== null" class="pa-4" style="background-color: #2D2D2D;">
           <v-spacer></v-spacer>
           <v-btn
-            :color="scriptExitCode === 0 ? 'primary' : 'error'"
+            variant="flat"
+            :color="scriptExitCode === 0 ? 'secondary' : 'error'"
             @click="handleClose"
           >
             {{ scriptExitCode === 0 ? 'Close Script Output' : 'Close' }}
@@ -70,6 +79,53 @@ export default {
   },
 
   computed: {
+    // Fill the screen when the dialog is fullscreen (mobile); on desktop scale
+    // the log with the viewport instead of a fixed height. The reserved space
+    // covers the top close bar plus the bottom actions bar when the script
+    // finishes.
+    logStyle() {
+      if (this.$vuetify.display.smAndDown) {
+        return {
+          height: 'calc(100dvh - 130px)',
+          fontSize: '10px',
+          lineHeight: '1.3',
+          padding: '8px',
+        };
+      }
+      return { height: '75dvh' };
+    },
+
+    // Flatten the log messages into per-line items so the fixed-width ASCII
+    // banner (solid #/- rows + centered title) renders as a CSS hairline +
+    // heading instead of raw characters. Used for all viewport sizes.
+    displayLines() {
+      const out = [];
+      this.logs.forEach((log) => {
+        (log.message || '').split('\n').forEach((line) => {
+          const stripped = line.trim();
+          if (stripped === '') return;
+          // Solid border rows -> hairline rule.
+          if (/^#{3,}$/.test(stripped) || /^-{3,}$/.test(stripped)) {
+            out.push({ kind: 'rule' });
+            return;
+          }
+          // Centered banner title -> bold heading.
+          if (stripped.includes('SCRIPT EXECUTION START')
+            || stripped.includes('SCRIPT EXECUTION END')) {
+            out.push({ kind: 'title', text: stripped.replace(/#/g, '').trim() });
+            return;
+          }
+          // Classify on the raw line (patterns rely on the leading #), then
+          // strip a single leading "# " decoration for display.
+          const cls = this.getLogClass({ message: line });
+          const text = line.replace(/^#\s?/, '');
+          if (text.trim() === '') return;
+          out.push({ kind: 'text', text, cls });
+        });
+      });
+      return out;
+    },
+
     dialogVisible: {
       get() {
         return this.modelValue;
@@ -323,8 +379,24 @@ export default {
   line-height: 1.2;
 }
 
-.log-output span {
-  white-space: pre;
+/* Wrap long lines instead of forcing horizontal scroll. */
+.log-wrap {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* Render the ASCII banner as a CSS hairline + heading. */
+.log-rule {
+  border: none;
+  border-top: 1px solid #555555;
+  margin: 6px 8px;
+}
+
+.log-title {
+  text-align: center;
+  font-weight: bold;
+  color: #F5F5F5;
+  padding: 2px 0;
 }
 
 /* Clean slate - remove Vuetify's color overrides */
