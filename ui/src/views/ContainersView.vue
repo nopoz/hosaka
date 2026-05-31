@@ -46,6 +46,10 @@ import ContainerFilter from "@/components/ContainerFilter";
 import { deleteContainer, getAllContainers } from "@/services/container";
 import bus from "@/event-bus";
 
+// Remember the filter/sort selection for the browser session so it survives
+// navigating away from /containers and back.
+const FILTERS_KEY = "containerFilters";
+
 export default {
   components: {
     ContainerItem,
@@ -153,42 +157,35 @@ export default {
   methods: {
     onRegistryChanged(registrySelected) {
       this.registrySelected = registrySelected;
-      this.updateQueryParams();
+      this.persistFilters();
     },
     onWatcherChanged(watcherSelected) {
       this.watcherSelected = watcherSelected;
-      this.updateQueryParams();
+      this.persistFilters();
     },
     onUpdateAvailableChanged() {
       this.updateAvailableSelected = !this.updateAvailableSelected;
-      this.updateQueryParams();
+      this.persistFilters();
     },
     onUpdateKindChanged(updateKindSelected) {
       this.updateKindSelected = updateKindSelected;
-      this.updateQueryParams();
+      this.persistFilters();
     },
     onSortChanged(sortSelected) {
       this.sortSelected = sortSelected;
-      this.updateQueryParams();
+      this.persistFilters();
     },
-    updateQueryParams() {
-      const query = {};
-      if (this.registrySelected) {
-        query["registry"] = this.registrySelected;
-      }
-      if (this.watcherSelected) {
-        query["watcher"] = this.watcherSelected;
-      }
-      if (this.updateKindSelected) {
-        query["update-kind"] = this.updateKindSelected;
-      }
-      if (this.updateAvailableSelected) {
-        query["update-available"] = this.updateAvailableSelected;
-      }
-      if (this.sortSelected && this.sortSelected !== "name") {
-        query["sort"] = this.sortSelected;
-      }
-      this.$router.push({ query });
+    persistFilters() {
+      sessionStorage.setItem(
+        FILTERS_KEY,
+        JSON.stringify({
+          registrySelected: this.registrySelected,
+          watcherSelected: this.watcherSelected,
+          updateKindSelected: this.updateKindSelected,
+          updateAvailableSelected: this.updateAvailableSelected,
+          sortSelected: this.sortSelected,
+        }),
+      );
     },
     onRefreshAllContainers(containersRefreshed) {
       this.containers = containersRefreshed;
@@ -311,28 +308,27 @@ export default {
   },
 
   async beforeRouteEnter(to, from, next) {
-    const registrySelected = to.query["registry"];
-    const watcherSelected = to.query["watcher"];
-    const updateKindSelected = to.query["update-kind"];
-    const updateAvailable = to.query["update-available"];
-    const sortSelected = to.query["sort"];
+    // Restore the filter/sort selection remembered for this session so filters
+    // survive navigating away and back. sessionStorage is the single source of
+    // truth (no query params), so there is nothing to contradict it.
+    const stored = JSON.parse(sessionStorage.getItem(FILTERS_KEY) || "{}");
     try {
       const containers = await getAllContainers();
       next((vm) => {
-        if (registrySelected) {
-          vm.registrySelected = registrySelected;
+        if (stored.registrySelected) {
+          vm.registrySelected = stored.registrySelected;
         }
-        if (watcherSelected) {
-          vm.watcherSelected = watcherSelected;
+        if (stored.watcherSelected) {
+          vm.watcherSelected = stored.watcherSelected;
         }
-        if (updateKindSelected) {
-          vm.updateKindSelected = updateKindSelected;
+        if (stored.updateKindSelected) {
+          vm.updateKindSelected = stored.updateKindSelected;
         }
-        if (updateAvailable) {
-          vm.updateAvailableSelected = updateAvailable.toLowerCase() === "true";
+        if (stored.updateAvailableSelected !== undefined) {
+          vm.updateAvailableSelected = stored.updateAvailableSelected;
         }
-        if (sortSelected) {
-          vm.sortSelected = sortSelected;
+        if (stored.sortSelected) {
+          vm.sortSelected = stored.sortSelected;
         }
         vm.containers = containers;
       });

@@ -2,6 +2,7 @@
   <v-app-bar flat tile density="compact" theme="dark" color="#272727">
     <v-app-bar-nav-icon
       v-if="$vuetify.display.smAndDown"
+      class="menu-toggle"
       @click.stop="$emit('toggle-drawer')"
     >
       <v-icon>mdi-menu</v-icon>
@@ -78,3 +79,13 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+/* The hamburger only renders on mobile (smAndDown). On touch devices :hover
+   sticks after a tap, so Vuetify's hover/active overlay lingers as a faint grey
+   circle after the drawer opens. The button needs no hover/active feedback, so
+   suppress its overlay entirely (avoids relying on (hover:none) detection). */
+.menu-toggle :deep(.v-btn__overlay) {
+  opacity: 0 !important;
+}
+</style>
