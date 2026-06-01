@@ -322,7 +322,6 @@ class Docker extends Component {
         };
 
         event.registerTriggerWatch(this.triggerWatchListener);
-        // === End of added code ===
     }
 
     initWatcher() {
@@ -529,20 +528,11 @@ class Docker extends Component {
     async watchFromCron() {
         this.log.info(`Cron started (${this.configuration.cron})`);
 
-        // Get container reports
         const containerReports = await this.watch();
-
-        // Filter out null container reports
         const validContainerReports = containerReports.filter(report => report.container !== null);
-
-        // Count container reports
         const containerReportsCount = validContainerReports.length;
-
-        // Count container available updates
         const containerUpdatesCount = validContainerReports
             .filter((containerReport) => containerReport.container.updateAvailable).length;
-
-        // Count container errors
         const containerErrorsCount = validContainerReports
             .filter((containerReport) => containerReport.container.error !== undefined).length;
 
