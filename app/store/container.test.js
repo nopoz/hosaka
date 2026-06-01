@@ -1,5 +1,6 @@
 const container = require('./container');
 const event = require('../event');
+const { validate: validateContainer } = require('../model/container');
 
 jest.mock('./migrate');
 jest.mock('../event');
@@ -78,11 +79,41 @@ test('insertContainer should insert doc and emit an event', () => {
     expect(spyEvent).toHaveBeenCalled();
 });
 
-test('updateContainer should update doc and emit an event', () => {
+const updateContainerExample = {
+    id: 'container-123456789',
+    name: 'test',
+    watcher: 'test',
+    image: {
+        id: 'image-123456789',
+        registry: {
+            name: 'registry',
+            url: 'https://hub',
+        },
+        name: 'organization/image',
+        tag: {
+            value: 'version',
+            semver: false,
+        },
+        digest: {
+            watch: false,
+            repo: undefined,
+        },
+        architecture: 'arch',
+        os: 'os',
+        created: '2021-06-12T05:33:38.440Z',
+    },
+    result: {
+        tag: 'version',
+    },
+};
+
+test('updateContainer should update doc and emit an event when the row is new', () => {
     const collection = {
         insert: () => {},
+        findOne: () => null,
         chain: () => ({
             find: () => ({
+                data: () => [],
                 remove: () => ({}),
             }),
         }),
@@ -91,39 +122,59 @@ test('updateContainer should update doc and emit an event', () => {
         getCollection: () => collection,
         addCollection: () => null,
     };
-    const containerToSave = {
-        id: 'container-123456789',
-        name: 'test',
-        watcher: 'test',
-        image: {
-            id: 'image-123456789',
-            registry: {
-                name: 'registry',
-                url: 'https://hub',
-            },
-            name: 'organization/image',
-            tag: {
-                value: 'version',
-                semver: false,
-            },
-            digest: {
-                watch: false,
-                repo: undefined,
-            },
-            architecture: 'arch',
-            os: 'os',
-            created: '2021-06-12T05:33:38.440Z',
-        },
-        result: {
-            tag: 'version',
-        },
-    };
     const spyInsert = jest.spyOn(collection, 'insert');
     const spyEvent = jest.spyOn(event, 'emitContainerUpdated');
     container.createCollections(db);
-    container.updateContainer(containerToSave);
+    container.updateContainer({ ...updateContainerExample });
     expect(spyInsert).toHaveBeenCalled();
     expect(spyEvent).toHaveBeenCalled();
+});
+
+test('updateContainer should update doc and emit an event when the state changed', () => {
+    const stored = validateContainer({ ...updateContainerExample });
+    const collection = {
+        insert: () => {},
+        findOne: () => ({ data: stored }),
+        chain: () => ({
+            find: () => ({
+                data: () => [],
+                remove: () => ({}),
+            }),
+        }),
+    };
+    const db = {
+        getCollection: () => collection,
+        addCollection: () => null,
+    };
+    const spyEvent = jest.spyOn(event, 'emitContainerUpdated');
+    container.createCollections(db);
+    container.updateContainer({
+        ...updateContainerExample,
+        result: { tag: 'new-version' },
+    });
+    expect(spyEvent).toHaveBeenCalled();
+});
+
+test('updateContainer should not emit an event when nothing changed', () => {
+    const stored = validateContainer({ ...updateContainerExample });
+    const collection = {
+        insert: () => {},
+        findOne: () => ({ data: stored }),
+        chain: () => ({
+            find: () => ({
+                data: () => [],
+                remove: () => ({}),
+            }),
+        }),
+    };
+    const db = {
+        getCollection: () => collection,
+        addCollection: () => null,
+    };
+    const spyEvent = jest.spyOn(event, 'emitContainerUpdated');
+    container.createCollections(db);
+    container.updateContainer({ ...updateContainerExample });
+    expect(spyEvent).not.toHaveBeenCalled();
 });
 
 test('getContainers should return all containers sorted by name', () => {
