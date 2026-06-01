@@ -364,6 +364,9 @@ test('findNewVersion should return same result as current when no image version 
 test('addImageDetailsToContainer should add an image definition to the container', async () => {
     storeContainer.getContainer = () => (undefined);
     docker.dockerApi = {
+        getContainer: () => ({
+            inspect: () => ({ State: { Status: 'running' } }),
+        }),
         getImage: () => ({
             inspect: () => ({
                 Id: 'image-123456789',
@@ -414,7 +417,11 @@ test('addImageDetailsToContainer should add an image definition to the container
 });
 
 test('addImageDetailsToContainer should support transforms', async () => {
+    storeContainer.getContainer = () => (undefined);
     docker.dockerApi = {
+        getContainer: () => ({
+            inspect: () => ({ State: { Status: 'running' } }),
+        }),
         getImage: () => ({
             inspect: () => ({
                 Id: 'image-123456789',
@@ -453,6 +460,11 @@ test('addImageDetailsToContainer should support transforms', async () => {
 test('watchContainer should return container report when found', async () => {
     storeContainer.getContainer = () => (undefined);
     storeContainer.insertContainer = (container) => (container);
+    docker.dockerApi = {
+        getContainer: () => ({
+            inspect: () => ({ State: { Status: 'running' }, Image: 'image-123456789' }),
+        }),
+    };
     docker.findNewVersion = () => ({
         tag: '7.8.9',
     });
@@ -470,6 +482,11 @@ test('watchContainer should return container report when found', async () => {
 test('watchContainer should return container report when no image version found', async () => {
     storeContainer.getContainer = () => (undefined);
     storeContainer.insertContainer = (container) => (container);
+    docker.dockerApi = {
+        getContainer: () => ({
+            inspect: () => ({ State: { Status: 'running' }, Image: 'image-123456789' }),
+        }),
+    };
     docker.findNewVersion = () => (undefined);
     hub.getTags = () => ([]);
     await expect(docker.watchContainer(sampleSemver)).resolves.toMatchObject({
@@ -483,6 +500,11 @@ test('watchContainer should return container report when no image version found'
 test('watchContainer should return container report with error when something bad happens', async () => {
     storeContainer.getContainer = () => (undefined);
     storeContainer.insertContainer = (container) => (container);
+    docker.dockerApi = {
+        getContainer: () => ({
+            inspect: () => ({ State: { Status: 'running' }, Image: 'image-123456789' }),
+        }),
+    };
     docker.findNewVersion = () => { throw new Error('Failure!!!'); };
     await expect(docker.watchContainer(sampleSemver)).resolves.toMatchObject({
         container: { error: { message: 'Failure!!!' } },
@@ -509,6 +531,9 @@ test('watch should return a list of containers with changed', async () => {
     };
     docker.dockerApi = {
         listContainers: () => ([container1]),
+        getContainer: () => ({
+            inspect: () => ({ State: { Status: 'running' }, Image: 'image-123456789' }),
+        }),
         getImage: () => ({
             inspect: () => ({
                 Architecture: 'arch',
@@ -548,6 +573,9 @@ test('watch should log error when watching a container fails', async () => {
     };
     docker.dockerApi = {
         listContainers: () => ([container1]),
+        getContainer: () => ({
+            inspect: () => ({ State: { Status: 'running' }, Image: 'image-123456789' }),
+        }),
         getImage: () => ({
             inspect: () => ({
                 Architecture: 'arch',
