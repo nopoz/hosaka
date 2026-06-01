@@ -61,7 +61,15 @@ function getTagCandidates(container, tags, logContainer, imageDigestMap = new Ma
         }
     }
 
-    const matchingDigest = imageDigestMap?.get(container.image.digest.value);
+    // Match exclude tag regex
+    if (container.excludeTags) {
+        const excludeTagsRegex = new RegExp(container.excludeTags);
+        const beforeCount = filteredTags.length;
+        filteredTags = filteredTags.filter((tag) => !excludeTagsRegex.test(tag));
+        logContainer.debug(`[TagFilter] After exclude regex: ${filteredTags.length} tags (was ${beforeCount})`);
+    }
+
+    const matchingDigest = imageDigestMap?.get(container.image.digest?.value);
 
     if (matchingDigest) {
         filteredTags = tags.filter((tag) => matchingDigest.tags.includes(tag));
@@ -79,10 +87,22 @@ function getTagCandidates(container, tags, logContainer, imageDigestMap = new Ma
 
     const beforeSemver = filteredTags.length;
     filteredTags = filteredTags
-        .filter((tag) => parseSemver(transformTag(container.transformTags, tag)) !== null)
-        .sort((t1, t2) =>
-            isGreaterSemver(transformTag(container.transformTags, t2), transformTag(container.transformTags, t1)) ? 1 : -1
-        );
+        .filter((tag) => parseSemver(transformTag(container.transformTags, tag)) !== null);
+
+    // For tags not pinned by the digest map, never propose a downgrade: keep
+    // only tags greater than or equal to the current one (isGreaterSemver is a
+    // >= comparison). Digest-matched tags are aliases of the same image and are
+    // left untouched.
+    if (!matchingDigest) {
+        filteredTags = filteredTags.filter((tag) =>
+            isGreaterSemver(
+                transformTag(container.transformTags, tag),
+                transformTag(container.transformTags, container.image.tag.value),
+            ));
+    }
+
+    filteredTags = filteredTags.sort((t1, t2) =>
+        (isGreaterSemver(transformTag(container.transformTags, t2), transformTag(container.transformTags, t1)) ? 1 : -1));
     logContainer.debug(`[TagFilter] After semver filter + sort: ${filteredTags.length} tags (was ${beforeSemver})`);
 
     return filteredTags;
