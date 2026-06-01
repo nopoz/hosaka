@@ -1,6 +1,7 @@
 /**
  * Container store.
  */
+const { isDeepStrictEqual } = require('util');
 const { byString, byValues } = require('sort-es');
 const log = require('../log').child({ component: 'store' });
 const { validate: validateContainer } = require('../model/container');
@@ -79,21 +80,35 @@ function updateContainer(container) {
         })
         .data();
 
+    let removedStaleDuplicate = false;
     for (const existing of existingContainers) {
         if (existing.data.id !== container.id) {
             console.log(`Removing old container record ${existing.data.id} for ${container.name}`);
             containers.remove(existing);
+            removedStaleDuplicate = true;
         }
     }
 
     // Now update/insert the new container
     const existingContainer = containers.findOne({ 'data.id': container.id });
+
+    // The watch loop re-saves every container each cycle even when nothing
+    // changed. Only emit an "updated" event when the persisted state actually
+    // differs from the stored row, otherwise SSE clients are flooded with no-op
+    // updates. The validated container is the persisted state (its computed
+    // getters compare by value), so a deep compare detects real changes.
+    const changed = removedStaleDuplicate
+        || !existingContainer
+        || !isDeepStrictEqual(existingContainer.data, containerToReturn);
+
     if (existingContainer) {
         containers.chain().find({ 'data.id': container.id }).remove();
     }
 
     containers.insert({ data: containerToReturn });
-    emitContainerUpdated(containerToReturn);
+    if (changed) {
+        emitContainerUpdated(containerToReturn);
+    }
     return containerToReturn;
 }
 
