@@ -18,6 +18,7 @@ const configurationValid = {
     simplebody: 'Container ${name} running with ${kind} ${local} can be updated to ${kind} ${remote}\n${link}',
     // eslint-disable-next-line no-template-curly-in-string
     batchtitle: '${count} updates available',
+    install: false,
 };
 
 beforeEach(() => {
@@ -57,10 +58,10 @@ test('trigger should send GET http request when configured like that', async () 
     expect(rp).toHaveBeenCalledWith({
         qs: {
             name: 'container1',
+            actionType: 'trigger',
         },
         method: 'GET',
         uri: 'https:///test',
-        auth: undefined,
     });
 });
 
@@ -77,6 +78,7 @@ test('trigger should send POST http request when configured like that', async ()
     expect(rp).toHaveBeenCalledWith({
         body: {
             name: 'container1',
+            actionType: 'trigger',
         },
         json: true,
         method: 'POST',
@@ -97,6 +99,7 @@ test('trigger should use basic auth when configured like that', async () => {
     expect(rp).toHaveBeenCalledWith({
         body: {
             name: 'container1',
+            actionType: 'trigger',
         },
         method: 'POST',
         json: true,
@@ -118,6 +121,7 @@ test('trigger should use bearer auth when configured like that', async () => {
     expect(rp).toHaveBeenCalledWith({
         body: {
             name: 'container1',
+            actionType: 'trigger',
         },
         method: 'POST',
         json: true,
@@ -139,6 +143,7 @@ test('trigger should use proxy when configured like that', async () => {
     expect(rp).toHaveBeenCalledWith({
         body: {
             name: 'container1',
+            actionType: 'trigger',
         },
         method: 'POST',
         json: true,
