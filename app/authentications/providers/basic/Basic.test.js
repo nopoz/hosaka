@@ -1,4 +1,13 @@
 const { ValidationError } = require('joi');
+
+// The pass lib shells out to the openssl binary to verify htpasswd hashes,
+// which is not present in the test container. Mock it so the provider's
+// accept/reject wiring can be tested without the binary; the real hash
+// verification is the pass lib's own (upstream-tested) responsibility.
+jest.mock('pass', () => ({
+    validate: (pass, hash, cb) => cb(null, pass === 'doe'),
+}));
+
 const Basic = require('./Basic');
 
 const configurationValid = {
