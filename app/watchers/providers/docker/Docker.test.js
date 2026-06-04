@@ -712,7 +712,7 @@ const containerToWatchTestCases = [{
 }];
 
 test.each(containerToWatchTestCases)(
-    'isContainerToWatch should return $result when wud.watch label = $label and watchbydefault = $default ',
+    'isContainerToWatch should return $result when hosaka.watch label = $label and watchbydefault = $default ',
     (item) => {
         const isContainerToWatch = Docker.__get__('isContainerToWatch');
         expect(isContainerToWatch(item.label, item.default)).toEqual(item.result);
@@ -754,7 +754,7 @@ const digestToWatchTestCases = [{
 }];
 
 test.each(digestToWatchTestCases)(
-    'isDigestToWatch should return $result when wud.watch label = $label and semver = semver ',
+    'isDigestToWatch should return $result when hosaka.watch label = $label and semver = semver ',
     (item) => {
         const isDigestToWatch = Docker.__get__('isDigestToWatch');
         expect(isDigestToWatch(item.label, item.semver)).toEqual(item.result);

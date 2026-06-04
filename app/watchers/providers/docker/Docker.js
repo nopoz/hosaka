@@ -7,14 +7,14 @@ const debounce = require('just-debounce');
 const { parse: parseSemver, isGreater: isGreaterSemver, transform: transformTag } = require('../../../tag');
 const event = require('../../../event');
 const {
-    wudWatch,
-    wudTagInclude,
-    wudTagExclude,
-    wudTagTransform,
-    wudWatchDigest,
-    wudLinkTemplate,
-    wudDisplayName,
-    wudDisplayIcon,
+    hosakaWatch,
+    hosakaTagInclude,
+    hosakaTagExclude,
+    hosakaTagTransform,
+    hosakaWatchDigest,
+    hosakaLinkTemplate,
+    hosakaDisplayName,
+    hosakaDisplayIcon,
 } = require('./label');
 const storeContainer = require('../../../store/container');
 const log = require('../../../log');
@@ -230,30 +230,30 @@ function getRepoDigest(containerImage) {
 
 /**
  * Return true if container must be watched.
- * @param wudWatchLabelValue the value of the wud.watch label
+ * @param hosakaWatchLabelValue the value of the hosaka.watch label
  * @param watchByDefault true if containers must be watched by default
  * @returns {boolean}
  */
-function isContainerToWatch(wudWatchLabelValue, watchByDefault) {
-    return wudWatchLabelValue !== undefined && wudWatchLabelValue !== '' ? wudWatchLabelValue.toLowerCase() === 'true' : watchByDefault;
+function isContainerToWatch(hosakaWatchLabelValue, watchByDefault) {
+    return hosakaWatchLabelValue !== undefined && hosakaWatchLabelValue !== '' ? hosakaWatchLabelValue.toLowerCase() === 'true' : watchByDefault;
 }
 
 /**
  * Return true if container digest must be watched.
- * @param wudWatchDigestLabelValue the value of wud.watch.digest label
+ * @param hosakaWatchDigestLabelValue the value of hosaka.watch.digest label
  * @param isSemver if image is semver
  * @returns {boolean|*}
  */
-function isDigestToWatch(wudWatchDigestLabelValue, isSemver) {
+function isDigestToWatch(hosakaWatchDigestLabelValue, isSemver) {
     let result = false;
     if (isSemver) {
-        if (wudWatchDigestLabelValue !== undefined && wudWatchDigestLabelValue !== '') {
-            result = wudWatchDigestLabelValue.toLowerCase() === 'true';
+        if (hosakaWatchDigestLabelValue !== undefined && hosakaWatchDigestLabelValue !== '') {
+            result = hosakaWatchDigestLabelValue.toLowerCase() === 'true';
         }
     } else {
         result = true;
-        if (wudWatchDigestLabelValue !== undefined && wudWatchDigestLabelValue !== '') {
-            result = wudWatchDigestLabelValue.toLowerCase() === 'true';
+        if (hosakaWatchDigestLabelValue !== undefined && hosakaWatchDigestLabelValue !== '') {
+            result = hosakaWatchDigestLabelValue.toLowerCase() === 'true';
         }
     }
     return result;
@@ -288,7 +288,7 @@ class Docker extends Component {
         this.eventReconnectDelay = 0;
         this.initWatcher();
         if (this.configuration.watchdigest !== undefined) {
-            this.log.warn('WUD_WATCHER_{watcher_name}_WATCHDIGEST environment variable is deprecated and won\'t be supported in upcoming versions');
+            this.log.warn('HOSAKA_WATCHER_{watcher_name}_WATCHDIGEST environment variable is deprecated and won\'t be supported in upcoming versions');
         }
         this.log.info(`Cron scheduled (${this.configuration.cron})`);
         this.watchCron = cron.schedule(this.configuration.cron, () => this.watchFromCron());
@@ -629,19 +629,19 @@ async watchContainer(container, skipRegistryCheck = false) {
         const filteredContainers = containers
             .filter(
                 (container) => isContainerToWatch(
-                    container.Labels[wudWatch],
+                    container.Labels[hosakaWatch],
                     this.configuration.watchbydefault,
                 ),
             );
         const containerPromises = filteredContainers
             .map((container) => this.addImageDetailsToContainer(
                 container,
-                container.Labels[wudTagInclude],
-                container.Labels[wudTagExclude],
-                container.Labels[wudTagTransform],
-                container.Labels[wudLinkTemplate],
-                container.Labels[wudDisplayName],
-                container.Labels[wudDisplayIcon],
+                container.Labels[hosakaTagInclude],
+                container.Labels[hosakaTagExclude],
+                container.Labels[hosakaTagTransform],
+                container.Labels[hosakaLinkTemplate],
+                container.Labels[hosakaDisplayName],
+                container.Labels[hosakaDisplayIcon],
             ));
         let containersWithImage = await Promise.all(containerPromises);
 
@@ -846,12 +846,12 @@ async watchContainer(container, skipRegistryCheck = false) {
         const parsedTag = parseSemver(transformTag(transformTags, tagName));
         const isSemver = parsedTag !== null && parsedTag !== undefined;
         const watchDigest = isDigestToWatch(
-            container.Labels[wudWatchDigest],
+            container.Labels[hosakaWatchDigest],
             isSemver,
         );
         
         if (!isSemver && !watchDigest) {
-            this.log.warn('Image is not a semver and digest watching is disabled so wud won\'t report any update. Please review the configuration to enable digest watching for this container or exclude this container from being watched');
+            this.log.warn('Image is not a semver and digest watching is disabled so Hosaka won\'t report any update. Please review the configuration to enable digest watching for this container or exclude this container from being watched');
         }
 
         return normalizeContainer({

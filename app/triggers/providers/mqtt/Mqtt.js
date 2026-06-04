@@ -8,7 +8,7 @@ const {
 } = require('../../../event');
 const { flatten } = require('../../../model/container');
 
-const containerDefaultTopic = 'wud/container';
+const containerDefaultTopic = 'hosaka/container';
 const hassDefaultPrefix = 'homeassistant';
 
 /**
@@ -35,7 +35,7 @@ class Mqtt extends Trigger {
                 scheme: ['mqtt', 'mqtts', 'tcp', 'tls', 'ws', 'wss'],
             }).required(),
             topic: this.joi.string().default(containerDefaultTopic),
-            clientid: this.joi.string().default(`wud_${Math.random().toString(16).substring(2, 10)}`),
+            clientid: this.joi.string().default(`hosaka_${Math.random().toString(16).substring(2, 10)}`),
             user: this.joi.string(),
             password: this.joi.string(),
             hass: this.joi.object({

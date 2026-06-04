@@ -9,7 +9,7 @@ const ifttt = new Ifttt();
 
 const configurationValid = {
     key: 'secret',
-    event: 'wud-image',
+    event: 'hosaka-image',
     threshold: 'all',
     mode: 'simple',
     once: true,

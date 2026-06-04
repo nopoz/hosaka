@@ -4,25 +4,25 @@ const events = require('events');
 const eventEmitter = new events.EventEmitter();
 
 // Container related events
-const WUD_CONTAINER_ADDED = 'wud:container-added';
-const WUD_CONTAINER_UPDATED = 'wud:container-updated';
-const WUD_CONTAINER_REMOVED = 'wud:container-removed';
-const WUD_CONTAINER_REPORT = 'wud:container-report';
-const WUD_CONTAINER_REPORTS = 'wud:container-reports';
+const HOSAKA_CONTAINER_ADDED = 'hosaka:container-added';
+const HOSAKA_CONTAINER_UPDATED = 'hosaka:container-updated';
+const HOSAKA_CONTAINER_REMOVED = 'hosaka:container-removed';
+const HOSAKA_CONTAINER_REPORT = 'hosaka:container-report';
+const HOSAKA_CONTAINER_REPORTS = 'hosaka:container-reports';
 
 // Watcher related events
-const WUD_WATCHER_START = 'wud:watcher-start';
-const WUD_WATCHER_STOP = 'wud:watcher-stop';
+const HOSAKA_WATCHER_START = 'hosaka:watcher-start';
+const HOSAKA_WATCHER_STOP = 'hosaka:watcher-stop';
 
 // New event constant
-const WUD_TRIGGER_WATCH = 'wud:trigger-watch';
+const HOSAKA_TRIGGER_WATCH = 'hosaka:trigger-watch';
 
 /**
  * Emit ContainerReports event.
  * @param containerReports
  */
 function emitContainerReports(containerReports) {
-    eventEmitter.emit(WUD_CONTAINER_REPORTS, containerReports);
+    eventEmitter.emit(HOSAKA_CONTAINER_REPORTS, containerReports);
 }
 
 /**
@@ -30,7 +30,7 @@ function emitContainerReports(containerReports) {
  * @param handler
  */
 function registerContainerReports(handler) {
-    eventEmitter.on(WUD_CONTAINER_REPORTS, handler);
+    eventEmitter.on(HOSAKA_CONTAINER_REPORTS, handler);
 }
 
 /**
@@ -38,7 +38,7 @@ function registerContainerReports(handler) {
  * @param containerReport
  */
 function emitContainerReport(containerReport) {
-    eventEmitter.emit(WUD_CONTAINER_REPORT, containerReport);
+    eventEmitter.emit(HOSAKA_CONTAINER_REPORT, containerReport);
 }
 
 /**
@@ -46,7 +46,7 @@ function emitContainerReport(containerReport) {
  * @param handler
  */
 function registerContainerReport(handler) {
-    eventEmitter.on(WUD_CONTAINER_REPORT, handler);
+    eventEmitter.on(HOSAKA_CONTAINER_REPORT, handler);
 }
 
 /**
@@ -54,7 +54,7 @@ function registerContainerReport(handler) {
  * @param containerAdded
  */
 function emitContainerAdded(containerAdded) {
-    eventEmitter.emit(WUD_CONTAINER_ADDED, containerAdded);
+    eventEmitter.emit(HOSAKA_CONTAINER_ADDED, containerAdded);
 }
 
 /**
@@ -62,7 +62,7 @@ function emitContainerAdded(containerAdded) {
  * @param handler
  */
 function registerContainerAdded(handler) {
-    eventEmitter.on(WUD_CONTAINER_ADDED, handler);
+    eventEmitter.on(HOSAKA_CONTAINER_ADDED, handler);
 }
 
 /**
@@ -70,7 +70,7 @@ function registerContainerAdded(handler) {
  * @param containerUpdated
  */
 function emitContainerUpdated(containerUpdated) {
-    eventEmitter.emit(WUD_CONTAINER_UPDATED, containerUpdated);
+    eventEmitter.emit(HOSAKA_CONTAINER_UPDATED, containerUpdated);
 }
 
 /**
@@ -78,7 +78,7 @@ function emitContainerUpdated(containerUpdated) {
  * @param handler
  */
 function registerContainerUpdated(handler) {
-    eventEmitter.on(WUD_CONTAINER_UPDATED, handler);
+    eventEmitter.on(HOSAKA_CONTAINER_UPDATED, handler);
 }
 
 /**
@@ -86,7 +86,7 @@ function registerContainerUpdated(handler) {
  * @param containerRemoved
  */
 function emitContainerRemoved(containerRemoved) {
-    eventEmitter.emit(WUD_CONTAINER_REMOVED, containerRemoved);
+    eventEmitter.emit(HOSAKA_CONTAINER_REMOVED, containerRemoved);
 }
 
 /**
@@ -94,42 +94,42 @@ function emitContainerRemoved(containerRemoved) {
  * @param handler
  */
 function registerContainerRemoved(handler) {
-    eventEmitter.on(WUD_CONTAINER_REMOVED, handler);
+    eventEmitter.on(HOSAKA_CONTAINER_REMOVED, handler);
 }
 
 function emitWatcherStart(watcher) {
-    eventEmitter.emit(WUD_WATCHER_START, watcher);
+    eventEmitter.emit(HOSAKA_WATCHER_START, watcher);
 }
 
 function registerWatcherStart(handler) {
-    eventEmitter.on(WUD_WATCHER_START, handler);
+    eventEmitter.on(HOSAKA_WATCHER_START, handler);
 }
 
 function emitWatcherStop(watcher) {
-    eventEmitter.emit(WUD_WATCHER_STOP, watcher);
+    eventEmitter.emit(HOSAKA_WATCHER_STOP, watcher);
 }
 
 function registerWatcherStop(handler) {
-    eventEmitter.on(WUD_WATCHER_STOP, handler);
+    eventEmitter.on(HOSAKA_WATCHER_STOP, handler);
 }
 
 // New function to emit trigger_watch
 function emitTriggerWatch() {
-    eventEmitter.emit(WUD_TRIGGER_WATCH);
+    eventEmitter.emit(HOSAKA_TRIGGER_WATCH);
 }
 
 // New function to register a handler for trigger_watch
 function registerTriggerWatch(handler) {
-    eventEmitter.on(WUD_TRIGGER_WATCH, handler);
+    eventEmitter.on(HOSAKA_TRIGGER_WATCH, handler);
 }
 
 // New function to unregister a handler for trigger_watch
 function unregisterTriggerWatch(handler) {
-    eventEmitter.off(WUD_TRIGGER_WATCH, handler);
+    eventEmitter.off(HOSAKA_TRIGGER_WATCH, handler);
 }
 
 function unregisterWatcherStop(handler) {
-    eventEmitter.off(WUD_WATCHER_STOP, handler);
+    eventEmitter.off(HOSAKA_WATCHER_STOP, handler);
 }
 
 

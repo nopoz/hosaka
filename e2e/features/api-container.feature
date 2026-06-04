@@ -1,10 +1,10 @@
-Feature: WUD Container API Exposure
+Feature: Hosaka Container API Exposure
     When I GET /api/containers
     Then response code should be 200
     And response body should be valid json
     And response body path $ should be of type array with length 19
 
-  Scenario Outline: WUD must allow to get all containers
+  Scenario Outline: Hosaka must allow to get all containers
     When I GET /api/containers
     Then response code should be 200
     And response body should be valid json
@@ -39,7 +39,7 @@ Feature: WUD Container API Exposure
       | 18    | lscr     | lscr_radarr              | https://lscr.io/v2                                      | linuxserver/radarr                  | 3.2.1.5070-ls105   | 5.12.2.9335-ls242  | true            |
       | 19    | quay     | quay_prometheus          | https://quay.io/v2                                      | prometheus/prometheus               | v2.52.0            | v2.54.1            | true            |
 
-  Scenario: WUD must allow to get a container with semver
+  Scenario: Hosaka must allow to get a container with semver
     Given I GET /api/containers
     And I store the value of body path $[0].id as containerId in scenario scope
     When I GET /api/containers/`containerId`
@@ -57,7 +57,7 @@ Feature: WUD Container API Exposure
     And response body path $.result.tag should be 2.0.0
     And response body path $.updateAvailable should be true
 
-  Scenario: WUD must allow to get a container with digest
+  Scenario: Hosaka must allow to get a container with digest
     Given I GET /api/containers
     And I store the value of body path $[8].id as containerId in scenario scope
     When I GET /api/containers/`containerId`
@@ -78,7 +78,7 @@ Feature: WUD Container API Exposure
     And response body path $.result.digest should be sha256:367678a80c0be120f67f3adfccc2f408bd2c1319ed98c1975ac88e750d0efe26
     And response body path $.updateAvailable should be true
 
-  Scenario: WUD must allow to get a container with its link
+  Scenario: Hosaka must allow to get a container with its link
     Given I GET /api/containers
     And I store the value of body path $[5].id as containerId in scenario scope
     When I GET /api/containers/`containerId`
@@ -87,7 +87,7 @@ Feature: WUD Container API Exposure
     And response body path $.link should be https://github.com/home-assistant/core/releases/tag/2021.6.1
     And response body path $.result.link should be https://github.com/home-assistant/core/releases/tag/2024.10.3
 
-  Scenario: WUD must allow to trigger a watch on a container
+  Scenario: Hosaka must allow to trigger a watch on a container
     Given I GET /api/containers
     And I store the value of body path $[0].id as containerId in scenario scope
     When I POST to /api/containers/`containerId`/watch

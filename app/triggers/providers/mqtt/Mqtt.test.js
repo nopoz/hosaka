@@ -10,8 +10,8 @@ mqtt.log = log;
 
 const configurationValid = {
     url: 'mqtt://host:1883',
-    topic: 'wud/container',
-    clientid: 'wud',
+    topic: 'hosaka/container',
+    clientid: 'hosaka',
     hass: {
         discovery: false,
         enabled: false,
@@ -46,7 +46,7 @@ test('validateConfiguration should return validated configuration when valid', (
 test('validateConfiguration should apply_default_configuration', () => {
     const validatedConfiguration = mqtt.validateConfiguration({
         url: configurationValid.url,
-        clientid: 'wud',
+        clientid: 'hosaka',
     });
     expect(validatedConfiguration).toStrictEqual(configurationValid);
 });
@@ -64,7 +64,7 @@ test('maskConfiguration should mask sensitive data', () => {
     mqtt.configuration = {
         password: 'password',
         url: 'mqtt://host:1883',
-        topic: 'wud/container',
+        topic: 'hosaka/container',
         hass: {
             discovery: false,
             enabled: false,
@@ -78,7 +78,7 @@ test('maskConfiguration should mask sensitive data', () => {
             prefix: 'homeassistant',
         },
         password: 'p******d',
-        topic: 'wud/container',
+        topic: 'hosaka/container',
         url: 'mqtt://host:1883',
     });
 });
@@ -88,7 +88,7 @@ test('initTrigger should init Mqtt client', async () => {
         ...configurationValid,
         user: 'user',
         password: 'password',
-        clientid: 'wud',
+        clientid: 'hosaka',
         hass: {
             enabled: true,
             discovery: true,
@@ -98,7 +98,7 @@ test('initTrigger should init Mqtt client', async () => {
     const spy = jest.spyOn(mqttClient, 'connectAsync');
     await mqtt.initTrigger();
     expect(spy).toHaveBeenCalledWith('mqtt://host:1883', {
-        clientId: 'wud',
+        clientId: 'hosaka',
         username: 'user',
         password: 'password',
         rejectUnauthorized: true,
@@ -107,7 +107,7 @@ test('initTrigger should init Mqtt client', async () => {
 
 test('trigger should format json message payload as expected', async () => {
     mqtt.configuration = {
-        topic: 'wud/container',
+        topic: 'hosaka/container',
     };
     mqtt.client = {
         publish: (topic, message) => ({

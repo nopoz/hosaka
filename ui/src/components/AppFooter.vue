@@ -1,7 +1,7 @@
 <template>
   <v-footer app theme="dark" height="30px" class="pa-0">
     <v-col cols="12" class="text-center text-caption pa-0">
-      {{ new Date().getFullYear() }} — WUD (version {{ version }})
+      {{ new Date().getFullYear() }} — Hosaka (version {{ version }})
     </v-col>
   </v-footer>
 </template>

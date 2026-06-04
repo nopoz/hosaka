@@ -9,8 +9,8 @@ const kafka = new Kafka();
 
 const configurationValid = {
     brokers: 'broker1:9000, broker2:9000',
-    topic: 'wud-container',
-    clientId: 'wud',
+    topic: 'hosaka-container',
+    clientId: 'hosaka',
     ssl: false,
     threshold: 'all',
     mode: 'simple',
@@ -69,8 +69,8 @@ test('validateConfiguration should throw error when invalid', () => {
 test('maskConfiguration should mask sensitive data', () => {
     kafka.configuration = {
         brokers: 'broker1:9000, broker2:9000',
-        topic: 'wud-image',
-        clientId: 'wud',
+        topic: 'hosaka-image',
+        clientId: 'hosaka',
         ssl: false,
         authentication: {
             type: 'PLAIN',
@@ -80,8 +80,8 @@ test('maskConfiguration should mask sensitive data', () => {
     };
     expect(kafka.maskConfiguration()).toEqual({
         brokers: 'broker1:9000, broker2:9000',
-        topic: 'wud-image',
-        clientId: 'wud',
+        topic: 'hosaka-image',
+        clientId: 'hosaka',
         ssl: false,
         authentication: {
             type: 'PLAIN',
@@ -94,14 +94,14 @@ test('maskConfiguration should mask sensitive data', () => {
 test('maskConfiguration should not fail if no auth provided', () => {
     kafka.configuration = {
         brokers: 'broker1:9000, broker2:9000',
-        topic: 'wud-image',
-        clientId: 'wud',
+        topic: 'hosaka-image',
+        clientId: 'hosaka',
         ssl: false,
     };
     expect(kafka.maskConfiguration()).toEqual({
         brokers: 'broker1:9000, broker2:9000',
-        topic: 'wud-image',
-        clientId: 'wud',
+        topic: 'hosaka-image',
+        clientId: 'hosaka',
         ssl: false,
     });
 });
@@ -109,14 +109,14 @@ test('maskConfiguration should not fail if no auth provided', () => {
 test('initTrigger should init kafka client', async () => {
     kafka.configuration = {
         brokers: 'broker1:9000, broker2:9000',
-        topic: 'wud-image',
-        clientId: 'wud',
+        topic: 'hosaka-image',
+        clientId: 'hosaka',
         ssl: false,
     };
     await kafka.initTrigger();
     expect(KafkaClient).toHaveBeenCalledWith({
         brokers: ['broker1:9000', 'broker2:9000'],
-        clientId: 'wud',
+        clientId: 'hosaka',
         ssl: false,
     });
 });
@@ -124,8 +124,8 @@ test('initTrigger should init kafka client', async () => {
 test('initTrigger should init kafka client with auth when configured', async () => {
     kafka.configuration = {
         brokers: 'broker1:9000, broker2:9000',
-        topic: 'wud-image',
-        clientId: 'wud',
+        topic: 'hosaka-image',
+        clientId: 'hosaka',
         ssl: false,
         authentication: {
             type: 'PLAIN',
@@ -136,7 +136,7 @@ test('initTrigger should init kafka client with auth when configured', async () 
     await kafka.initTrigger();
     expect(KafkaClient).toHaveBeenCalledWith({
         brokers: ['broker1:9000', 'broker2:9000'],
-        clientId: 'wud',
+        clientId: 'hosaka',
         ssl: false,
         sasl: {
             mechanism: 'PLAIN',

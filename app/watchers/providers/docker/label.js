@@ -1,46 +1,46 @@
 /**
- * WUD supported Docker labels.
+ * Hosaka supported Docker labels.
  */
 module.exports = {
 
     /**
      * Should the container be tracked? (true | false).
      */
-    wudWatch: 'wud.watch',
+    hosakaWatch: 'hosaka.watch',
 
     /**
      * Optional regex indicating what tags to consider.
      */
-    wudTagInclude: 'wud.tag.include',
+    hosakaTagInclude: 'hosaka.tag.include',
 
     /**
      * Optional regex indicating what tags to not consider.
      */
-    wudTagExclude: 'wud.tag.exclude',
+    hosakaTagExclude: 'hosaka.tag.exclude',
 
     /**
      * Optional transform function to apply to the tag.
      */
-    wudTagTransform: 'wud.tag.transform',
+    hosakaTagTransform: 'hosaka.tag.transform',
 
     /**
      * Should container digest be tracked? (true | false).
      */
-    wudWatchDigest: 'wud.watch.digest',
+    hosakaWatchDigest: 'hosaka.watch.digest',
 
     /**
      * Optional templated string pointing to a browsable link.
      */
-    wudLinkTemplate: 'wud.link.template',
+    hosakaLinkTemplate: 'hosaka.link.template',
 
     /**
      * Optional friendly name to display.
      */
-    wudDisplayName: 'wud.display.name',
+    hosakaDisplayName: 'hosaka.display.name',
 
     /**
      * Optional friendly icon to display.
      */
-    wudDisplayIcon: 'wud.display.icon',
+    hosakaDisplayIcon: 'hosaka.display.icon',
 
 };

@@ -1,5 +1,5 @@
 {
-  "name": "wud-app",
+  "name": "hosaka-app",
   "version": "1.0.0",
   "description": "What'up Docker? the app",
   "main": "index.js",
@@ -10,7 +10,7 @@
     "test": "jest --coverage"
   },
   "author": "fmartinou",
-  "repository": "getwud/wud",
+  "repository": "nopoz/hosaka",
   "license": "MIT",
   "dependencies": {
     "@slack/web-api": "7.16.0",

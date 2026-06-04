@@ -10,7 +10,7 @@ const container = require('./container');
 // Store Configuration Schema
 const configurationSchema = joi.object().keys({
     path: joi.string().default('/store'),
-    file: joi.string().default('wud.json'),
+    file: joi.string().default('hosaka.json'),
 });
 
 // Validate Configuration

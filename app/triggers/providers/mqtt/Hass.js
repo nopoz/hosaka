@@ -8,9 +8,9 @@ const {
 } = require('../../../event');
 const containerStore = require('../../../store/container');
 
-const HASS_DEVICE_ID = 'wud';
-const HASS_DEVICE_NAME = 'wud';
-const HASS_MANUFACTURER = 'wud';
+const HASS_DEVICE_ID = 'hosaka';
+const HASS_DEVICE_NAME = 'hosaka';
+const HASS_MANUFACTURER = 'hosaka';
 const HASS_ENTITY_VALUE_TEMPLATE = '{{ value_json.image_tag_value }}';
 const HASS_LATEST_VERSION_TEMPLATE = '{% if value_json.update_kind_kind == "digest" %}{{ value_json.result_digest[:15] }}{% else %}{{ value_json.result_tag }}{% endif %}';
 
@@ -24,7 +24,7 @@ function getHassEntityId(topic) {
 }
 
 /**
- * Get HA wud device info.
+ * Get HA hosaka device info.
  * @returns {*}
  */
 function getHaDevice() {
@@ -254,7 +254,7 @@ class Hass {
             name: name || entityId,
             device: getHaDevice(),
             icon: icon || sanitizeIcon('mdi:docker'),
-            entity_picture: 'https://github.com/getwud/wud/raw/main/docs/wud_logo.png',
+            entity_picture: 'https://github.com/nopoz/hosaka/raw/main/docs/wud_logo.png',
             state_topic: stateTopic,
             ...options,
         }), {

@@ -3,6 +3,6 @@ const { getLogLevel } = require('../configuration');
 
 // Init Bunyan logger
 module.exports = bunyan.createLogger({
-    name: 'whats-up-docker',
+    name: 'hosaka',
     level: getLogLevel(),
 });

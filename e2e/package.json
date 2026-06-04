@@ -1,14 +1,14 @@
 {
-  "name": "wud-e2e",
+  "name": "hosaka-e2e",
   "version": "1.0.0",
-  "description": "WUD - e2e",
+  "description": "Hosaka - e2e",
   "main": "index.js",
   "scripts": {
     "lint": "eslint '**/*.js'",
     "cucumber": "cucumber-js **/*.feature"
   },
   "author": "fmartinou",
-  "repository": "getwud/wud",
+  "repository": "nopoz/hosaka",
   "license": "MIT",
   "dependencies": {
     "@cucumber/cucumber": "11.0.1",
