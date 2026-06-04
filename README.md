@@ -46,6 +46,7 @@ Hosaka sits in the middle, where most people actually want to be:
 | **Portainer stacks** | generic script trigger, write your own | bundled one-click updater that rewrites the stack file and redeploys through the Portainer API |
 | **Mobile** | desktop-oriented: permanent nav, no mobile layout | fully responsive: hamburger nav, mobile layouts, update from your phone |
 | **Live container state** | manual refresh | list updates in place over SSE, no full-page reload |
+| **Update lifecycle** | trigger fires; output is logged server-side after it exits | tracks the container recreation, confirms the new container is live, and carries the "update complete" state onto the new container ID |
 | **In-app UX** | filter + oldest-first toggle | sort by name, update type, or watcher; distinct color per update type, including prerelease |
 
 ## How it works
@@ -76,6 +77,15 @@ Hosaka is built on three concepts:
 - Auto-update Docker containers and docker-compose stacks, or run your own
   update script, automatically or with a single click from the UI
 - Per-update or batched notifications, with a "once" guard against repeats
+
+**Updates that keep track of themselves**
+- An update recreates the container under a new ID; Hosaka detects the swap,
+  confirms the new container is running, forces an immediate rescan, and carries
+  the "update complete" status onto the new row, so the UI reflects reality
+  instead of a stale or orphaned entry
+- The live state stream pushes only real changes, so dozens of containers can
+  update in place without flooding or freezing the page
+- State is flushed on shutdown, so the last writes survive a restart
 
 **One-click Portainer stack updates, built in**
 - Ships a ready-to-use updater for Portainer-managed stacks: it rewrites the
