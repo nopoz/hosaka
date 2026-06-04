@@ -235,6 +235,59 @@ fetch_container_logs() {
 	fi
 }
 
+# ---------------------------------------------------------------------------
+# Preflight validation: fail fast with an actionable message before doing work.
+# ---------------------------------------------------------------------------
+missing_env=()
+[[ -z "$portainer_url" ]] && missing_env+=("PORTAINER_API_ENDPOINT")
+[[ -z "$api_key" ]] && missing_env+=("PORTAINER_API_KEY")
+if [[ ${#missing_env[@]} -gt 0 ]]; then
+	echo "ERROR: required environment variable(s) not set: ${missing_env[*]}"
+	echo "Set them on the Hosaka container. PORTAINER_API_ENDPOINT must include the /api"
+	echo "suffix (e.g. https://portainer.example.com:9443/api); PORTAINER_API_KEY is a"
+	echo "Portainer API access token."
+	exit 1
+fi
+
+if [[ -z "$container_name" || -z "$image_name" || -z "$current_version" \
+		|| -z "$update_version" || -z "$compose_project" ]]; then
+	echo "ERROR: missing required argument(s)."
+	echo "usage: $(basename "$0") <container name> <image name> <current version> <update version> <watcher name> <compose project>"
+	echo "got:   name='$container_name' image='$image_name' current='$current_version' update='$update_version' watcher='$watcher_name' project='$compose_project'"
+	echo "When run by Hosaka these are passed automatically; an empty value usually means the"
+	echo "container is missing version or compose-project metadata Hosaka could not resolve."
+	exit 1
+fi
+
+# Verify connectivity and auth up front so any failure is attributable to the
+# right cause (unreachable endpoint vs bad key vs missing /api suffix).
+preflight_code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 --location \
+	--request GET "$portainer_url/endpoints" \
+	--header 'Accept: application/json' \
+	--header "X-API-Key: $api_key")
+preflight_rc=$?
+if [[ $preflight_rc -ne 0 ]]; then
+	echo "ERROR: could not reach Portainer at \"$portainer_url\" (curl exit $preflight_rc)."
+	echo "Check PORTAINER_API_ENDPOINT (scheme, host, port) and that the Hosaka container can"
+	echo "reach it on the network."
+	exit 1
+fi
+case "$preflight_code" in
+	2*) : ;;  # reachable and authorized
+	401|403)
+		echo "ERROR: Portainer rejected the API key (HTTP $preflight_code)."
+		echo "Check PORTAINER_API_KEY - it must be a valid, non-expired Portainer API access token."
+		exit 1 ;;
+	404)
+		echo "ERROR: Portainer returned HTTP 404 for \"$portainer_url/endpoints\"."
+		echo "Check that PORTAINER_API_ENDPOINT includes the /api suffix (e.g. https://host:9443/api)."
+		exit 1 ;;
+	*)
+		echo "ERROR: unexpected HTTP $preflight_code from \"$portainer_url/endpoints\"."
+		echo "Verify PORTAINER_API_ENDPOINT and that the Portainer API is reachable and healthy."
+		exit 1 ;;
+esac
+
 echo -e "\ncontainer name: $container_name"
 echo "image name: $image_name"
 echo "current version: $current_version"
@@ -278,7 +331,14 @@ endpoint_inspect=$(curl -s --location -g \
 	--header 'Accept: application/json' \
 	--header "X-API-Key: $api_key")
 image_id=$(echo "$endpoint_inspect" | jq '[.[] | .Portainer.ResourceControl.Id] | first')
-data_extraction_error_check "$image_id" "image id"
+if [[ -z "$image_id" || "$image_id" == "null" ]]; then
+	echo -e "\nERROR: could not find Portainer stack ownership for container \"$container_name\" on endpoint $endpoint_id."
+	echo "This updater only works on containers deployed as part of a Portainer stack."
+	echo "If \"$container_name\" is a standalone container or was created outside Portainer, it"
+	echo "cannot be updated this way."
+	exit 1
+fi
+echo "container image id: $image_id"
 
 # get stack id
 filter_encoded=$(printf '{"EndpointID":%s}' "$endpoint_id" | jq -sRr @uri)
@@ -287,7 +347,13 @@ endpoint_stacks=$(curl -s --location -g \
 	--header 'Accept: application/json' \
 	--header "X-API-Key: $api_key")
 stack_id=$(echo "$endpoint_stacks" | jq --arg image_id "$image_id" '[.[] | select(.ResourceControl.Id == ($image_id|tonumber)) | .Id] | first')
-data_extraction_error_check "$stack_id" "stack id"
+if [[ -z "$stack_id" || "$stack_id" == "null" ]]; then
+	echo -e "\nERROR: no Portainer stack found for container \"$container_name\" on endpoint $endpoint_id."
+	echo "The container reports Portainer resource id $image_id but no matching stack was returned."
+	echo "Confirm \"$compose_project\" is a Portainer-managed stack on this endpoint."
+	exit 1
+fi
+echo "container stack id: $stack_id"
 
 # get environment variables if present:
 env_data=$(echo "$endpoint_stacks" | jq --arg id "$stack_id" '.[] | select(.Id == ($id | tonumber)) | .Env')
@@ -306,7 +372,35 @@ fi
 # check current stack data contains current version
 literal_match=$(printf '%s' "$image_name:$current_version" | sed 's/[][()\.^$?*+|{}]/\\&/g')
 if [[ ! $stack_contents =~ $literal_match ]]; then
-	echo -e "\nERROR: $current_version not found in stack file contents"
+	echo -e "\nERROR: could not find \"$image_name:$current_version\" in the $compose_project stack file."
+	echo "The Portainer updater rewrites an explicit, pinned image tag and redeploys, so the"
+	echo "stack must pin the exact current version of this image."
+
+	stack_file_text=$(echo "$stack_contents" | jq -r '.StackFileContent // empty')
+	image_lines=$(printf '%s\n' "$stack_file_text" | grep -F "$image_name:")
+
+	if [[ $current_version == sha256:* || $current_version =~ ^[0-9a-f]{12,}$ ]]; then
+		echo
+		echo "Hosaka is watching this container by image DIGEST, which means its tag is a moving"
+		echo "tag such as \"latest\". It passed a digest (\"$current_version\") instead of a version"
+		echo "number, and this updater cannot rewrite a moving tag."
+		echo "Fix: pin an explicit version in your stack (e.g. \"$image_name:1.2.3\" rather than"
+		echo "\"$image_name:latest\"), redeploy the stack, then let Hosaka watch it for updates."
+	elif printf '%s\n' "$image_lines" | grep -qE ":(latest|stable|edge|main|master|nightly|rolling|dev)([[:space:]\"']|\$)"; then
+		echo
+		echo "Your stack pins a moving tag for this image. This updater only works with explicit"
+		echo "version tags. Replace the moving tag with a specific version (e.g. \"$image_name:1.2.3\")."
+	fi
+
+	if [[ -n $image_lines ]]; then
+		echo
+		echo "Lines in the $compose_project stack file that reference \"$image_name\":"
+		printf '%s\n' "$image_lines" | sed 's/^/  /'
+	else
+		echo
+		echo "No lines referencing \"$image_name\" were found in the stack file - check that the"
+		echo "image name matches what is written in your compose file."
+	fi
 	exit 1
 fi
 
