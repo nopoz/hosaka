@@ -9,7 +9,7 @@ let app;
 
 function saveAppInfosAndMigrate() {
     const appInfosCurrent = {
-        name: 'wud',
+        name: 'hosaka',
         version: getVersion(),
     };
     const appInfosSaved = app.findOne({});
