@@ -7,6 +7,36 @@ update run live.
 Hosaka is a fork of [What's Up Docker (WUD)](https://github.com/getwud/wud),
 rebuilt around a faster, mobile-friendly UI and one-click updates.
 
+## Why Hosaka
+
+Keeping self-hosted containers up to date is a chore with bad default options.
+Pin everything to `latest` and updates land silently: you do not know what
+version is running, a pull can break a service overnight, and there is no clean
+way back. Pin explicit versions instead and you trade surprises for manual toil:
+watching release notes, hunting for new tags, and editing compose files by hand
+across every host. Blind auto-updaters take the wheel entirely, which is the last
+thing you want for a database or a service you depend on.
+
+Hosaka sits in the middle, where most people actually want to be:
+
+- **Know what is running.** Keep pinned versions in your stacks and let Hosaka
+  watch your registries, so a new release shows up in one place instead of you
+  going to look for it. A `hosaka.link.template` label turns each update into a
+  direct link to that version's release notes, so you can read what changed
+  without hunting down the changelog.
+- **Update on your terms.** Nothing changes until you click. Every update is
+  classified as major, minor, patch, or prerelease, so you can take a patch and
+  hold back a major.
+- **See it happen.** Updates are not a black box: the run streams to the UI line
+  by line and waits for the container to come back healthy before it counts as
+  done.
+- **Stay in control of Portainer stacks.** The built-in updater rewrites the
+  stack file from the current pinned version to the new one and redeploys through
+  the API, so your stack definition stays the source of truth and rolling back is
+  just redeploying the old tag.
+- **Cover every host, from your phone.** Watch local and remote Docker hosts at
+  once, and drive it all from a responsive UI that works on mobile.
+
 ## What's different from WUD
 
 | Area | WUD | Hosaka |
