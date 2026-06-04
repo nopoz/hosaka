@@ -201,3 +201,21 @@ describe('Script Trigger Tests', () => {
         );
     });
 });
+
+describe('Script Trigger configuration schema', () => {
+    test('path defaults to the bundled portainer script when omitted', () => {
+        const trigger = new Script();
+        const validated = trigger.validateConfiguration({ install: true });
+        expect(validated.path).toEqual('/scripts/portainer_stack_update.sh');
+        expect(validated.install).toEqual(true);
+        expect(validated.timeout).toEqual(300000);
+    });
+
+    test('an explicit path overrides the default', () => {
+        const trigger = new Script();
+        const validated = trigger.validateConfiguration({
+            path: '/scripts/myscript.sh',
+        });
+        expect(validated.path).toEqual('/scripts/myscript.sh');
+    });
+});

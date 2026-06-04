@@ -66,5 +66,9 @@ COPY --from=dependencies /home/node/app/node_modules ./node_modules
 # Copy backend app files
 COPY app/ ./
 
+# Copy bundled scripts (e.g. the Portainer stack-update script) to /scripts
+COPY scripts/ /scripts/
+RUN chmod +x /scripts/portainer_stack_update.sh
+
 # Copy built UI from the ui-builder stage
 COPY --from=ui-builder /home/node/ui/dist ./ui

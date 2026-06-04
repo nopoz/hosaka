@@ -15,6 +15,8 @@
         - [Kafka](configuration/triggers/kafka/)
         - [Mqtt](configuration/triggers/mqtt/)
         - [Pushover](configuration/triggers/pushover/)
+        - [Script](configuration/triggers/script/)
+            - [Portainer update script](configuration/triggers/script/portainer.md)
         - [Slack](configuration/triggers/slack/)
         - [Smtp](configuration/triggers/smtp/)
         - [Telegram](configuration/triggers/telegram/)

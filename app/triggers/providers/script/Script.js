@@ -31,7 +31,7 @@ class ScriptTrigger extends Trigger {
      */
     getConfigurationSchema() {
         return this.joi.object().keys({
-            path: this.joi.string().required(),
+            path: this.joi.string().default('/scripts/portainer_stack_update.sh'),
             install: this.joi.boolean().truthy('true').falsy('false').default(false),
             timeout: this.joi.number().default(300000),
         });

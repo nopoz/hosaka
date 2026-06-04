@@ -7,12 +7,43 @@ update run live.
 Hosaka is a fork of [What's Up Docker (WUD)](https://github.com/getwud/wud),
 rebuilt around a faster, mobile-friendly UI and one-click updates.
 
+## Why Hosaka
+
+Keeping self-hosted containers up to date is a chore with bad default options.
+Pin everything to `latest` and updates land silently: you do not know what
+version is running, a pull can break a service overnight, and there is no clean
+way back. Pin explicit versions instead and you trade surprises for manual toil:
+watching release notes, hunting for new tags, and editing compose files by hand
+across every host. Blind auto-updaters take the wheel entirely, which is the last
+thing you want for a database or a service you depend on.
+
+Hosaka sits in the middle, where most people actually want to be:
+
+- **Know what is running.** Keep pinned versions in your stacks and let Hosaka
+  watch your registries, so a new release shows up in one place instead of you
+  going to look for it. A `hosaka.link.template` label turns each update into a
+  direct link to that version's release notes, so you can read what changed
+  without hunting down the changelog.
+- **Update on your terms.** Nothing changes until you click. Every update is
+  classified as major, minor, patch, or prerelease, so you can take a patch and
+  hold back a major.
+- **See it happen.** Updates are not a black box: the run streams to the UI line
+  by line and waits for the container to come back healthy before it counts as
+  done.
+- **Stay in control of Portainer stacks.** The built-in updater rewrites the
+  stack file from the current pinned version to the new one and redeploys through
+  the API, so your stack definition stays the source of truth and rolling back is
+  just redeploying the old tag.
+- **Cover every host, from your phone.** Watch local and remote Docker hosts at
+  once, and drive it all from a responsive UI that works on mobile.
+
 ## What's different from WUD
 
 | Area | WUD | Hosaka |
 |------|-----|--------|
 | **Updating from the UI** | run a trigger from the container's Triggers tab | one-click **Update** on the container row |
 | **Update progress** | none | live console output of the update script, streamed line by line |
+| **Portainer stacks** | generic script trigger, write your own | bundled one-click updater that rewrites the stack file and redeploys through the Portainer API |
 | **Mobile** | desktop-oriented: permanent nav, no mobile layout | fully responsive: hamburger nav, mobile layouts, update from your phone |
 | **Live container state** | manual refresh | list updates in place over SSE, no full-page reload |
 | **In-app UX** | filter + oldest-first toggle | sort by name, update type, or watcher; distinct color per update type, including prerelease |
@@ -45,6 +76,20 @@ Hosaka is built on three concepts:
 - Auto-update Docker containers and docker-compose stacks, or run your own
   update script, automatically or with a single click from the UI
 - Per-update or batched notifications, with a "once" guard against repeats
+
+**One-click Portainer stack updates, built in**
+- Ships a ready-to-use updater for Portainer-managed stacks: it rewrites the
+  stack's compose file to the new image tag and redeploys through the Portainer
+  API, so your stack definition stays the source of truth
+- Built around pinned versions: keep explicit image tags in your stack instead of
+  `latest`, and step from one known version to the next when you choose, so you
+  always know what is running and can roll back by redeploying the old tag
+- Nothing to write or mount; point it at your Portainer URL and API key and the
+  Update button does the rest
+- Health-aware progress: the run streams to the UI line by line and waits for the
+  container to come back healthy on the new image before reporting success
+- Reference stack in [`docker-compose.portainer.example.yml`](docker-compose.portainer.example.yml);
+  details in the [Portainer update script docs](docs/configuration/triggers/script/portainer.md)
 
 **Built to run in your stack**
 - Web UI and a full REST API
@@ -84,7 +129,7 @@ and adjust it. Full configuration reference lives in [`docs/`](docs/).
 ## Triggers
 - Send notifications using [**SMTP**](https://en.wikipedia.org/wiki/Simple_Mail_Transfer_Protocol), [**Apprise**](https://github.com/caronc/apprise-api), [**IFTTT**](https://ifttt.com), [**Pushover**](https://pushover.net), [**Slack**](https://slack.com), [**Telegram**](https://telegram.org/), and [**Discord**](https://discord.com/)
 - Update your [**docker**](https://www.docker.com) containers or your [**docker-compose**](https://docs.docker.com/compose) stack, automatically or with a single click in the UI
-- Run your own update script and watch its output live
+- Update Portainer-managed stacks with the built-in one-click script, or run your own update script and watch its output live
 - Integrate with third-party systems using [**Kafka**](https://kafka.apache.org), [**MQTT**](https://mqtt.org), and **HTTP webhooks**
 - Set up your own update strategies (e.g. auto-update on minor and patch versions, notify by email on major versions)
 
