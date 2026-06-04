@@ -13,8 +13,8 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["favicon.ico", "img/icons/*"],
       manifest: {
-        name: "WUD",
-        short_name: "WUD",
+        name: "Hosaka",
+        short_name: "Hosaka",
         theme_color: "#00355E",
         background_color: "#00355E",
         icons: [

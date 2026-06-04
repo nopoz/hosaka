@@ -26,7 +26,7 @@ async function shutdown(signal) {
 }
 
 async function main() {
-    log.info(`WUD is starting (version = ${getVersion()})`);
+    log.info(`Hosaka is starting (version = ${getVersion()})`);
 
     // Init store
     await store.init();
