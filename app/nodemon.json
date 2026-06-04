@@ -1,9 +1,9 @@
 {
   "env": {
-    "WUD_VERSION": "dev",
-    "WUD_STORE_PATH": ".store",
-    "WUD_WATCHER_LOCAL_WATCHBYDEFAULT": "true",
-    "WUD_AUTH_BASIC_JOHN_USER": "john",
-    "WUD_AUTH_BASIC_JOHN_HASH": "$apr1$aefKbZEa$ZSA5Y3zv9vDQOxr283NGx/"
+    "HOSAKA_VERSION": "dev",
+    "HOSAKA_STORE_PATH": ".store",
+    "HOSAKA_WATCHER_LOCAL_WATCHBYDEFAULT": "true",
+    "HOSAKA_AUTH_BASIC_JOHN_USER": "john",
+    "HOSAKA_AUTH_BASIC_JOHN_HASH": "$apr1$aefKbZEa$ZSA5Y3zv9vDQOxr283NGx/"
   }
 }

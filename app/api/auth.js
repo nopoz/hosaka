@@ -14,8 +14,8 @@ const router = express.Router();
 // The configured strategy ids.
 const STRATEGY_IDS = [];
 
-// Constant WUD namespace for uuid v5 bound sessions.
-const WUD_NAMESPACE = 'dee41e92-5fc4-460e-beec-528c9ea7d760';
+// Constant Hosaka namespace for uuid v5 bound sessions.
+const HOSAKA_NAMESPACE = 'dee41e92-5fc4-460e-beec-528c9ea7d760';
 
 /**
  * Get all strategies id.
@@ -35,12 +35,12 @@ function getCookieMaxAge(days) {
 }
 
 /**
- * Get session secret key (bound to wud version).
+ * Get session secret key (bound to hosaka version).
  * @returns {string}
  */
 function getSessionSecretKey() {
-    const stringToHash = `wud.${getVersion()}.${getmac()}`;
-    return uuidV5(stringToHash, WUD_NAMESPACE);
+    const stringToHash = `hosaka.${getVersion()}.${getmac()}`;
+    return uuidV5(stringToHash, HOSAKA_NAMESPACE);
 }
 
 /**

@@ -199,7 +199,7 @@ function addUpdateKindProperty(container) {
                 ) {
                     if (container.image.tag.value !== container.result.tag) {
                         updateKind.kind = 'tag';
-                        let semverDiffWud = 'unknown';
+                        let semverDiffValue = 'unknown';
                         const isSemver = container.image.tag.semver;
                         if (isSemver) {
                             const semverDiff = diffSemver(
@@ -209,26 +209,26 @@ function addUpdateKindProperty(container) {
                             switch (semverDiff) {
                             case 'major':
                             case 'premajor':
-                                semverDiffWud = 'major';
+                                semverDiffValue = 'major';
                                 break;
                             case 'minor':
                             case 'preminor':
-                                semverDiffWud = 'minor';
+                                semverDiffValue = 'minor';
                                 break;
                             case 'patch':
                             case 'prepatch':
-                                semverDiffWud = 'patch';
+                                semverDiffValue = 'patch';
                                 break;
                             case 'prerelease':
-                                semverDiffWud = 'prerelease';
+                                semverDiffValue = 'prerelease';
                                 break;
                             default:
-                                semverDiffWud = 'unknown';
+                                semverDiffValue = 'unknown';
                             }
                         }
                         updateKind.localValue = container.image.tag.value;
                         updateKind.remoteValue = container.result.tag;
-                        updateKind.semverDiff = semverDiffWud;
+                        updateKind.semverDiff = semverDiffValue;
                     } else if (container.image.digest
                         && container.image.digest.value !== container.result.digest
                     ) {

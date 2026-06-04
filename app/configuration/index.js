@@ -24,51 +24,51 @@ function get(prop, env = process.env) {
 
 /**
  * Lookup external secrets defined in files.
- * @param wudEnvVars
+ * @param hosakaEnvVars
  */
 /* eslint-disable no-param-reassign */
-function replaceSecrets(wudEnvVars) {
-    const secretFileEnvVars = Object.keys(wudEnvVars)
-        .filter((wudEnvVar) => wudEnvVar.toUpperCase().endsWith(VAR_FILE_SUFFIX));
+function replaceSecrets(hosakaEnvVars) {
+    const secretFileEnvVars = Object.keys(hosakaEnvVars)
+        .filter((hosakaEnvVar) => hosakaEnvVar.toUpperCase().endsWith(VAR_FILE_SUFFIX));
     secretFileEnvVars.forEach((secretFileEnvVar) => {
         const secretKey = secretFileEnvVar.replace(VAR_FILE_SUFFIX, '');
-        const secretFilePath = wudEnvVars[secretFileEnvVar];
+        const secretFilePath = hosakaEnvVars[secretFileEnvVar];
         const secretFileValue = fs.readFileSync(secretFilePath, 'utf-8');
-        delete wudEnvVars[secretFileEnvVar];
-        wudEnvVars[secretKey] = secretFileValue;
+        delete hosakaEnvVars[secretFileEnvVar];
+        hosakaEnvVars[secretKey] = secretFileValue;
     });
 }
 
-// 1. Get a copy of all wud related env vars
-const wudEnvVars = {};
+// 1. Get a copy of all hosaka related env vars
+const hosakaEnvVars = {};
 Object.keys(process.env)
-    .filter((envVar) => envVar.toUpperCase().startsWith('WUD'))
-    .forEach((wudEnvVar) => {
-        wudEnvVars[wudEnvVar] = process.env[wudEnvVar];
+    .filter((envVar) => envVar.toUpperCase().startsWith('HOSAKA'))
+    .forEach((hosakaEnvVar) => {
+        hosakaEnvVars[hosakaEnvVar] = process.env[hosakaEnvVar];
     });
 
 // 2. Replace all secret files referenced by their secret values
-replaceSecrets(wudEnvVars);
+replaceSecrets(hosakaEnvVars);
 
 function getVersion() {
-    return wudEnvVars.WUD_VERSION || 'unknown';
+    return hosakaEnvVars.HOSAKA_VERSION || 'unknown';
 }
 
 function getLogLevel() {
-    return wudEnvVars.WUD_LOG_LEVEL || 'info';
+    return hosakaEnvVars.HOSAKA_LOG_LEVEL || 'info';
 }
 /**
  * Get watcher configuration.
  */
 function getWatcherConfigurations() {
-    return get('wud.watcher', wudEnvVars);
+    return get('hosaka.watcher', hosakaEnvVars);
 }
 
 /**
  * Get trigger configurations.
  */
 function getTriggerConfigurations() {
-    return get('wud.trigger', wudEnvVars);
+    return get('hosaka.trigger', hosakaEnvVars);
 }
 
 /**
@@ -76,7 +76,7 @@ function getTriggerConfigurations() {
  * @returns {*}
  */
 function getRegistryConfigurations() {
-    return get('wud.registry', wudEnvVars);
+    return get('hosaka.registry', hosakaEnvVars);
 }
 
 /**
@@ -84,21 +84,21 @@ function getRegistryConfigurations() {
  * @returns {*}
  */
 function getAuthenticationConfigurations() {
-    return get('wud.auth', wudEnvVars);
+    return get('hosaka.auth', hosakaEnvVars);
 }
 
 /**
  * Get Input configurations.
  */
 function getStoreConfiguration() {
-    return get('wud.store', wudEnvVars);
+    return get('hosaka.store', hosakaEnvVars);
 }
 
 /**
  * Get Server configurations.
  */
 function getServerConfiguration() {
-    const configurationFromEnv = get('wud.server', wudEnvVars);
+    const configurationFromEnv = get('hosaka.server', hosakaEnvVars);
     const configurationSchema = joi.object().keys({
         enabled: joi.boolean().default(true),
         port: joi.number().default(3000).integer().min(0)
@@ -129,7 +129,7 @@ function getServerConfiguration() {
 }
 
 function getPublicUrl(req) {
-    const publicUrl = wudEnvVars.WUD_PUBLIC_URL;
+    const publicUrl = hosakaEnvVars.HOSAKA_PUBLIC_URL;
     if (publicUrl) {
         return publicUrl;
     }
@@ -138,7 +138,7 @@ function getPublicUrl(req) {
 }
 
 module.exports = {
-    wudEnvVars,
+    hosakaEnvVars,
     get,
     replaceSecrets,
     getVersion,

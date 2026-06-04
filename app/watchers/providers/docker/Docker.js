@@ -230,7 +230,7 @@ function getRepoDigest(containerImage) {
 
 /**
  * Return true if container must be watched.
- * @param wudWatchLabelValue the value of the wud.watch label
+ * @param wudWatchLabelValue the value of the hosaka.watch label
  * @param watchByDefault true if containers must be watched by default
  * @returns {boolean}
  */
@@ -240,7 +240,7 @@ function isContainerToWatch(wudWatchLabelValue, watchByDefault) {
 
 /**
  * Return true if container digest must be watched.
- * @param wudWatchDigestLabelValue the value of wud.watch.digest label
+ * @param wudWatchDigestLabelValue the value of hosaka.watch.digest label
  * @param isSemver if image is semver
  * @returns {boolean|*}
  */
@@ -288,7 +288,7 @@ class Docker extends Component {
         this.eventReconnectDelay = 0;
         this.initWatcher();
         if (this.configuration.watchdigest !== undefined) {
-            this.log.warn('WUD_WATCHER_{watcher_name}_WATCHDIGEST environment variable is deprecated and won\'t be supported in upcoming versions');
+            this.log.warn('HOSAKA_WATCHER_{watcher_name}_WATCHDIGEST environment variable is deprecated and won\'t be supported in upcoming versions');
         }
         this.log.info(`Cron scheduled (${this.configuration.cron})`);
         this.watchCron = cron.schedule(this.configuration.cron, () => this.watchFromCron());

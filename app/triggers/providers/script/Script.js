@@ -133,15 +133,15 @@ async install(container) {
         console.log(`Setting up Docker API for watcher: ${watcherName}`);
         
         try {
-            const envPrefix = `WUD_WATCHER_${watcherName.toUpperCase()}_`;
+            const envPrefix = `HOSAKA_WATCHER_${watcherName.toUpperCase()}_`;
             console.log(`Looking for environment variables with prefix: ${envPrefix}`);
 
             // Log all relevant environment variables for debugging
             const relevantEnvVars = Object.entries(process.env)
-                .filter(([key]) => key.startsWith('WUD_WATCHER'))
+                .filter(([key]) => key.startsWith('HOSAKA_WATCHER'))
                 .map(([key, value]) => `${key}=${value}`);
-            
-            console.log('Available WUD_WATCHER environment variables:', relevantEnvVars);
+
+            console.log('Available HOSAKA_WATCHER environment variables:', relevantEnvVars);
 
             const socketPath = process.env[`${envPrefix}SOCKET`];
             const host = process.env[`${envPrefix}HOST`];
@@ -311,7 +311,7 @@ async install(container) {
         }
         
         // Add artificial delay for local watcher to match remote behavior
-        const envPrefix = `WUD_WATCHER_${originalWatcher.toUpperCase()}_`;
+        const envPrefix = `HOSAKA_WATCHER_${originalWatcher.toUpperCase()}_`;
         const socketPath = process.env[`${envPrefix}SOCKET`];
         if (socketPath) {  // This indicates a local watcher
             console.log(`Adding delay for local watcher ${originalWatcher}`);
