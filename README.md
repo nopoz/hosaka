@@ -9,27 +9,21 @@ rebuilt around a faster, mobile-friendly UI and one-click updates.
 
 ## What's different from WUD
 
-- **One-click updates with live output.** Update a container straight from the
-  UI and watch the update script run in a console window, line by line, so you
-  see exactly what happened (and any errors) without leaving the page.
-- **Works on mobile.** The UI is fully responsive, so you can check and update
-  your containers from a phone, not just a desktop.
-- **Modern, maintained dependencies.** The UI runs on Vue 3 / Vuetify 3 / Vite
-  (off the EOL Vue 2 stack), and the backend has dropped deprecated libraries in
-  favor of current ones.
-- **A more polished UI.** Fewer clicks, clearer navigation, container sorting,
-  distinct colors per update type, and live container state that updates in
-  place without a full-page reload.
+| Area | WUD | Hosaka |
+|------|-----|--------|
+| **Updating from the UI** | run a trigger from the container's Triggers tab | one-click **Update** on the container row |
+| **Update progress** | none | live console output of the update script, streamed line by line |
+| **Mobile** | desktop-oriented: permanent nav, no mobile layout | fully responsive: hamburger nav, mobile layouts, update from your phone |
+| **Live container state** | manual refresh | list updates in place over SSE, no full-page reload |
+| **In-app UX** | filter + oldest-first toggle | sort by name, update type, or watcher; distinct color per update type, including prerelease |
 
 ## How it works
 
 Hosaka is built on three concepts:
 
-> `WATCHERS` query your Docker hosts to get the containers to watch
-
-> `REGISTRIES` query the Docker registries to find available updates
-
-> `TRIGGERS` perform actions when updates are available
+- **Watchers** query your Docker hosts to get the containers to watch
+- **Registries** query the Docker registries to find available updates
+- **Triggers** perform actions when updates are available
 
 ## Features
 
@@ -58,41 +52,55 @@ Hosaka is built on three concepts:
 - Basic auth or OpenID Connect (OIDC) for SSO
 - Docker secrets via `__FILE` env vars, single image, sensible defaults
 
+## Get started
+
+Create a `docker-compose.yml`:
+
+```yaml
+services:
+  hosaka:
+    image: ghcr.io/nopoz/hosaka:latest
+    container_name: hosaka
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./store:/store
+    ports:
+      - 3000:3000
+```
+
+Then bring it up and open the UI:
+
+```bash
+docker compose up -d
+```
+
+The UI is now at [http://localhost:3000](http://localhost:3000).
+
+For a hardened setup (read-only Docker socket proxy, plus watcher, registry, and
+trigger config), copy [`docker-compose.example.yml`](docker-compose.example.yml)
+and adjust it. Full configuration reference lives in [`docs/`](docs/).
+
 ## Triggers
-> Send notifications using **Smtp**, [**Apprise**](https://github.com/caronc/apprise-api), [**Ifttt**](https://ifttt.com), [**Pushover**](https://pushover.net), [**Slack**](https://slack.com), [**Telegram**](https://telegram.org/), [**Discord**](https://discord.com/)...
-
-> Update your [**docker**](https://www.docker.com) containers or your [**docker-compose**](https://docs.docker.com/compose) stack, automatically or with a single click in the UI.
-
-> Run your own update script and watch its output live.
-
-> Integrate with third-party systems using [**Kafka**](https://kafka.apache.org), [**Mqtt**](https://mqtt.org), **Http Webhooks**...
-
-> Setup your own update strategies \
-> (e.g. automatically update containers when minor or patch versions are available & notify by email when major versions are available)
+- Send notifications using [**SMTP**](https://en.wikipedia.org/wiki/Simple_Mail_Transfer_Protocol), [**Apprise**](https://github.com/caronc/apprise-api), [**IFTTT**](https://ifttt.com), [**Pushover**](https://pushover.net), [**Slack**](https://slack.com), [**Telegram**](https://telegram.org/), and [**Discord**](https://discord.com/)
+- Update your [**docker**](https://www.docker.com) containers or your [**docker-compose**](https://docs.docker.com/compose) stack, automatically or with a single click in the UI
+- Run your own update script and watch its output live
+- Integrate with third-party systems using [**Kafka**](https://kafka.apache.org), [**MQTT**](https://mqtt.org), and **HTTP webhooks**
+- Set up your own update strategies (e.g. auto-update on minor and patch versions, notify by email on major versions)
 
 ## Registries
 
-> [**AWS Elastic Container Registry**](https://aws.amazon.com/ecr)
-
-> [**Azure Container Registry**](https://azure.microsoft.com/services/container-registry)
-
-> [**Docker Hub**](http://hub.docker.com)
-
-> [**Forgejo Container Registry**](https://forgejo.org/)
-
-> [**Gitea Container Registry**](https://gitea.com/)
-
-> [**Github Container Registry**](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-docker-registry)
-
-> [**Gitlab Container Registry**](https://docs.gitlab.com/ee/user/packages/container_registry/)
-
-> [**Google Container Registry**](https://cloud.google.com/container-registry)
-
-> [**LinuxServer Container Registry (lscr.io)**](https://fleet.linuxserver.io/)
-
-> [**Redhat Quay**](https://quay.io/)
-
-> [**Self-hosted Docker Registry**](https://docs.docker.com/registry/)
+- [**AWS Elastic Container Registry**](https://aws.amazon.com/ecr)
+- [**Azure Container Registry**](https://azure.microsoft.com/services/container-registry)
+- [**Docker Hub**](http://hub.docker.com)
+- [**Forgejo Container Registry**](https://forgejo.org/)
+- [**Gitea Container Registry**](https://gitea.com/)
+- [**GitHub Container Registry**](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-docker-registry)
+- [**GitLab Container Registry**](https://docs.gitlab.com/ee/user/packages/container_registry/)
+- [**Google Container Registry**](https://cloud.google.com/container-registry)
+- [**LinuxServer Container Registry (lscr.io)**](https://fleet.linuxserver.io/)
+- [**Red Hat Quay**](https://quay.io/)
+- [**Self-hosted Docker Registry**](https://docs.docker.com/registry/)
 
 ## Authentication
 - [Openid Connect](https://openid.net/connect/)
@@ -100,19 +108,13 @@ Hosaka is built on three concepts:
 
 ## Integrations
 
-> [**Authelia**](https://www.authelia.com/)
-
-> [**Authentik**](https://goauthentik.io/)
-
-> [**Auth0**](https://auth0.com/)
-
-> [**Grafana**](https://grafana.com/)
-
-> [**Home-Assistant**](https://www.home-assistant.io/)
-
-> [**Keycloak**](https://www.keycloak.org/)
-
-> [**Prometheus**](https://prometheus.io/)
+- [**Authelia**](https://www.authelia.com/)
+- [**Authentik**](https://goauthentik.io/)
+- [**Auth0**](https://auth0.com/)
+- [**Grafana**](https://grafana.com/)
+- [**Home-Assistant**](https://www.home-assistant.io/)
+- [**Keycloak**](https://www.keycloak.org/)
+- [**Prometheus**](https://prometheus.io/)
 
 ## Contact & Support
 - Create a [GitHub issue](https://github.com/nopoz/hosaka/issues) for bug reports, feature requests, or questions
