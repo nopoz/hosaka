@@ -1,5 +1,9 @@
 {
     "extends": "airbnb-base",
+    "parserOptions": {
+        "ecmaVersion": 2022,
+        "sourceType": "script"
+    },
     "plugins": ["jest"],
     "rules": {
         "indent": ["error", 4],
