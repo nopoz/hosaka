@@ -13,6 +13,7 @@ rebuilt around a faster, mobile-friendly UI and one-click updates.
 |------|-----|--------|
 | **Updating from the UI** | run a trigger from the container's Triggers tab | one-click **Update** on the container row |
 | **Update progress** | none | live console output of the update script, streamed line by line |
+| **Portainer stacks** | generic script trigger, write your own | bundled one-click updater that rewrites the stack file and redeploys through the Portainer API |
 | **Mobile** | desktop-oriented: permanent nav, no mobile layout | fully responsive: hamburger nav, mobile layouts, update from your phone |
 | **Live container state** | manual refresh | list updates in place over SSE, no full-page reload |
 | **In-app UX** | filter + oldest-first toggle | sort by name, update type, or watcher; distinct color per update type, including prerelease |
@@ -45,6 +46,17 @@ Hosaka is built on three concepts:
 - Auto-update Docker containers and docker-compose stacks, or run your own
   update script, automatically or with a single click from the UI
 - Per-update or batched notifications, with a "once" guard against repeats
+
+**One-click Portainer stack updates, built in**
+- Ships a ready-to-use updater for Portainer-managed stacks: it rewrites the
+  stack's compose file to the new image tag and redeploys through the Portainer
+  API, so your stack definition stays the source of truth
+- Nothing to write or mount; point it at your Portainer URL and API key and the
+  Update button does the rest
+- Health-aware progress: the run streams to the UI line by line and waits for the
+  container to come back healthy on the new image before reporting success
+- Reference stack in [`docker-compose.portainer.example.yml`](docker-compose.portainer.example.yml);
+  details in the [Portainer update script docs](docs/configuration/triggers/script/portainer.md)
 
 **Built to run in your stack**
 - Web UI and a full REST API
@@ -84,7 +96,7 @@ and adjust it. Full configuration reference lives in [`docs/`](docs/).
 ## Triggers
 - Send notifications using [**SMTP**](https://en.wikipedia.org/wiki/Simple_Mail_Transfer_Protocol), [**Apprise**](https://github.com/caronc/apprise-api), [**IFTTT**](https://ifttt.com), [**Pushover**](https://pushover.net), [**Slack**](https://slack.com), [**Telegram**](https://telegram.org/), and [**Discord**](https://discord.com/)
 - Update your [**docker**](https://www.docker.com) containers or your [**docker-compose**](https://docs.docker.com/compose) stack, automatically or with a single click in the UI
-- Run your own update script and watch its output live
+- Update Portainer-managed stacks with the built-in one-click script, or run your own update script and watch its output live
 - Integrate with third-party systems using [**Kafka**](https://kafka.apache.org), [**MQTT**](https://mqtt.org), and **HTTP webhooks**
 - Set up your own update strategies (e.g. auto-update on minor and patch versions, notify by email on major versions)
 
