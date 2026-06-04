@@ -22,6 +22,20 @@ have `INSTALL=true`), the script:
 
 The full live log is streamed to the UI's script-output console.
 
+## Designed for pinned versions
+
+This script is built for stacks that pin explicit image tags (for example
+`nginx:1.27.1`) rather than moving tags like `latest`. That keeps you in control
+of updates: Hosaka detects a newer tag, and the update rewrites your stack file
+from the current pinned version to the new one. The stack definition always
+records exactly what is deployed, so there are no surprise updates and you can
+roll back at any time by redeploying the previous tag.
+
+Because the update edits the stack file in place, that file **must contain the
+current `image:tag`** of the container being updated. If the stack pins a
+different tag, or uses a moving tag like `latest`, the script stops with an error
+rather than guessing - so pin the versions in your stack before using it.
+
 ## Configuration
 
 Two sets of variables are involved. The `HOSAKA_TRIGGER_SCRIPT_*` variables

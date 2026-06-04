@@ -51,6 +51,9 @@ Hosaka is built on three concepts:
 - Ships a ready-to-use updater for Portainer-managed stacks: it rewrites the
   stack's compose file to the new image tag and redeploys through the Portainer
   API, so your stack definition stays the source of truth
+- Built around pinned versions: keep explicit image tags in your stack instead of
+  `latest`, and step from one known version to the next when you choose, so you
+  always know what is running and can roll back by redeploying the old tag
 - Nothing to write or mount; point it at your Portainer URL and API key and the
   Update button does the rest
 - Health-aware progress: the run streams to the UI line by line and waits for the
