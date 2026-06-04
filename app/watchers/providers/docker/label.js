@@ -6,41 +6,41 @@ module.exports = {
     /**
      * Should the container be tracked? (true | false).
      */
-    wudWatch: 'hosaka.watch',
+    hosakaWatch: 'hosaka.watch',
 
     /**
      * Optional regex indicating what tags to consider.
      */
-    wudTagInclude: 'hosaka.tag.include',
+    hosakaTagInclude: 'hosaka.tag.include',
 
     /**
      * Optional regex indicating what tags to not consider.
      */
-    wudTagExclude: 'hosaka.tag.exclude',
+    hosakaTagExclude: 'hosaka.tag.exclude',
 
     /**
      * Optional transform function to apply to the tag.
      */
-    wudTagTransform: 'hosaka.tag.transform',
+    hosakaTagTransform: 'hosaka.tag.transform',
 
     /**
      * Should container digest be tracked? (true | false).
      */
-    wudWatchDigest: 'hosaka.watch.digest',
+    hosakaWatchDigest: 'hosaka.watch.digest',
 
     /**
      * Optional templated string pointing to a browsable link.
      */
-    wudLinkTemplate: 'hosaka.link.template',
+    hosakaLinkTemplate: 'hosaka.link.template',
 
     /**
      * Optional friendly name to display.
      */
-    wudDisplayName: 'hosaka.display.name',
+    hosakaDisplayName: 'hosaka.display.name',
 
     /**
      * Optional friendly icon to display.
      */
-    wudDisplayIcon: 'hosaka.display.icon',
+    hosakaDisplayIcon: 'hosaka.display.icon',
 
 };
