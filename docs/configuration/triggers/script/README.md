@@ -1,6 +1,10 @@
 # Script
 
-The `script` trigger executes a local script file mounted inside the WUD container.
+The `script` trigger executes a local script file mounted inside the Hosaka container.
+
+> Hosaka ships a ready-to-use Portainer update script as the default. If you just
+> want one-click Portainer updates, see [Portainer update script](configuration/triggers/script/portainer.md)
+> - you do not need to set `PATH` or mount anything.
 
 Parameters passed to the script in this order are:
 1. container name
@@ -18,15 +22,15 @@ Supported shells for scripts are `/bin/bash`, `/bin/ash`, and `/bin/sh`.
 
 | Env var                                       |    Required    | Description                                                                   | Supported values             | Default value when missing |
 |-----------------------------------------------|:--------------:|-------------------------------------------------------------------------------|------------------------------|----------------------------|
-| `WUD_TRIGGER_SCRIPT_{trigger_name}_PATH`      |  :red_circle:  | The absolute path with script file name                                       | Any local path               |                            |
-| `WUD_TRIGGER_SCRIPT_{trigger_name}_INSTALL`   | :white_circle: | If `true`, makes this a manual Update button trigger in the UI\*              | `true`, `false`              | `false`                    |
-| `WUD_TRIGGER_SCRIPT_{trigger_name}_TIMEOUT`   | :white_circle: | The amount of time in milliseconds before considering the script timed out    | integer in ms                | `300000` (5 minutes)       |
+| `HOSAKA_TRIGGER_SCRIPT_{trigger_name}_PATH`      | :white_circle: | The absolute path with script file name. Omit to use the bundled Portainer script. | Any local path               | `/scripts/portainer_stack_update.sh` |
+| `HOSAKA_TRIGGER_SCRIPT_{trigger_name}_INSTALL`   | :white_circle: | If `true`, makes this a manual Update button trigger in the UI\*              | `true`, `false`              | `false`                    |
+| `HOSAKA_TRIGGER_SCRIPT_{trigger_name}_TIMEOUT`   | :white_circle: | The amount of time in milliseconds before considering the script timed out    | integer in ms                | `300000` (5 minutes)       |
 
 \* By setting the INSTALL variable to `true`, this trigger is only executed manually in the containers UI page by clicking the "Update" button next to the upgrade version. Typical scheduled watch triggers for this trigger will not occur when INSTALL is `true`. Only one INSTALL variable can be set across all trigger types - if more than one is set the UI will throw an error and the trigger will not be executed.
 
 ### Examples
 
-#### Specify the local script file inside the WUD container
+#### Specify the local script file inside the Hosaka container
 
 <!-- tabs:start -->
 #### **Docker Compose**
@@ -34,22 +38,22 @@ Supported shells for scripts are `/bin/bash`, `/bin/ash`, and `/bin/sh`.
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka:latest
     ...
     environment:
-      - WUD_TRIGGER_SCRIPT_MYSCRIPT_PATH=/scripts/myscript.sh
-      - WUD_TRIGGER_SCRIPT_MYSCRIPT_INSTALL=true
+      - HOSAKA_TRIGGER_SCRIPT_MYSCRIPT_PATH=/scripts/myscript.sh
+      - HOSAKA_TRIGGER_SCRIPT_MYSCRIPT_INSTALL=true
     volumes:
       - /hostpath/myscript.sh:/scripts/myscript.sh
 ```
 #### **Docker**
 ```bash
 docker run \
--e WUD_TRIGGER_SCRIPT_MYSCRIPT_PATH=/scripts/myscript.sh \
--e WUD_TRIGGER_SCRIPT_MYSCRIPT_INSTALL=true \
+-e HOSAKA_TRIGGER_SCRIPT_MYSCRIPT_PATH=/scripts/myscript.sh \
+-e HOSAKA_TRIGGER_SCRIPT_MYSCRIPT_INSTALL=true \
 -v /hostpath/myscript.sh:/scripts/myscript.sh \
-getwud/wud
+ghcr.io/nopoz/hosaka:latest
 ```
 <!-- tabs:end -->
 
