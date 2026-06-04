@@ -1,8 +1,29 @@
 # Hosaka
 
-Gets you notified when new versions of your Docker containers are available and lets you react the way you want.
+Hosaka watches your Docker hosts for new container image versions, then lets you
+react: get notified, or update the container with a single click and watch the
+update run live.
 
-### Hosaka is built on 3 concepts:
+Hosaka is a fork of [What's Up Docker (WUD)](https://github.com/getwud/wud),
+rebuilt around a faster, mobile-friendly UI and one-click updates.
+
+## What's different from WUD
+
+- **One-click updates with live output.** Update a container straight from the
+  UI and watch the update script run in a console window, line by line, so you
+  see exactly what happened (and any errors) without leaving the page.
+- **Works on mobile.** The UI is fully responsive, so you can check and update
+  your containers from a phone, not just a desktop.
+- **Modern, maintained dependencies.** The UI runs on Vue 3 / Vuetify 3 / Vite
+  (off the EOL Vue 2 stack), and the backend has dropped deprecated libraries in
+  favor of current ones.
+- **A more polished UI.** Fewer clicks, clearer navigation, container sorting,
+  distinct colors per update type, and live container state that updates in
+  place without a full-page reload.
+
+## How it works
+
+Hosaka is built on three concepts:
 
 > `WATCHERS` query your Docker hosts to get the containers to watch
 
@@ -10,17 +31,46 @@ Gets you notified when new versions of your Docker containers are available and 
 
 > `TRIGGERS` perform actions when updates are available
 
-## Many supported triggers
+## Features
+
+**Smart update detection**
+- Watch multiple Docker hosts at once, local socket or remote over TCP/TLS
+- Semver-aware: every update is classified as major, minor, patch, or prerelease
+- Digest watching catches new images behind mutable tags like `latest`
+- Per-tag include/exclude regex and tag transforms to handle any versioning scheme
+- Scheduled (cron) scans plus instant detection from Docker events
+
+**Per-container control, no central config**
+- Drive everything with `hosaka.*` Docker labels: opt in/out, set tag filters,
+  custom display name and icon, or a link to the release notes
+- Update thresholds so you only act on, say, minor and patch bumps
+
+**Notify or update, your call**
+- Notify through SMTP, Slack, Discord, Telegram, Apprise, IFTTT, Pushover,
+  Kafka, MQTT, or HTTP webhooks, with templated titles and bodies
+- Auto-update Docker containers and docker-compose stacks, or run your own
+  update script, automatically or with a single click from the UI
+- Per-update or batched notifications, with a "once" guard against repeats
+
+**Built to run in your stack**
+- Web UI and a full REST API
+- Prometheus metrics and a `/health` endpoint, ready for Grafana
+- Basic auth or OpenID Connect (OIDC) for SSO
+- Docker secrets via `__FILE` env vars, single image, sensible defaults
+
+## Triggers
 > Send notifications using **Smtp**, [**Apprise**](https://github.com/caronc/apprise-api), [**Ifttt**](https://ifttt.com), [**Pushover**](https://pushover.net), [**Slack**](https://slack.com), [**Telegram**](https://telegram.org/), [**Discord**](https://discord.com/)...
 
-> Automatically update your [**docker**](https://www.docker.com) containers or your [**docker-compose**](https://docs.docker.com/compose) stack.
+> Update your [**docker**](https://www.docker.com) containers or your [**docker-compose**](https://docs.docker.com/compose) stack, automatically or with a single click in the UI.
+
+> Run your own update script and watch its output live.
 
 > Integrate with third-party systems using [**Kafka**](https://kafka.apache.org), [**Mqtt**](https://mqtt.org), **Http Webhooks**...
 
 > Setup your own update strategies \
 > (e.g. automatically update containers when minor or patch versions are available & notify by email when major versions are available)
 
-## Many supported registries
+## Registries
 
 > [**AWS Elastic Container Registry**](https://aws.amazon.com/ecr)
 
@@ -44,17 +94,17 @@ Gets you notified when new versions of your Docker containers are available and 
 
 > [**Self-hosted Docker Registry**](https://docs.docker.com/registry/)
 
-## REST API & Web UI
-
-## Flexible authentication strategies
+## Authentication
 - [Openid Connect](https://openid.net/connect/)
 - [Basic authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication)
 
-## Good integration with
+## Integrations
 
 > [**Authelia**](https://www.authelia.com/)
 
 > [**Authentik**](https://goauthentik.io/)
+
+> [**Auth0**](https://auth0.com/)
 
 > [**Grafana**](https://grafana.com/)
 
@@ -64,11 +114,13 @@ Gets you notified when new versions of your Docker containers are available and 
 
 > [**Prometheus**](https://prometheus.io/)
 
-> ...
-
 ## Contact & Support
 - Create a [GitHub issue](https://github.com/nopoz/hosaka/issues) for bug reports, feature requests, or questions
 - Add a star on [GitHub](https://github.com/nopoz/hosaka) to support the project!
+
+## Credits
+Hosaka builds on [What's Up Docker](https://github.com/getwud/wud) by the WUD
+authors and contributors. Thanks for the foundation.
 
 ## License
 This project is licensed under the [MIT license](https://github.com/nopoz/hosaka/blob/main/LICENSE).
