@@ -45,7 +45,7 @@ jobs:
 
       - name: Build and push
         env:
-          WUD_VERSION: ${{ github.event.release.tag_name }}
+          HOSAKA_VERSION: ${{ github.event.release.tag_name }}
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -54,4 +54,4 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            WUD_VERSION=${{ env.WUD_VERSION }}
+            HOSAKA_VERSION=${{ env.HOSAKA_VERSION }}

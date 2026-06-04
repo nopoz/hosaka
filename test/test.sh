@@ -16,14 +16,14 @@ docker tag nginx:1.10-alpine 229211676173.dkr.ecr.eu-west-1.amazonaws.com/sub/te
 docker tag nginx:1.10-alpine 229211676173.dkr.ecr.eu-west-1.amazonaws.com/sub/sub/test:1.0.0
 
 # GCR
-docker tag nginx:1.10-alpine gcr.io/wud-test/test:1.0.0
-docker tag nginx:1.10-alpine gcr.io/wud-test/sub/test:1.0.0
-docker tag nginx:1.10-alpine gcr.io/wud-test/sub/sub/test:1.0.0
+docker tag nginx:1.10-alpine gcr.io/hosaka-test/test:1.0.0
+docker tag nginx:1.10-alpine gcr.io/hosaka-test/sub/test:1.0.0
+docker tag nginx:1.10-alpine gcr.io/hosaka-test/sub/sub/test:1.0.0
 
 # ACR
-docker tag nginx:1.10-alpine wudtest.azurecr.io/test:1.0.0
-docker tag nginx:1.10-alpine wudtest.azurecr.io/sub/test:1.0.0
-docker tag nginx:1.10-alpine wudtest.azurecr.io/sub/sub/test:1.0.0
+docker tag nginx:1.10-alpine hosakatest.azurecr.io/test:1.0.0
+docker tag nginx:1.10-alpine hosakatest.azurecr.io/sub/test:1.0.0
+docker tag nginx:1.10-alpine hosakatest.azurecr.io/sub/sub/test:1.0.0
 
 docker-compose down --remove-orphans
 

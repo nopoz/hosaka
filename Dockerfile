@@ -4,11 +4,11 @@ FROM node:18-alpine as base
 LABEL maintainer="fmartinou"
 EXPOSE 3000
 
-ARG WUD_VERSION=unknown
+ARG HOSAKA_VERSION=unknown
 
 ENV WORKDIR=/home/node/app
-ENV WUD_LOG_FORMAT=text
-ENV WUD_VERSION=$WUD_VERSION
+ENV HOSAKA_LOG_FORMAT=text
+ENV HOSAKA_VERSION=$HOSAKA_VERSION
 
 WORKDIR /home/node/app
 
