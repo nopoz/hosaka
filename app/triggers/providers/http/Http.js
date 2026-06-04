@@ -71,9 +71,9 @@ class Http extends Trigger {
      * @param container
      * @returns {Promise<void>}
      */
-    async install(container) { // MODIFICATION START: Added 'install' method
+    async install(container) {
         return this.sendHttpRequest(container, 'install');
-    } // MODIFICATION END
+    }
 
     /**
      * Send an HTTP Request.
@@ -109,20 +109,17 @@ class Http extends Trigger {
             options.proxy = this.configuration.proxy;
         }
 
-        // MODIFICATION START: Add logging and error handling
         console.log(`Sending ${actionType} HTTP request to ${options.uri}`);
         try {
             const response = await rp(options);
-            console.log(response 
-                ? `HTTP ${actionType} request successful: ${JSON.stringify(response)}` 
+            console.log(response
+                ? `HTTP ${actionType} request successful: ${JSON.stringify(response)}`
                 : `HTTP ${actionType} request successful`);
             return response;
         } catch (error) {
             console.error(`HTTP ${actionType} request failed:`, error.message);
             throw error;
         }
-        // MODIFICATION END
-        // return rp(options);
     }
 }
 
