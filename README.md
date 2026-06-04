@@ -116,13 +116,42 @@ and adjust it. Full configuration reference lives in [`docs/`](docs/).
 - [**Keycloak**](https://www.keycloak.org/)
 - [**Prometheus**](https://prometheus.io/)
 
+## Security
+
+Hosaka talks to your Docker host and can update running services, so treat it as
+a privileged tool.
+
+- **Lock down access.** Hosaka allows anonymous access by default. Enable
+  [Basic auth](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication)
+  or [OIDC](https://openid.net/connect/) before exposing it, and put it behind a
+  reverse proxy with TLS rather than publishing the port to the internet. Anyone
+  who can reach the UI or API can trigger updates that change your live
+  containers.
+- **Limit Docker access.** The Docker socket is effectively root on the host.
+  Prefer the read-only socket proxy shown in `docker-compose.example.yml` over
+  mounting `/var/run/docker.sock` directly, so Hosaka only gets the endpoints it
+  needs.
+- **Keep secrets out of plain config.** Registry credentials and trigger tokens
+  can be loaded from files with the `__FILE` env var suffix (Docker secrets)
+  instead of being written in your compose file.
+
+## More of my projects
+
+Other open-source tools I maintain that you might find useful:
+
+- [**Portrieve**](https://github.com/nopoz/portrieve) - back up, restore, and
+  migrate Portainer stacks as plain Docker Compose files.
+- [**pfSense DNSCrypt Proxy**](https://github.com/nopoz/pfsense-dnscrypt-proxy) -
+  a pfSense package for DNSCrypt Proxy: encrypted DNS with full GUI support.
+
 ## Contact & Support
 - Create a [GitHub issue](https://github.com/nopoz/hosaka/issues) for bug reports, feature requests, or questions
 - Add a star on [GitHub](https://github.com/nopoz/hosaka) to support the project!
 
 ## Credits
 Hosaka builds on [What's Up Docker](https://github.com/getwud/wud) by the WUD
-authors and contributors. Thanks for the foundation.
+authors and contributors. Huge thanks to them for the solid foundation this fork
+is built on.
 
 ## License
 This project is licensed under the [MIT license](https://github.com/nopoz/hosaka/blob/main/LICENSE).
