@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-# usage is <script> <container name> <image name> <current version> <update version> <wud watcher name> <compose project name>
-
+# usage: <script> <container name> <image name> <current version> <update version> <watcher name> <compose project name>
 
 portainer_url="$PORTAINER_API_ENDPOINT"
 api_key="$PORTAINER_API_KEY"
@@ -16,21 +15,8 @@ compose_project="$6"
 update_timeout="${UPDATE_TIMEOUT:-300}"  # Overall timeout for update operations (default 300s)
 poll_interval="${POLL_INTERVAL:-5}"      # Interval for polling container state (default 5s)
 
-data_extraction_error_check(){
-	variable_data="$1"
-	variable_name="$2"
-	if [[ -z $variable_data || $variable_data == "null" ]]; then
-		echo "ERROR: could not retrieve $variable_name from portainer"
-		exit 1
-	else
-		echo "container $variable_name: $variable_data"
-	fi
-}
-
-# Inspect the container once and classify its state relative to the target.
-# Echoes one of: ready | unhealthy | sameimage | waiting | absent
-# (sameimage = running target tag but image ID never changed, i.e. likely
-# already on target before the update).
+# Inspect the container once; echo its state vs the target:
+# ready | unhealthy | sameimage (target tag but image ID unchanged) | waiting | absent
 check_container_state() {
 	local endpoint_id="$1"
 	local container_name="$2"
@@ -130,12 +116,9 @@ wait_for_container_update() {
 		fi
 
 		if [[ $stream_dead -eq 0 ]]; then
-			# Drain and display every event currently available, acting on
-			# completion signals as they arrive. read returns the moment a line
-			# arrives (real-time display); its timeout only bounds how long we
-			# idle before falling through to the backstop inspect. Draining here
-			# ensures the recreate's start/health events are printed and acted on
-			# before the backstop poll can preempt them.
+			# Drain all currently-available events, acting on completion signals
+			# as they arrive. read's timeout only bounds idle time before we fall
+			# through to the backstop inspect.
 			local line=""
 			while IFS= read -r -t "$poll_interval" line; do
 				# Parse the event; key off .Action (.status is often null).
@@ -199,15 +182,14 @@ demux_docker_stream() {
 		}'
 }
 
-# Function to fetch container logs for error diagnostics
+# Fetch the last N lines of a container's logs for failure diagnostics.
 fetch_container_logs() {
 	local endpoint_id="$1"
 	local container_name="$2"
-	local lines="${3:-50}"  # Default to last 50 lines
+	local lines="${3:-50}"
 
 	echo -e "\nFetching last $lines lines of logs for container \"$container_name\"..."
 
-	# Get container ID first
 	local containers_json=$(curl -s --location --request GET "$portainer_url/endpoints/$endpoint_id/docker/containers/json?all=true" \
 		--header 'Accept: application/json' \
 		--header "X-API-Key: $api_key")
@@ -304,10 +286,8 @@ else
 		--header 'Accept: application/json' \
 		--header "X-API-KEY: $api_key")
 
-	# Collect candidate endpoint IDs matching the watcher name. Newer Portainer
-	# versions no longer embed the container list in the endpoint snapshot
-	# (.Snapshots[].DockerSnapshotRaw.Containers is null), so verify each
-	# candidate against the live Docker proxy instead.
+	# Match the watcher name to an endpoint by checking each candidate against
+	# the live Docker proxy (newer Portainer leaves the endpoint snapshot empty).
 	candidate_ids=$(echo "$endpoints_json" | jq -r 'if type == "array" then .[] else . end | .Id')
 	endpoint_id=""
 	for candidate_id in $candidate_ids; do
@@ -321,8 +301,15 @@ else
 			break
 		fi
 	done
-	fi
-data_extraction_error_check "$endpoint_id" "endpoint id"
+fi
+
+if [[ -z "$endpoint_id" || "$endpoint_id" == "null" ]]; then
+	echo -e "\nERROR: could not determine the Portainer endpoint for watcher \"$watcher_name\"."
+	echo "No endpoint matching \"$watcher_name\" has a container \"$container_name\" in project \"$compose_project\"."
+	echo "Check that the Hosaka watcher name matches the Portainer environment (endpoint) name."
+	exit 1
+fi
+echo "container endpoint id: $endpoint_id"
 
 # get image id from endpoints output
 filter_encoded=$(printf '{"name":["/%s"]}' "$container_name" | jq -sRr @uri)
@@ -445,16 +432,15 @@ else
 	initial_image_id=""
 fi
 
-# create the curl "stack update" json payload using jq
+# build the stack-update payload
 env_data=${env_data:-"[]"}
 payload=$(jq -n \
---argjson env_data "$env_data" \
---arg stack_file_content "$stack_update" \
-'{env: $env_data, prune: true, pullImage: false, stackFileContent: $stack_file_content}')
+	--argjson env_data "$env_data" \
+	--arg stack_file_content "$stack_update" \
+	'{env: $env_data, prune: true, pullImage: false, stackFileContent: $stack_file_content}')
 
 # push stack update to portainer API
 echo -e "\npushing $compose_project stack file update to portainer..."
-update_start_time=$(date +%s)
 response=$(curl -s --max-time 300 -i --location \
 	--request PUT "$portainer_url/stacks/$stack_id?endpointId=$endpoint_id" \
 	--header 'Content-Type: application/json' \
@@ -483,18 +469,13 @@ if ! wait_for_container_update "$endpoint_id" "$container_name" "$image_name:$up
 	exit 1
 fi
 
-# function to check if any containers are running with the old image
+# Echo how many containers are still running the old image.
 check_old_container_present() {
-	# perform a fresh API query
 	containers_json=$(curl -s --location --request GET "$portainer_url/endpoints/$endpoint_id/docker/containers/json?all=true" \
 		--header 'Accept: application/json' \
 		--header "X-API-Key: $api_key")
-
-	# check for containers running with the old image version
-	old_container_count=$(echo "$containers_json" | jq --arg old_image "$old_image" \
-		'[.[] | select(.Image | endswith($old_image))] | length')
-
-	echo "$old_container_count"
+	echo "$containers_json" | jq --arg old_image "$old_image" \
+		'[.[] | select(.Image | endswith($old_image))] | length'
 }
 
 # verify that the old container is no longer present
@@ -518,7 +499,3 @@ fi
 
 echo "no containers are running with the old image version: $old_image"
 echo -e "\nupdate verification completed successfully."
-
-# echo -e "\nwaiting for container to normalize..."
-# sleep 30
-# echo -e "\nscript complete."
