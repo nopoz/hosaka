@@ -1,14 +1,15 @@
 const Ecr = require('./Ecr');
 
-jest.mock('aws-sdk/clients/ecr', () => jest.fn().mockImplementation(() => ({
-    getAuthorizationToken: () => ({
-        promise: () => Promise.resolve({
+jest.mock('@aws-sdk/client-ecr', () => ({
+    ECRClient: jest.fn().mockImplementation(() => ({
+        send: () => Promise.resolve({
             authorizationData: [
                 { authorizationToken: 'xxxxx' },
             ],
         }),
-    }),
-})));
+    })),
+    GetAuthorizationTokenCommand: jest.fn(),
+}));
 
 const ecr = new Ecr();
 ecr.configuration = {
