@@ -23,13 +23,13 @@ services:
     ...
     environment:
       - WUD_REGISTRY_ACR_CLIENTID=7c0195aa-112d-4ac3-be24-6664a13f3d2b
-      - WUD_REGISTRY_ACR_CLIENTSECRET=SBgHNi3zA5K.f9.f9ft~_hpqbS~.pk.t_i
+      - WUD_REGISTRY_ACR_CLIENTSECRET=your-azure-client-secret
 ```
 #### **Docker**
 ```bash
 docker run \
   -e WUD_REGISTRY_ACR_CLIENTID=7c0195aa-112d-4ac3-be24-6664a13f3d2b \
-  -e WUD_REGISTRY_ACR_CLIENTSECRET=SBgHNi3zA5K.f9.f9ft~_hpqbS~.pk.t_i \
+  -e WUD_REGISTRY_ACR_CLIENTSECRET=your-azure-client-secret \
   ...
   getwud/wud
 ```
