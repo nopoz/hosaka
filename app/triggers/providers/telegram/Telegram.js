@@ -1,5 +1,7 @@
-const TelegramBot = require('node-telegram-bot-api');
+const rp = require('../../../request');
 const Trigger = require('../Trigger');
+
+const TELEGRAM_API_BASE_URL = 'https://api.telegram.org';
 
 /**
  * Telegram Trigger implementation
@@ -29,11 +31,11 @@ class Telegram extends Trigger {
     }
 
     /**
-     * Init trigger (create telegram client).
+     * Init trigger.
      * @returns {Promise<void>}
      */
     async initTrigger() {
-        this.telegramBot = new TelegramBot(this.configuration.bottoken);
+        // Nothing to init; messages are sent over the Telegram Bot HTTP API.
     }
 
     /*
@@ -56,7 +58,15 @@ class Telegram extends Trigger {
      * @returns {Promise<>}
      */
     async sendMessage(text) {
-        return this.telegramBot.sendMessage(this.configuration.chatid, text);
+        return rp({
+            method: 'POST',
+            uri: `${TELEGRAM_API_BASE_URL}/bot${this.configuration.bottoken}/sendMessage`,
+            headers: { 'Content-Type': 'application/json' },
+            body: {
+                chat_id: this.configuration.chatid,
+                text,
+            },
+        });
     }
 }
 

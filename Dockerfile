@@ -15,10 +15,12 @@ WORKDIR /home/node/app
 RUN mkdir /store
 
 RUN apk update \
+    # patch OS-level packages (busybox, openssl, ...) to the latest in the branch
+    && apk upgrade --no-cache \
     # add tzdata and openssl dependencies
     && apk add --no-cache tzdata openssl \
     # add common programs used in shell scripting
-    && apk add bash curl jq \
+    && apk add --no-cache bash curl jq \
     && rm -rf /var/cache/apk/*
 
 # Dependencies Stage (Backend)
@@ -53,6 +55,13 @@ RUN npm run build
 
 # Release Stage
 FROM base as release
+
+# npm is a build-time tool only; the runtime entrypoint is `node index`. Remove it
+# from the released image to drop its vulnerable bundled dependencies (tar, glob,
+# minimatch, cross-spawn, ...) from the attack surface.
+RUN rm -rf /usr/local/lib/node_modules/npm \
+    /usr/local/bin/npm \
+    /usr/local/bin/npx
 
 # Default entrypoint
 COPY Docker.entrypoint.sh /usr/bin/entrypoint.sh

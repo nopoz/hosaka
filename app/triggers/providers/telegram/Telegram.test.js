@@ -1,4 +1,7 @@
 const { ValidationError } = require('joi');
+const rp = require('../../../request');
+
+jest.mock('../../../request');
 const Telegram = require('./Telegram');
 
 const telegram = new Telegram();
@@ -47,5 +50,20 @@ test('maskConfiguration should mask sensitive data', () => {
         // eslint-disable-next-line no-template-curly-in-string
         simpletitle: 'New ${kind} found for container ${name}',
         threshold: 'all',
+    });
+});
+
+test('sendMessage should POST to the Telegram Bot API', async () => {
+    telegram.configuration = configurationValid;
+    rp.mockResolvedValue({ ok: true });
+    await telegram.sendMessage('hello');
+    expect(rp).toHaveBeenCalledWith({
+        method: 'POST',
+        uri: 'https://api.telegram.org/bottoken/sendMessage',
+        headers: { 'Content-Type': 'application/json' },
+        body: {
+            chat_id: '123456789',
+            text: 'hello',
+        },
     });
 });
