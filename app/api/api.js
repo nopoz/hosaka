@@ -49,7 +49,7 @@ function init() {
     router.use('/authentications', authenticationRouter.init());
 
     // All other API routes => 404
-    router.get('/*', (req, res) => res.sendStatus(404));
+    router.get('/{*splat}', (req, res) => res.sendStatus(404));
 
     return router;
 }
