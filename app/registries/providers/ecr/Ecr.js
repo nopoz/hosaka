@@ -1,5 +1,4 @@
-const ECR = require('aws-sdk/clients/ecr');
-require('aws-sdk/lib/maintenance_mode_message').suppress = true; // Disable aws sdk maintenance mode message at startup
+const { ECRClient, GetAuthorizationTokenCommand } = require('@aws-sdk/client-ecr');
 const rp = require('../../../request');
 const Registry = require('../../Registry');
 
@@ -63,14 +62,14 @@ class Ecr extends Registry {
         const requestOptionsWithAuth = requestOptions;
         // Private registry
         if (this.configuration.accesskeyid) {
-            const ecr = new ECR({
+            const ecr = new ECRClient({
                 credentials: {
                     accessKeyId: this.configuration.accesskeyid,
                     secretAccessKey: this.configuration.secretaccesskey,
                 },
                 region: this.configuration.region,
             });
-            const authorizationToken = await ecr.getAuthorizationToken().promise();
+            const authorizationToken = await ecr.send(new GetAuthorizationTokenCommand({}));
             const tokenValue = authorizationToken.authorizationData[0].authorizationToken;
 
             requestOptionsWithAuth.headers.Authorization = `Basic ${tokenValue}`;

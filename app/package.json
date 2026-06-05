@@ -13,8 +13,8 @@
   "repository": "nopoz/hosaka",
   "license": "MIT",
   "dependencies": {
+    "@aws-sdk/client-ecr": "3.946.0",
     "@slack/web-api": "7.16.0",
-    "aws-sdk": "2.1693.0",
     "axios": "1.16.1",
     "body-parser": "1.20.5",
     "bunyan": "1.8.15",
