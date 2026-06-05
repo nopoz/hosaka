@@ -1,5 +1,9 @@
 # Hosaka
 
+[![CI](https://github.com/nopoz/hosaka/actions/workflows/ci.yml/badge.svg)](https://github.com/nopoz/hosaka/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/nopoz/hosaka?sort=semver)](https://github.com/nopoz/hosaka/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 Hosaka watches your Docker hosts for new container image versions, then lets you
 react: get notified, or update the container with a single click and watch the
 update run live.
