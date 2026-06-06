@@ -1,53 +1,21 @@
-# Dependabot version updates.
-# Keeps the three npm packages and the workflow action pins current so the
-# dependency CVEs that prompted the security-scan remediation don't recur.
-# Non-major updates are grouped into one PR per ecosystem to cut noise; majors
-# still open individually (they are handled as their own modernization tracks).
+# Dependabot configuration.
+#
+# npm: NO scheduled version updates. We deliberately avoid version-chasing
+# noise. Security coverage for the app/ui/e2e packages comes from Dependabot
+# *security updates* (the repo "Dependabot security updates" setting), which
+# only open a PR when a dependency has a known CVE advisory. Major upgrades are
+# handled deliberately as their own modernization tracks, not automated bumps.
+#
+# github-actions: keep version updates (monthly, grouped). Action releases are
+# infrequent and refreshing the SHA pins has a real security payoff for low
+# noise. Dependabot bumps both the SHA and the # vX.Y.Z comment.
 version: 2
 updates:
-  # Workflow action pins (SHA-pinned with # vX.Y.Z comments). Dependabot bumps
-  # both the SHA and the version comment, so the pins stay fresh automatically.
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: weekly
+      interval: monthly
     groups:
       github-actions:
         patterns:
           - "*"
-
-  # Backend (Node 18 in prod).
-  - package-ecosystem: npm
-    directory: /app
-    schedule:
-      interval: weekly
-    open-pull-requests-limit: 5
-    groups:
-      app-non-major:
-        update-types:
-          - minor
-          - patch
-
-  # Frontend SPA.
-  - package-ecosystem: npm
-    directory: /ui
-    schedule:
-      interval: weekly
-    open-pull-requests-limit: 5
-    groups:
-      ui-non-major:
-        update-types:
-          - minor
-          - patch
-
-  # End-to-end tests.
-  - package-ecosystem: npm
-    directory: /e2e
-    schedule:
-      interval: weekly
-    open-pull-requests-limit: 5
-    groups:
-      e2e-non-major:
-        update-types:
-          - minor
-          - patch
