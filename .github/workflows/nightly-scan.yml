@@ -1,0 +1,38 @@
+name: Nightly scan
+
+# Scheduled deep scans that don't fit the per-PR gates. Today: a full-history
+# secret sweep (the PR gitleaks job only sees the diff). A published-image Trivy
+# rescan will be added here once a release is cut under the new name (the ghcr
+# image does not exist yet).
+
+on:
+  schedule:
+    - cron: "0 4 * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: nightly-${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  gitleaks-full:
+    name: gitleaks (full history)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout (full history)
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
+        with:
+          persist-credentials: false
+          # Full history so the sweep covers every commit, not just the tip.
+          fetch-depth: 0
+      - name: Scan entire history for secrets
+        # Non-PR events make gitleaks run a full `detect`. Known fake
+        # example/test secrets are suppressed via .gitleaksignore, so a clean
+        # run means a genuine new leak would fail this job.
+        uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e  # v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
