@@ -16,7 +16,7 @@
     "simple-icons-font": "13.9.0",
     "vue": "3.5.35",
     "vue-router": "4.6.4",
-    "vuetify": "3.12.7"
+    "vuetify": "4.1.0"
   },
   "devDependencies": {
     "@fontsource/roboto": "5.1.0",
