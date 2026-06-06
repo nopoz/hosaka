@@ -1,0 +1,40 @@
+# gitleaks baseline.
+#
+# These are example/test secrets that have always been fake: doc snippets,
+# unit-test fixtures, and throwaway test TLS keys. They are intentionally
+# committed and are not real credentials. Listing their fingerprints here lets
+# a full-history `gitleaks detect` (nightly scan) read clean, so a genuine
+# future leak stands out instead of drowning in known noise.
+#
+# Format: <commit>:<file>:<rule>:<startline>
+005cb21f6c6ee8eea36858c565c6ef6997c9066a:app/triggers/providers/rocketchat/Rocketchat.test.js:generic-api-key:113
+005cb21f6c6ee8eea36858c565c6ef6997c9066a:app/triggers/providers/rocketchat/Rocketchat.test.js:generic-api-key:130
+005cb21f6c6ee8eea36858c565c6ef6997c9066a:app/triggers/providers/rocketchat/Rocketchat.test.js:generic-api-key:30
+005cb21f6c6ee8eea36858c565c6ef6997c9066a:app/triggers/providers/rocketchat/Rocketchat.test.js:generic-api-key:96
+005cb21f6c6ee8eea36858c565c6ef6997c9066a:docs/configuration/triggers/rocketchat/README.md:generic-api-key:40
+005cb21f6c6ee8eea36858c565c6ef6997c9066a:docs/configuration/triggers/rocketchat/README.md:generic-api-key:50
+098f602fc9939a227654792f833690ddc83a8662:docs/api/registry.md:generic-api-key:46
+1f4a441a9578fb23f7fda994eaf9662402fbbc8c:docs/configuration/triggers/gotify/README.md:generic-api-key:37
+1f4a441a9578fb23f7fda994eaf9662402fbbc8c:docs/configuration/triggers/gotify/README.md:generic-api-key:43
+38f0ed6239255f2104c2cb59c62d224492123eed:docs/configuration/registries/hub/README.md:generic-api-key:78
+38f0ed6239255f2104c2cb59c62d224492123eed:docs/configuration/registries/hub/README.md:generic-api-key:83
+38f0ed6239255f2104c2cb59c62d224492123eed:docs/configuration/registries/quay/README.md:generic-api-key:28
+38f0ed6239255f2104c2cb59c62d224492123eed:docs/configuration/registries/quay/README.md:generic-api-key:35
+3cdbf2c5067c5d5cd92af46c6baa06ded78d9b82:app/registries/providers/custom/Custom.test.js:generic-api-key:80
+59651e81f5149f848e009d32f5eba7331fb638f6:docs/watchers/docker/hub.md:generic-api-key:23
+5d1dafc4a8d9c0935b162c9a334740429c17f41f:docs/configuration/triggers/telegram/README.md:telegram-bot-api-token:28
+5d1dafc4a8d9c0935b162c9a334740429c17f41f:docs/configuration/triggers/telegram/README.md:telegram-bot-api-token:35
+5e638a634d39ce572b57fccb687e548afdfdbb53:scripts/start-wud.sh:private-key:27
+6a094eab24683f3ad0a15524df1c8edd82d664e4:app/registries/providers/hub/Hub.test.js:generic-api-key:93
+6a094eab24683f3ad0a15524df1c8edd82d664e4:docs/api/registry/get-registries.md:generic-api-key:24
+6a094eab24683f3ad0a15524df1c8edd82d664e4:docs/api/registry/get-registry.md:generic-api-key:13
+6a094eab24683f3ad0a15524df1c8edd82d664e4:docs/registries/hub/README.md:generic-api-key:53
+73e50d0089cf1dfb5dfb184fde3a065d0ba44c49:nodemon.json:generic-api-key:6
+7ee49284556cc5de25c1f4e97c8786d6de3d6ccc:docs/configuration/registries/hub/README.md:generic-api-key:103
+7ee49284556cc5de25c1f4e97c8786d6de3d6ccc:docs/configuration/registries/hub/README.md:generic-api-key:108
+84fb9b179eb43f704f7144e565460ce2e98456e9:test/server.key:private-key:1
+9023557494ecee41eed3655e168be652c689e941:docs/configuration/registries/quay/README.md:generic-api-key:53
+9023557494ecee41eed3655e168be652c689e941:docs/configuration/registries/quay/README.md:generic-api-key:60
+b76bfd1fc94427488f8d389a4d55362a0ef348f6:docs/configuration/authentications/oidc/README.md:private-key:28
+c23098b1e49e8528811a78d3ee2843c389267efb:test/mosquitto/config/minica-key.pem:private-key:1
+c23098b1e49e8528811a78d3ee2843c389267efb:test/mosquitto/config/mosquitto.dev/key.pem:private-key:1

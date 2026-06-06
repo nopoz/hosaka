@@ -110,4 +110,5 @@ docker-compose.yml
 !/.dockerignore
 !/.github
 !/.gitignore
+!/.gitleaksignore
 !/.travis.yml
