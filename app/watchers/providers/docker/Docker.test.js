@@ -142,12 +142,69 @@ const getTagCandidatesTestCases = [{
     },
     items: ['1.10.0', '1.2.3'],
     candidates: ['1.10.0'],
+}, {
+    // (b) .sig dropped (no include regex). Without the filter '7.8.9.sig'
+    // coerces to 7.8.9 and would leak in as a candidate.
+    source: sampleSemver,
+    items: ['7.8.9', '7.8.9.sig'],
+    candidates: ['7.8.9'],
+}, {
+    // (b) .sig dropped EVEN WITH an include regex that matches it (always-on).
+    source: {
+        ...sampleSemver,
+        includeTags: '7.8.9',
+    },
+    items: ['7.8.9', '7.8.9.sig'],
+    candidates: ['7.8.9'],
+}, {
+    // (a)+(c) sha-prefixed digest tag dropped (no include regex). Without the
+    // filters 'sha256abcdef' coerces to 256.0.0 and would leak in.
+    source: sampleSemver,
+    items: ['7.8.9', 'sha256abcdef'],
+    candidates: ['7.8.9'],
+}, {
+    // (a) gate off: when an include regex matches a sha tag, the sha-prefix
+    // filter is bypassed and the tag survives (it coerces to a real semver).
+    // Proves the sha drop is gated on the absence of a user include regex.
+    source: {
+        ...sampleSemver,
+        includeTags: 'sha',
+    },
+    items: ['sha256abcdef'],
+    candidates: ['sha256abcdef'],
+}, {
+    // (c) prefix propagation: current 'v1.2.3' keeps only 'v'-prefixed tags,
+    // so a bare '1.3.0' is rejected and 'v1.3.0' accepted.
+    source: {
+        image: {
+            tag: {
+                value: 'v1.2.3',
+                semver: true,
+            },
+        },
+    },
+    items: ['v1.3.0', '1.3.0'],
+    candidates: ['v1.3.0'],
+}, {
+    // coerced-semver preserved (regression guard for the omitted segment-count
+    // filter): current '4.5' still offered 3-segment '7.8.9'.
+    source: sampleCoercedSemver,
+    items: ['7.8.9', '7.8.9.sig'],
+    candidates: ['7.8.9'],
+}, {
+    // digest-alias preserved (regression guard): alias 'v8.0.0' survives even
+    // though prefix propagation would otherwise drop it (current tag '4.5.6'
+    // has no prefix). digest match also skips the greater-semver step.
+    source: sampleSemver,
+    items: ['v8.0.0'],
+    imageDigestMap: new Map([['xxx', { tags: ['v8.0.0'] }]]),
+    candidates: ['v8.0.0'],
 }];
 
 test.each(getTagCandidatesTestCases)(
     'getTagCandidates should behave as expected',
     (item) => {
-        expect(Docker.__get__('getTagCandidates')(item.source, item.items, docker.log)).toEqual(item.candidates);
+        expect(Docker.__get__('getTagCandidates')(item.source, item.items, docker.log, item.imageDigestMap)).toEqual(item.candidates);
     },
 );
 
