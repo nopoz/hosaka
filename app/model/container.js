@@ -17,6 +17,8 @@ const schema = joi.object({
     excludeTags: joi.string(),
     transformTags: joi.string(),
     linkTemplate: joi.string(),
+    triggerInclude: joi.string(),
+    triggerExclude: joi.string(),
     link: joi.string(),
     image: joi.object({
         id: joi.string().min(1).required(),

@@ -43,4 +43,14 @@ module.exports = {
      */
     hosakaDisplayIcon: 'hosaka.display.icon',
 
+    /**
+     * Optional comma-separated list of triggers to include.
+     */
+    hosakaTriggerInclude: 'hosaka.trigger.include',
+
+    /**
+     * Optional comma-separated list of triggers to exclude.
+     */
+    hosakaTriggerExclude: 'hosaka.trigger.exclude',
+
 };

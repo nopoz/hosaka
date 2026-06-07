@@ -377,3 +377,81 @@ test('renderBatchBody should replace placeholders when called', async () => {
         },
     }])).toEqual('- Container container-name running with tag 1.0.0 can be updated to tag 2.0.0\nhttp://test\n');
 });
+
+test('parseIncludeOrExcludeTriggerString parses id and threshold', () => {
+    expect(Trigger.parseIncludeOrExcludeTriggerString('trigger.smtp.main'))
+        .toEqual({ id: 'trigger.smtp.main', threshold: 'all' });
+    expect(Trigger.parseIncludeOrExcludeTriggerString('trigger.smtp.main:minor'))
+        .toEqual({ id: 'trigger.smtp.main', threshold: 'minor' });
+    expect(Trigger.parseIncludeOrExcludeTriggerString('trigger.smtp.main:major-only'))
+        .toEqual({ id: 'trigger.smtp.main', threshold: 'major-only' });
+    expect(Trigger.parseIncludeOrExcludeTriggerString('trigger.smtp.main:bogus'))
+        .toEqual({ id: 'trigger.smtp.main', threshold: 'all' });
+});
+
+const isThresholdReachedOverrideTestCases = [
+    { threshold: 'major-only', semverDiff: 'major', expected: true },
+    { threshold: 'major-only', semverDiff: 'minor', expected: false },
+    { threshold: 'minor-only', semverDiff: 'minor', expected: true },
+    { threshold: 'minor-only', semverDiff: 'major', expected: false },
+    { threshold: 'minor', semverDiff: 'major', expected: false },
+    { threshold: 'minor', semverDiff: 'minor', expected: true },
+    { threshold: 'minor', semverDiff: 'patch', expected: true },
+    { threshold: 'patch', semverDiff: 'minor', expected: false },
+    { threshold: 'patch', semverDiff: 'patch', expected: true },
+    { threshold: 'all', semverDiff: 'major', expected: true },
+];
+
+test.each(isThresholdReachedOverrideTestCases)(
+    'isThresholdReached($threshold, $semverDiff) === $expected',
+    ({ threshold, semverDiff, expected }) => {
+        const container = { updateKind: { kind: 'tag', semverDiff } };
+        expect(trigger.isThresholdReached(container, threshold)).toEqual(expected);
+    },
+);
+
+const mustTriggerTestCases = [
+    // no labels => fires
+    { triggerInclude: undefined, triggerExclude: undefined, expected: true },
+    // include matches this trigger id => fires
+    { triggerInclude: 'trigger.mock.mock', triggerExclude: undefined, expected: true },
+    // include does not match => does not fire
+    { triggerInclude: 'trigger.other.x', triggerExclude: undefined, expected: false },
+    // exclude matches this trigger id => does not fire
+    { triggerInclude: undefined, triggerExclude: 'trigger.mock.mock', expected: false },
+    // include with cumulative ':minor' and a patch update => fires (minor covers patch)
+    {
+        triggerInclude: 'trigger.mock.mock:minor', triggerExclude: undefined, semverDiff: 'patch', expected: true,
+    },
+    // include with ':patch' and a major update => does not fire (threshold not reached)
+    {
+        triggerInclude: 'trigger.mock.mock:patch', triggerExclude: undefined, semverDiff: 'major', expected: false,
+    },
+    // include with exact ':minor-only' and a patch update => does not fire
+    {
+        triggerInclude: 'trigger.mock.mock:minor-only', triggerExclude: undefined, semverDiff: 'patch', expected: false,
+    },
+    // exclude with ':major-only' and a minor update => still fires (exclude threshold not reached)
+    {
+        triggerInclude: undefined, triggerExclude: 'trigger.mock.mock:major-only', semverDiff: 'minor', expected: true,
+    },
+    // case-insensitive id match
+    { triggerInclude: 'TRIGGER.MOCK.MOCK', triggerExclude: undefined, expected: true },
+];
+
+test.each(mustTriggerTestCases)(
+    'mustTrigger include=$triggerInclude exclude=$triggerExclude => $expected',
+    ({
+        triggerInclude, triggerExclude, semverDiff, expected,
+    }) => {
+        trigger.kind = 'trigger';
+        trigger.type = 'mock';
+        trigger.name = 'mock';
+        const container = {
+            triggerInclude,
+            triggerExclude,
+            updateKind: { kind: 'tag', semverDiff: semverDiff || 'major' },
+        };
+        expect(trigger.mustTrigger(container)).toEqual(expected);
+    },
+);

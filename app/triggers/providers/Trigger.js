@@ -43,6 +43,8 @@ class Trigger extends Component {
             try {
                 if (!this.isThresholdReached(containerReport.container)) {
                     logContainer.debug('Threshold not reached => do not trigger');
+                } else if (!this.mustTrigger(containerReport.container)) {
+                    logContainer.debug('Trigger routing excludes this container => do not trigger');
                 } else {
                     logContainer.debug('Run trigger');
                     await this.trigger(containerReport.container);
@@ -68,7 +70,8 @@ class Trigger extends Component {
             const containerReportsFiltered = containerReports
                 .filter((containerReport) => containerReport.changed || !this.configuration.once)
                 .filter((containerReport) => containerReport.container.updateAvailable)
-                .filter((containerReport) => this.isThresholdReached(containerReport.container));
+                .filter((containerReport) => this.isThresholdReached(containerReport.container))
+                .filter((containerReport) => this.mustTrigger(containerReport.container));
             const containersFiltered = containerReportsFiltered
                 .map((containerReport) => containerReport.container);
             if (containersFiltered.length > 0) {
@@ -82,21 +85,28 @@ class Trigger extends Component {
     }
 
     /**
-     * Return true if update reaches trigger threshold.
+     * Return true if update reaches the given threshold (defaults to the
+     * trigger's configured threshold).
      * @param containerResult
+     * @param threshold
      * @returns {boolean}
      */
-    isThresholdReached(containerResult) {
+    isThresholdReached(containerResult, threshold = this.configuration.threshold) {
         let thresholdPassing = true;
         if (
-            this.configuration.threshold.toLowerCase() !== 'all'
+            threshold.toLowerCase() !== 'all'
             && containerResult.updateKind
             && containerResult.updateKind.kind === 'tag'
             && containerResult.updateKind.semverDiff
             && containerResult.updateKind.semverDiff !== 'unknown'
         ) {
-            const threshold = this.configuration.threshold.toLowerCase();
-            switch (threshold) {
+            switch (threshold.toLowerCase()) {
+            case 'major-only':
+                thresholdPassing = containerResult.updateKind.semverDiff === 'major';
+                break;
+            case 'minor-only':
+                thresholdPassing = containerResult.updateKind.semverDiff === 'minor';
+                break;
             case 'minor':
                 thresholdPassing = containerResult.updateKind.semverDiff !== 'major';
                 break;
@@ -109,6 +119,96 @@ class Trigger extends Component {
             }
         }
         return thresholdPassing;
+    }
+
+    /**
+     * Parse an "id" or "id:threshold" trigger string.
+     * @param includeOrExcludeTriggerString
+     * @returns {{id: string, threshold: string}}
+     */
+    static parseIncludeOrExcludeTriggerString(includeOrExcludeTriggerString) {
+        const split = includeOrExcludeTriggerString.split(/\s*:\s*/);
+        const parsed = { id: split[0], threshold: 'all' };
+        if (split.length === 2) {
+            switch (split[1]) {
+            case 'major-only':
+                parsed.threshold = 'major-only';
+                break;
+            case 'minor-only':
+                parsed.threshold = 'minor-only';
+                break;
+            case 'major':
+                parsed.threshold = 'major';
+                break;
+            case 'minor':
+                parsed.threshold = 'minor';
+                break;
+            case 'patch':
+                parsed.threshold = 'patch';
+                break;
+            default:
+                parsed.threshold = 'all';
+            }
+        }
+        return parsed;
+    }
+
+    /**
+     * Return true if this trigger id is in the comma-separated list AND the
+     * update reaches the per-entry threshold.
+     * @param containerResult
+     * @param triggerList
+     * @returns {boolean}
+     */
+    isTriggerIncludedOrExcluded(containerResult, triggerList) {
+        const triggers = triggerList
+            .split(/\s*,\s*/)
+            .map((t) => Trigger.parseIncludeOrExcludeTriggerString(t));
+        const matched = triggers
+            .find((t) => t.id.toLowerCase() === this.getId().toLowerCase());
+        if (!matched) {
+            return false;
+        }
+        return this.isThresholdReached(containerResult, matched.threshold.toLowerCase());
+    }
+
+    /**
+     * Return true when the container does not restrict includes, or this
+     * trigger is in the include list.
+     * @param containerResult
+     * @param triggerInclude
+     * @returns {boolean}
+     */
+    isTriggerIncluded(containerResult, triggerInclude) {
+        if (!triggerInclude) {
+            return true;
+        }
+        return this.isTriggerIncludedOrExcluded(containerResult, triggerInclude);
+    }
+
+    /**
+     * Return true when this trigger is in the exclude list (and threshold met).
+     * @param containerResult
+     * @param triggerExclude
+     * @returns {boolean}
+     */
+    isTriggerExcluded(containerResult, triggerExclude) {
+        if (!triggerExclude) {
+            return false;
+        }
+        return this.isTriggerIncludedOrExcluded(containerResult, triggerExclude);
+    }
+
+    /**
+     * Return true if this trigger must fire for the container per its routing
+     * labels.
+     * @param containerResult
+     * @returns {boolean}
+     */
+    mustTrigger(containerResult) {
+        const { triggerInclude, triggerExclude } = containerResult;
+        return this.isTriggerIncluded(containerResult, triggerInclude)
+            && !this.isTriggerExcluded(containerResult, triggerExclude);
     }
 
     /**
@@ -141,7 +241,7 @@ class Trigger extends Component {
             threshold: this.joi
                 .string()
                 .insensitive()
-                .valid('all', 'major', 'minor', 'patch')
+                .valid('all', 'major', 'minor', 'patch', 'major-only', 'minor-only')
                 .default('all'),
             mode: this.joi
                 .string()
