@@ -81,6 +81,37 @@ function getTagCandidates(container, tags, logContainer, imageDigestMap = new Ma
         }
     }
 
+    // Always drop Cosign signature tags (e.g. "1.2.3.sig"); they would otherwise
+    // coerce to a real semver and leak in as bogus candidates.
+    filteredTags = filteredTags.filter((tag) => !tag.endsWith('.sig'));
+    logContainer.debug(`[TagFilter] After .sig drop: ${filteredTags.length} tags`);
+
+    const noUserInclude = !container.includeTags;
+
+    // Drop content-addressed "sha..." tags unless the user pinned an include
+    // regex (they coerce to bogus high semvers otherwise).
+    if (noUserInclude) {
+        filteredTags = filteredTags.filter((tag) => !tag.startsWith('sha'));
+        logContainer.debug(`[TagFilter] After sha drop: ${filteredTags.length} tags`);
+    }
+
+    // Tag-prefix propagation: keep only tags sharing the current tag's
+    // non-numeric prefix (so a "v1.2.3" container is not offered a bare
+    // "1.3.0"). Skipped when the user pinned an include regex, or when the
+    // digest map already aliased the candidates (aliases of the same image
+    // legitimately differ in prefix, e.g. local "8" -> alias "8.0.0").
+    if (noUserInclude && !matchingDigest) {
+        const currentTag = container.image.tag.value;
+        const prefixMatch = currentTag.match(/^(.*?)(\d+.*)$/);
+        const currentPrefix = prefixMatch ? prefixMatch[1] : '';
+        if (currentPrefix) {
+            filteredTags = filteredTags.filter((tag) => tag.startsWith(currentPrefix));
+        } else {
+            filteredTags = filteredTags.filter((tag) => /^\d/.test(tag));
+        }
+        logContainer.debug(`[TagFilter] After prefix propagation ('${currentPrefix}'): ${filteredTags.length} tags`);
+    }
+
     if (filteredTags.length === 0) {
         logContainer.warn('No tags found after filtering. Check regex filters.');
     }
