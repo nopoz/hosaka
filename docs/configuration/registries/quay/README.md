@@ -7,9 +7,9 @@ The `quay` registry lets you configure [QUAY](https://quay.io/) integration.
 
 | Env var                      | Required        | Description    | Supported values | Default value when missing |
 | ----------------------------- |:--------------:| -------------- | ---------------- | -------------------------- | 
-| `WUD_REGISTRY_QUAY_NAMESPACE` | :white_circle: | Quay namespace |                  |                            |
-| `WUD_REGISTRY_QUAY_ACCOUNT`   | :white_circle: | Quay account   |                  |                            |
-| `WUD_REGISTRY_QUAY_TOKEN`     | :white_circle: | Quay token     |                  |                            |
+| `HOSAKA_REGISTRY_QUAY_NAMESPACE` | :white_circle: | Quay namespace |                  |                            |
+| `HOSAKA_REGISTRY_QUAY_ACCOUNT`   | :white_circle: | Quay account   |                  |                            |
+| `HOSAKA_REGISTRY_QUAY_TOKEN`     | :white_circle: | Quay token     |                  |                            |
 
 ### Examples
 
@@ -25,12 +25,12 @@ services:
     image: getwud/wud
     ...
     environment:
-      - WUD_REGISTRY_QUAY
+      - HOSAKA_REGISTRY_QUAY
 ```
 #### **Docker**
 ```bash
 docker run \
-  -e WUD_REGISTRY_QUAY= \
+  -e HOSAKA_REGISTRY_QUAY= \
   ...
   getwud/wud
 ```
@@ -48,16 +48,16 @@ services:
     image: getwud/wud
     ...
     environment:
-      - WUD_REGISTRY_QUAY_NAMESPACE=mynamespace
-      - WUD_REGISTRY_QUAY_ACCOUNT=myaccount
-      - WUD_REGISTRY_QUAY_TOKEN=BA8JI3Y2BWQDH849RYT3YD5J0J6CYEORYTQMMJK364B4P88VPTJIAI704L0BBP8D6CYE4P88V 
+      - HOSAKA_REGISTRY_QUAY_NAMESPACE=mynamespace
+      - HOSAKA_REGISTRY_QUAY_ACCOUNT=myaccount
+      - HOSAKA_REGISTRY_QUAY_TOKEN=BA8JI3Y2BWQDH849RYT3YD5J0J6CYEORYTQMMJK364B4P88VPTJIAI704L0BBP8D6CYE4P88V 
 ```
 #### **Docker**
 ```bash
 docker run \
-  -e WUD_REGISTRY_QUAY_NAMESPACE="mynamespace" \
-  -e WUD_REGISTRY_QUAY_ACCOUNT="myaccount" \
-  -e WUD_REGISTRY_QUAY_TOKEN="BA8JI3Y2BWQDH849RYT3YD5J0J6CYEORYTQMMJK364B4P88VPTJIAI704L0BBP8D6CYE4P88V" \
+  -e HOSAKA_REGISTRY_QUAY_NAMESPACE="mynamespace" \
+  -e HOSAKA_REGISTRY_QUAY_ACCOUNT="myaccount" \
+  -e HOSAKA_REGISTRY_QUAY_TOKEN="BA8JI3Y2BWQDH849RYT3YD5J0J6CYEORYTQMMJK364B4P88VPTJIAI704L0BBP8D6CYE4P88V" \
   ...
   getwud/wud
 ```

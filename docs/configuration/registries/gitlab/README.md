@@ -7,9 +7,9 @@ The `gitlab` registry lets you configure [GITLAB](https://docs.gitlab.com/ee/use
 
 | Env var                       |   Required   | Description                    | Supported values                         | Default value when missing  |
 |-------------------------------|:------------:|--------------------------------| ---------------------------------------- |-----------------------------| 
-| `WUD_REGISTRY_GITLAB_URL`     | :red_circle: | Gitlab Registry base url       |                                          | https://registry.gitlab.com |
-| `WUD_REGISTRY_GITLAB_AUTHURL` | :red_circle: | Gitlab Authentication base url |                                          | https://gitlab.com          |
-| `WUD_REGISTRY_GITLAB_TOKEN`   | :red_circle: | Gitlab Personal Access Token   |                                          |                             |
+| `HOSAKA_REGISTRY_GITLAB_URL`     | :red_circle: | Gitlab Registry base url       |                                          | https://registry.gitlab.com |
+| `HOSAKA_REGISTRY_GITLAB_AUTHURL` | :red_circle: | Gitlab Authentication base url |                                          | https://gitlab.com          |
+| `HOSAKA_REGISTRY_GITLAB_TOKEN`   | :red_circle: | Gitlab Personal Access Token   |                                          |                             |
 
 ### Examples
 
@@ -25,12 +25,12 @@ services:
     image: getwud/wud
     ...
     environment:
-      - WUD_REGISTRY_GITLAB_TOKEN=xxxxx 
+      - HOSAKA_REGISTRY_GITLAB_TOKEN=xxxxx 
 ```
 #### **Docker**
 ```bash
 docker run \
-  -e WUD_REGISTRY_GITLAB_TOKEN="xxxxx" \
+  -e HOSAKA_REGISTRY_GITLAB_TOKEN="xxxxx" \
   ...
   getwud/wud
 ```
@@ -48,16 +48,16 @@ services:
     image: getwud/wud
     ...
     environment:
-      - WUD_REGISTRY_GITLAB_URL=https://registry.mygitlab.acme.com
-      - WUD_REGISTRY_GITLAB_AUTHURL=https://mygitlab.acme.com
-      - WUD_REGISTRY_GITLAB_TOKEN=xxxxx 
+      - HOSAKA_REGISTRY_GITLAB_URL=https://registry.mygitlab.acme.com
+      - HOSAKA_REGISTRY_GITLAB_AUTHURL=https://mygitlab.acme.com
+      - HOSAKA_REGISTRY_GITLAB_TOKEN=xxxxx 
 ```
 #### **Docker**
 ```bash
 docker run \
-  -e WUD_REGISTRY_GITLAB_URL="https://registry.mygitlab.acme.com"
-  -e WUD_REGISTRY_GITLAB_AUTHURL="https://mygitlab.acme.com"
-  -e WUD_REGISTRY_GITLAB_TOKEN="xxxxx" \
+  -e HOSAKA_REGISTRY_GITLAB_URL="https://registry.mygitlab.acme.com"
+  -e HOSAKA_REGISTRY_GITLAB_AUTHURL="https://mygitlab.acme.com"
+  -e HOSAKA_REGISTRY_GITLAB_TOKEN="xxxxx" \
   ...
   getwud/wud
 ```
@@ -71,5 +71,5 @@ docker run \
 Choose an expiration time & appropriate scopes (`read_registry` is only needed for wud) and generate.
 ![image](gitlab_01.png)
 
-#### Copy the token & use it as the WUD_REGISTRY_GITLAB_TOKEN value
+#### Copy the token & use it as the HOSAKA_REGISTRY_GITLAB_TOKEN value
 ![image](gitlab_02.png)

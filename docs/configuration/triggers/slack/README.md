@@ -7,8 +7,8 @@ The `slack` trigger lets you post image update notifications to a Slack channel.
 
 | Env var                                    | Required     | Description                      | Supported values | Default value when missing |
 | ------------------------------------------ |:------------:| -------------------------------- | ---------------- | -------------------------- | 
-| `WUD_TRIGGER_SLACK_{trigger_name}_TOKEN`   | :red_circle: | The Oauth Token of the Slack app |                  |                            |
-| `WUD_TRIGGER_SLACK_{trigger_name}_CHANNEL` | :red_circle: | The name of the channel to post  |                  |                            |
+| `HOSAKA_TRIGGER_SLACK_{trigger_name}_TOKEN`   | :red_circle: | The Oauth Token of the Slack app |                  |                            |
+| `HOSAKA_TRIGGER_SLACK_{trigger_name}_CHANNEL` | :red_circle: | The name of the channel to post  |                  |                            |
 
 !> The Slack channel must already exist on the workspace (the trigger won't automatically create it)
 
@@ -26,15 +26,15 @@ services:
     image: getwud/wud
     ...
     environment:
-        - WUD_TRIGGER_SLACK_TEST_TOKEN=xoxp-743817063446-xxx
-        - WUD_TRIGGER_SLACK_TEST_CHANNEL=wud
+        - HOSAKA_TRIGGER_SLACK_TEST_TOKEN=xoxp-743817063446-xxx
+        - HOSAKA_TRIGGER_SLACK_TEST_CHANNEL=wud
 ```
 
 #### **Docker**
 ```bash
 docker run \
-    -e WUD_TRIGGER_SLACK_TEST_TOKEN="xoxp-743817063446-xxx" \
-    -e WUD_TRIGGER_SLACK_TEST_CHANNEL="wud" \
+    -e HOSAKA_TRIGGER_SLACK_TEST_TOKEN="xoxp-743817063446-xxx" \
+    -e HOSAKA_TRIGGER_SLACK_TEST_CHANNEL="wud" \
   ...
   getwud/wud
 ```

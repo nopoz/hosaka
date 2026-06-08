@@ -7,8 +7,8 @@ The `telegram` trigger lets you send realtime notifications using [Telegram](htt
 
 | Env var                                        | Required       | Description   | Supported values                                                                                   | Default value when missing  |
 |------------------------------------------------|:--------------:|---------------| -------------------------------------------------------------------------------------------------- |-----------------------------| 
-| `WUD_TRIGGER_TELEGRAM_{trigger_name}_BOTTOKEN` | :red_circle:   | The Bot token |                                                                                                    |                             |
-| `WUD_TRIGGER_TELEGRAM_{trigger_name}_CHATID`   | :red_circle:   | The Chat ID   |                                                                                                    |                             |
+| `HOSAKA_TRIGGER_TELEGRAM_{trigger_name}_BOTTOKEN` | :red_circle:   | The Bot token |                                                                                                    |                             |
+| `HOSAKA_TRIGGER_TELEGRAM_{trigger_name}_CHATID`   | :red_circle:   | The Chat ID   |                                                                                                    |                             |
 
 ?> This trigger also supports the [common configuration variables](configuration/triggers/?id=common-trigger-configuration).
 
@@ -25,15 +25,15 @@ services:
     image: getwud/wud
     ...
     environment:
-      - WUD_TRIGGER_TELEGRAM_1_BOTTOKEN=your-telegram-bot-token
-      - WUD_TRIGGER_TELEGRAM_1_CHATID=9876543210
+      - HOSAKA_TRIGGER_TELEGRAM_1_BOTTOKEN=your-telegram-bot-token
+      - HOSAKA_TRIGGER_TELEGRAM_1_CHATID=9876543210
 ```
 
 #### **Docker**
 ```bash
 docker run \
-  -e WUD_TRIGGER_TELEGRAM_1_BOTTOKEN="your-telegram-bot-token" \
-  -e WUD_TRIGGER_TELEGRAM_1_CHATID="9876543210" \
+  -e HOSAKA_TRIGGER_TELEGRAM_1_BOTTOKEN="your-telegram-bot-token" \
+  -e HOSAKA_TRIGGER_TELEGRAM_1_CHATID="9876543210" \
   ...
   getwud/wud
 ```
