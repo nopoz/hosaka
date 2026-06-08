@@ -100,7 +100,7 @@ class Hub extends Custom {
     // eslint-disable-next-line class-methods-use-this
     getImageFullName(image, tagOrDigest) {
         let fullName = super.getImageFullName(image, tagOrDigest);
-        fullName = fullName.replace(/registry-1.docker.io\//, '');
+        fullName = fullName.replace(/registry-1\.docker\.io\//, '');
         fullName = fullName.replace(/library\//, '');
         return fullName;
     }

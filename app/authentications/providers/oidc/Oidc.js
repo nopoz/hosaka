@@ -129,7 +129,7 @@ class Oidc extends Authentication {
             req.login(user, (err) => {
                 if (err) {
                     this.log.warn(`Error when logging the user [${err.message}]`);
-                    res.status(401).send(err.message);
+                    res.status(401).json({ error: err.message });
                 } else {
                     this.log.debug('User authenticated => redirect to app');
                     res.redirect(`${getPublicUrl(req)}`);
@@ -137,7 +137,7 @@ class Oidc extends Authentication {
             });
         } catch (err) {
             this.log.warn(`Error when logging the user [${err.message}]`);
-            res.status(401).send(err.message);
+            res.status(401).json({ error: err.message });
         }
     }
 

@@ -518,7 +518,7 @@ async function refreshContainer(req, res) {
         const containerReport = await watcherInstance.watchContainer(liveContainer);
         return res.status(200).json(containerReport.container);
     } catch (error) {
-        console.error(`Error refreshing container ${name}:`, error);
+        console.error('Error refreshing container %s:', name, error);
         return res.status(500).json({ error: `Error refreshing container: ${error.message}` });
     }
 }

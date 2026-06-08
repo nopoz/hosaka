@@ -113,6 +113,9 @@ function getServerConfiguration() {
             origin: joi.string().default('*'),
             methods: joi.string().default('GET,HEAD,PUT,PATCH,POST,DELETE'),
         }).default({}),
+        cookie: joi.object({
+            secure: joi.boolean().default(false),
+        }).default({}),
         feature: joi.object({
             delete: joi.boolean().default(true),
         }).default({

@@ -7,7 +7,7 @@ const getmac = require('getmac').default;
 const store = require('../store');
 const registry = require('../registry');
 const log = require('../log');
-const { getVersion } = require('../configuration');
+const { getVersion, getServerConfiguration } = require('../configuration');
 
 const router = express.Router();
 
@@ -127,6 +127,16 @@ function logout(req, res) {
  * @returns {*}
  */
 function init(app) {
+    // Mark the session cookie as Secure when Hosaka serves TLS directly, or when
+    // explicitly opted in for a TLS-terminating reverse proxy (HOSAKA_SERVER_COOKIE_SECURE).
+    // In the proxy case, trust the proxy so X-Forwarded-Proto is honoured, otherwise
+    // a Secure cookie would never be set over the plain-HTTP hop to the proxy.
+    const serverConfiguration = getServerConfiguration();
+    const secureCookie = serverConfiguration.tls.enabled || serverConfiguration.cookie.secure;
+    if (serverConfiguration.cookie.secure && !serverConfiguration.tls.enabled) {
+        app.set('trust proxy', 1);
+    }
+
     // Init express session
     app.use(session({
         store: new LokiStore({
@@ -138,6 +148,7 @@ function init(app) {
         saveUninitialized: false,
         cookie: {
             httpOnly: true,
+            secure: secureCookie,
             maxAge: getCookieMaxAge(7),
         },
     }));
