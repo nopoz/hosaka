@@ -514,6 +514,44 @@ test('addImageDetailsToContainer should support transforms', async () => {
     });
 });
 
+test('addImageDetailsToContainer should map trigger include/exclude labels', async () => {
+    storeContainer.getContainer = () => (undefined);
+    docker.dockerApi = {
+        getContainer: () => ({
+            inspect: () => ({ State: { Status: 'running' } }),
+        }),
+        getImage: () => ({
+            inspect: () => ({
+                Id: 'image-123456789',
+                Architecture: 'arch',
+                Os: 'os',
+            }),
+        }),
+    };
+    const container = {
+        Id: 'container-123456789',
+        Image: 'organization/image:version',
+        Names: ['/test'],
+        Labels: {},
+    };
+
+    const containerWithImage = await docker.addImageDetailsToContainer(
+        container,
+        undefined, // includeTags
+        undefined, // excludeTags
+        undefined, // transformTags
+        undefined, // linkTemplate
+        undefined, // displayName
+        undefined, // displayIcon
+        'trigger.smtp.main', // triggerInclude
+        'trigger.discord.x:minor', // triggerExclude
+    );
+    expect(containerWithImage).toMatchObject({
+        triggerInclude: 'trigger.smtp.main',
+        triggerExclude: 'trigger.discord.x:minor',
+    });
+});
+
 test('watchContainer should return container report when found', async () => {
     storeContainer.getContainer = () => (undefined);
     storeContainer.insertContainer = (container) => (container);

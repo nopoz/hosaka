@@ -15,6 +15,8 @@ const {
     hosakaLinkTemplate,
     hosakaDisplayName,
     hosakaDisplayIcon,
+    hosakaTriggerInclude,
+    hosakaTriggerExclude,
 } = require('./label');
 const storeContainer = require('../../../store/container');
 const log = require('../../../log');
@@ -179,7 +181,7 @@ function getRegistry(registryName) {
  * @param {Object} newLive - the freshly built live container (mutated in place)
  */
 function carryUpdateState(oldRow, newLive) {
-    const metadataFields = ['includeTags', 'excludeTags', 'transformTags', 'linkTemplate'];
+    const metadataFields = ['includeTags', 'excludeTags', 'transformTags', 'linkTemplate', 'triggerInclude', 'triggerExclude'];
     metadataFields.forEach((field) => {
         if ((newLive[field] === undefined || newLive[field] === null)
             && oldRow[field] !== undefined && oldRow[field] !== null) {
@@ -673,6 +675,8 @@ async watchContainer(container, skipRegistryCheck = false) {
                 container.Labels[hosakaLinkTemplate],
                 container.Labels[hosakaDisplayName],
                 container.Labels[hosakaDisplayIcon],
+                container.Labels[hosakaTriggerInclude],
+                container.Labels[hosakaTriggerExclude],
             ));
         let containersWithImage = await Promise.all(containerPromises);
 
@@ -810,6 +814,8 @@ async watchContainer(container, skipRegistryCheck = false) {
         linkTemplate,
         displayName,
         displayIcon,
+        triggerInclude,
+        triggerExclude,
     ) {
         const containerId = container.Id;
 
@@ -896,6 +902,8 @@ async watchContainer(container, skipRegistryCheck = false) {
             linkTemplate,
             displayName,
             displayIcon,
+            triggerInclude,
+            triggerExclude,
             compose_project: projectLabel,
             image: {
                 id: imageId,
