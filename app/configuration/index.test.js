@@ -81,6 +81,7 @@ test('getStoreConfiguration should return configured store', () => {
 test('getServerConfiguration should return configured api (new vars)', () => {
     configuration.hosakaEnvVars.HOSAKA_SERVER_PORT = '4000';
     expect(configuration.getServerConfiguration()).toStrictEqual({
+        cookie: {},
         cors: {},
         enabled: true,
         feature: {
