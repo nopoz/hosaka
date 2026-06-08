@@ -1,0 +1,38 @@
+# gitleaks configuration for Hosaka.
+#
+# Extends the default ruleset (all stock rules stay active) and allowlists the
+# handful of known-fake example secrets that are committed in the docs (registry
+# and auth config snippets). These are placeholder values, not real
+# credentials: they decode to obvious fakes such as "username:password" and
+# "johndoe:...".
+#
+# Why a value-based allowlist instead of only .gitleaksignore: the ignore file
+# pins findings to a specific <commit>:<file>:<rule>:<line> fingerprint, so any
+# edit that moves one of these example lines (e.g. a docs rebrand) gives it a
+# fresh fingerprint and the PR secret scan fails again. Matching on the value
+# keeps the allowlist stable across edits, while a genuinely new secret is still
+# flagged.
+#
+# gitleaks auto-detects this file at the repo root (both the PR diff scan in
+# ci.yml and the full-history scan in nightly-scan.yml), so no workflow wiring
+# is required. .gitleaksignore is retained for the historical fingerprint
+# baseline.
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Known fake example secrets committed in the docs"
+# Match anywhere on the line so the placeholder is allowlisted regardless of the
+# surrounding env-var name or quoting.
+regexTarget = "line"
+regexes = [
+  # docs/configuration/registries/quay/README.md - example Quay OAuth token
+  '''BA8JI3Y2BWQDH849RYT3YD5J0J6CYEORYTQMMJK364B4P88VPTJIAI704L0BBP8D6CYE4P88V''',
+  # docs/configuration/registries/hub/README.md - base64 of "johndoe:<fake-uuid>"
+  '''am9obmRvZToyYzFiZDg3Mi1lZmI2LTRmM2EtODFhYS03MjQ1MThhMGE1OTI=''',
+  # docs/configuration/registries/hub/README.md - example Docker Hub password (uuid)
+  '''fb4d5db9-e64d-3648-8846-74d0846e55de''',
+  # docs/api/registry.md - base64 of "username:password"
+  '''dXNlcm5hbWU6cGFzc3dvcmQ=''',
+]
