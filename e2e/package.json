@@ -7,7 +7,7 @@
     "lint": "eslint '**/*.js'",
     "cucumber": "cucumber-js **/*.feature"
   },
-  "author": "fmartinou",
+  "author": "nopoz",
   "repository": "nopoz/hosaka",
   "license": "MIT",
   "dependencies": {

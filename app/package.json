@@ -9,7 +9,7 @@
     "lint": "eslint '**/*.js'",
     "test": "jest --coverage"
   },
-  "author": "fmartinou",
+  "author": "nopoz",
   "repository": "nopoz/hosaka",
   "license": "MIT",
   "dependencies": {
