@@ -1,4 +1,4 @@
-# GHCR (Gitlab Container Registry)
+# GITLAB (Gitlab Container Registry)
 ![logo](gitlab.png)
 
 The `gitlab` registry lets you configure [GITLAB](https://docs.gitlab.com/ee/user/packages/container_registry/) integration.
@@ -7,9 +7,9 @@ The `gitlab` registry lets you configure [GITLAB](https://docs.gitlab.com/ee/use
 
 | Env var                       |   Required   | Description                    | Supported values                         | Default value when missing  |
 |-------------------------------|:------------:|--------------------------------| ---------------------------------------- |-----------------------------| 
-| `HOSAKA_REGISTRY_GITLAB_URL`     | :red_circle: | Gitlab Registry base url       |                                          | https://registry.gitlab.com |
-| `HOSAKA_REGISTRY_GITLAB_AUTHURL` | :red_circle: | Gitlab Authentication base url |                                          | https://gitlab.com          |
-| `HOSAKA_REGISTRY_GITLAB_TOKEN`   | :red_circle: | Gitlab Personal Access Token   |                                          |                             |
+| `HOSAKA_REGISTRY_GITLAB_URL`     | :white_circle: | Gitlab Registry base url       |                                          | https://registry.gitlab.com |
+| `HOSAKA_REGISTRY_GITLAB_AUTHURL` | :white_circle: | Gitlab Authentication base url |                                          | https://gitlab.com          |
+| `HOSAKA_REGISTRY_GITLAB_TOKEN`   | :red_circle:   | Gitlab Personal Access Token   |                                          |                             |
 
 ### Examples
 

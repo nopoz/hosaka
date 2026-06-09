@@ -8,11 +8,15 @@ Hosaka supports most registries:
 
 ?> [**ECR** (Amazon Elastic Container Registry)](configuration/registries/ecr/)
 
+?> [**FORGEJO** (Forgejo Container Registry)](configuration/registries/forgejo/)
+
 ?> [**GCR** (Google Container Registry)](configuration/registries/gcr/)
 
 ?> [**GHCR** (Github Container Registry)](configuration/registries/ghcr/)
 
-?> [**GITLAB (Gitlab Container Registry)**](configuration/registries/gitlab/)
+?> [**GITEA** (Gitea Container Registry)](configuration/registries/gitea/)
+
+?> [**GITLAB** (Gitlab Container Registry)](configuration/registries/gitlab/)
 
 ?> [**HUB** (Docker Hub)](configuration/registries/hub/)
 
