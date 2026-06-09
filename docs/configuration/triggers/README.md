@@ -44,8 +44,8 @@ All implemented triggers, in addition to their specific configuration, also supp
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
       - HOSAKA_TRIGGER_SMTP_GMAIL_SIMPLETITLE=Container $${name} can be updated
@@ -57,6 +57,6 @@ docker run \
   -e 'HOSAKA_TRIGGER_SMTP_GMAIL_SIMPLETITLE=Container ${name} can be updated' \
   -e 'HOSAKA_TRIGGER_SMTP_GMAIL_SIMPLEBODY=Container ${name} can be updated from version ${local} to version ${remote}'
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->

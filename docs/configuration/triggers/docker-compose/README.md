@@ -26,7 +26,7 @@ The trigger will:
 
 !> This trigger will only work with locally watched containers.
 
-!> Do not forget to mount the docker-compose.yml file in the wud container.
+!> Do not forget to mount the docker-compose.yml file in the Hosaka container.
 
 ### Examples
 
@@ -36,20 +36,20 @@ The trigger will:
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     volumes:
-    - /etc/my-services/docker-compose.yml:/wud/docker-compose.yml
+    - /etc/my-services/docker-compose.yml:/hosaka/docker-compose.yml
     environment:
-      - HOSAKA_TRIGGER_DOCKERCOMPOSE_EXAMPLE_FILE=/wud/docker-compose.yml
+      - HOSAKA_TRIGGER_DOCKERCOMPOSE_EXAMPLE_FILE=/hosaka/docker-compose.yml
 ```
 #### **Docker**
 ```bash
 docker run \
-  -v /etc/my-services/docker-compose.yml:/wud/docker-compose.yml
-  -e "HOSAKA_TRIGGER_DOCKERCOMPOSE_EXAMPLE_FILE=/wud/docker-compose.yml" \
+  -v /etc/my-services/docker-compose.yml:/hosaka/docker-compose.yml
+  -e "HOSAKA_TRIGGER_DOCKERCOMPOSE_EXAMPLE_FILE=/hosaka/docker-compose.yml" \
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->

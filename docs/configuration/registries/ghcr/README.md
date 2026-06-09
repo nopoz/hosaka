@@ -20,8 +20,8 @@ The `ghcr` registry lets you configure [GHCR](https://docs.github.com/en/package
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
       - HOSAKA_REGISTRY_GHCR=
@@ -31,7 +31,7 @@ services:
 docker run \
   -e HOSAKA_REGISTRY_GHCR= \
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->
 
@@ -43,8 +43,8 @@ docker run \
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
       - HOSAKA_REGISTRY_GHCR_USERNAME=john@doe
@@ -56,7 +56,7 @@ docker run \
   -e HOSAKA_REGISTRY_GHCR_USERNAME="john@doe" \
   -e HOSAKA_REGISTRY_GHCR_TOKEN="xxxxx" \
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->
 
@@ -65,7 +65,7 @@ docker run \
 [Click here](https://github.com/settings/tokens)
 
 #### Click on `Generate new token`
-Choose an expiration time & appropriate scopes (`read:packages` is only needed for wud) and generate.
+Choose an expiration time & appropriate scopes (`read:packages` is only needed for Hosaka) and generate.
 ![image](ghcr_01.png)
 
 #### Copy the token & use it as the HOSAKA_REGISTRY_GHCR_TOKEN value

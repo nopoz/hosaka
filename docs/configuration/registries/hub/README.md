@@ -8,7 +8,7 @@ Currently, the supported credentials are:
 - Docker Base64 credentials (like in [.docker/config.json](https://docs.docker.com/engine/reference/commandline/auth/))
 - Docker Hub auth + Docker Hub password (not recommended)
 
-!> By default, if you don't configure any registries, WUD will configure a default one with anonymous access. \
+!> By default, if you don't configure any registries, Hosaka will configure a default one with anonymous access. \
 Don't forget to configure authentication if you're using [Docker Hub Private Repositories](https://docs.docker.com/docker-hub/repos/#private-repositories).
 
 ### Variables
@@ -29,8 +29,8 @@ Don't forget to configure authentication if you're using [Docker Hub Private Rep
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
       - HOSAKA_REGISTRY_HUB=
@@ -40,7 +40,7 @@ services:
 docker run \
   -e HOSAKA_REGISTRY_HUB= \
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->
 
@@ -61,8 +61,8 @@ docker run \
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
       - HOSAKA_REGISTRY_HUB_LOGIN=mylogin
@@ -74,7 +74,7 @@ docker run \
   -e HOSAKA_REGISTRY_HUB_LOGIN="mylogin"
   -e HOSAKA_REGISTRY_HUB_PASSWORD="fb4d5db9-e64d-3648-8846-74d0846e55de"
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->
 
@@ -97,8 +97,8 @@ For example,
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
       - HOSAKA_REGISTRY_HUB_AUTH=am9obmRvZToyYzFiZDg3Mi1lZmI2LTRmM2EtODFhYS03MjQ1MThhMGE1OTI=
@@ -108,6 +108,6 @@ services:
 docker run \
   -e HOSAKA_REGISTRY_HUB_AUTH="am9obmRvZToyYzFiZDg3Mi1lZmI2LTRmM2EtODFhYS03MjQ1MThhMGE1OTI="
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->

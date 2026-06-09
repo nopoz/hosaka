@@ -27,8 +27,8 @@ The `smtp` trigger lets you send emails with smtp.
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
         - HOSAKA_TRIGGER_SMTP_GMAIL_HOST=smtp.gmail.com
@@ -51,7 +51,7 @@ docker run \
     -e HOSAKA_TRIGGER_SMTP_GMAIL_TO="jane.doe@gmail.com" \
     -e HOSAKA_TRIGGER_SMTP_GMAIL_TLS_ENABLED="true" \
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->
 

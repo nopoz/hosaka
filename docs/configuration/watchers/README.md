@@ -16,11 +16,11 @@ The ```docker``` watcher lets you configure the Docker hosts you want to watch.
 | `HOSAKA_WATCHER_{watcher_name}_CERTFILE`                     | :white_circle: | Certificate pem file path (only for TLS connection)             |                                                |                                                                 |
 | `HOSAKA_WATCHER_{watcher_name}_KEYFILE`                      | :white_circle: | Key pem file path (only for TLS connection)                     |                                                |                                                                 |
 | `HOSAKA_WATCHER_{watcher_name}_CRON`                         | :white_circle: | Scheduling options                                              | [Valid CRON expression](https://crontab.guru/) | `0 * * * *` (every hour)                                        |
-| `HOSAKA_WATCHER_{watcher_name}_WATCHBYDEFAULT`               | :white_circle: | If WUD must monitor all containers by default                   | `true`, `false`                                | `true`                                                          |
-| `HOSAKA_WATCHER_{watcher_name}_WATCHALL`                     | :white_circle: | If WUD must monitor all containers instead of just running ones | `true`, `false`                                | `false`                                                         |
-| `HOSAKA_WATCHER_{watcher_name}_WATCHEVENTS`                  | :white_circle: | If WUD must monitor docker events                               | `true`, `false`                                | `true`                                                          |
-| `HOSAKA_WATCHER_{watcher_name}_WATCHATSTART`                 | :white_circle: | If WUD must check for image updates during startup              | `true`, `false`                                | `true`                                                          |
-| ~~`HOSAKA_WATCHER_{watcher_name}_WATCHDIGEST`~~ (deprecated) | :white_circle: | If WUD must monitor container digests                           |                                                | `false` for semver image tags, `true` for non semver image tags |
+| `HOSAKA_WATCHER_{watcher_name}_WATCHBYDEFAULT`               | :white_circle: | If Hosaka must monitor all containers by default                   | `true`, `false`                                | `true`                                                          |
+| `HOSAKA_WATCHER_{watcher_name}_WATCHALL`                     | :white_circle: | If Hosaka must monitor all containers instead of just running ones | `true`, `false`                                | `false`                                                         |
+| `HOSAKA_WATCHER_{watcher_name}_WATCHEVENTS`                  | :white_circle: | If Hosaka must monitor docker events                               | `true`, `false`                                | `true`                                                          |
+| `HOSAKA_WATCHER_{watcher_name}_WATCHATSTART`                 | :white_circle: | If Hosaka must check for image updates during startup              | `true`, `false`                                | `true`                                                          |
+| ~~`HOSAKA_WATCHER_{watcher_name}_WATCHDIGEST`~~ (deprecated) | :white_circle: | If Hosaka must monitor container digests                           |                                                | `false` for semver image tags, `true` for non semver image tags |
 
 ?> If no watcher is configured, a default one named `local` will be automatically created (reading the Docker socket).
 
@@ -29,7 +29,7 @@ You just need to give them different names.
 
 !> Socket configuration and host/port configuration are mutually exclusive.
 
-!> If socket configuration is used, don't forget to mount the Docker socket on your WUD container.
+!> If socket configuration is used, don't forget to mount the Docker socket on your Hosaka container.
 
 !> If host/port configuration is used, don't forget to enable the Docker remote API. \
 [See dockerd documentation](https://docs.docker.com/engine/reference/commandline/dockerd/#description)
@@ -38,7 +38,7 @@ You just need to give them different names.
 [See dockerd documentation](https://docs.docker.com/engine/security/protect-access/#use-tls-https-to-protect-the-docker-daemon-socket)
 
 !> Watching image digests causes an extensive usage of _Docker Registry Pull API_ which is restricted by [**Quotas on the Docker Hub**](https://docs.docker.com/docker-hub/download-rate-limit/). \
-By default, WUD enables it only for **non semver** image tags. \
+By default, Hosaka enables it only for **non semver** image tags. \
 You can tune this behavior per container using the `hosaka.watch.digest` label. \
 If you face [quota related errors](https://docs.docker.com/docker-hub/download-rate-limit/#how-do-i-know-my-pull-requests-are-being-limited), consider slowing down the watcher rate by adjusting the `HOSAKA_WATCHER_{watcher_name}_CRON` variable.
 
@@ -52,8 +52,8 @@ If you face [quota related errors](https://docs.docker.com/docker-hub/download-r
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
         - HOSAKA_WATCHER_LOCAL_CRON=0 1 * * *
@@ -64,7 +64,7 @@ services:
 docker run \
     -e HOSAKA_WATCHER_LOCAL_CRON="0 1 * * *" \
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->
 
@@ -76,8 +76,8 @@ docker run \
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
         - HOSAKA_WATCHER_LOCAL_WATCHALL=true
@@ -88,7 +88,7 @@ services:
 docker run \
     -e HOSAKA_WATCHER_LOCAL_WATCHALL="true" \
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->
 
@@ -100,8 +100,8 @@ docker run \
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
         - HOSAKA_WATCHER_MYREMOTEHOST_HOST=myremotehost 
@@ -112,7 +112,7 @@ services:
 docker run \
     -e HOSAKA_WATCHER_MYREMOTEHOST_HOST="myremotehost" \
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->
 
@@ -124,8 +124,8 @@ docker run \
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
         - HOSAKA_WATCHER_MYREMOTEHOST_HOST=myremotehost
@@ -151,7 +151,7 @@ docker run \
     -v /my-host/my-certs/ca.pem:/certs/cert.pem:ro \
     -v /my-host/my-certs/ca.pem:/certs/key.pem:ro \
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->
 
@@ -165,8 +165,8 @@ docker run \
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
         -  HOSAKA_WATCHER_LOCAL_SOCKET=/var/run/docker.sock
@@ -181,13 +181,13 @@ docker run \
     -e  HOSAKA_WATCHER_MYREMOTEHOST1_HOST="myremotehost1" \
     -e  HOSAKA_WATCHER_MYREMOTEHOST2_HOST="myremotehost2" \
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->
 
 ## Labels
 
-To fine-tune the behaviour of WUD _per container_, you can add labels on them.
+To fine-tune the behaviour of Hosaka _per container_, you can add labels on them.
 
 | Label               |    Required    | Description                                        | Supported values                                                                                                                                                            | Default value when missing                                                            |
 |---------------------|:--------------:|----------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------|
@@ -203,15 +203,15 @@ To fine-tune the behaviour of WUD _per container_, you can add labels on them.
 ## Label examples
 
 ### Include specific containers to watch
-Configure WUD to disable WATCHBYDEFAULT feature.
+Configure Hosaka to disable WATCHBYDEFAULT feature.
 <!-- tabs:start -->
 #### **Docker Compose**
 ```yaml
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
       - HOSAKA_WATCHER_LOCAL_WATCHBYDEFAULT=false
@@ -222,7 +222,7 @@ services:
 docker run \
     -e HOSAKA_WATCHER_LOCAL_WATCHBYDEFAULT="false" \
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->
 
@@ -296,7 +296,7 @@ docker run -d --name mariadb --label 'hosaka.tag.include=^\d+\.\d+\.\d+$' mariad
 In certain cases, tag values are so badly formatted that the resolution algorithm cannot find any valid update candidates or, worst, find bad positive matches.
 
 For example, you can encounter such an issue if you need to deal with tags looking like `1.0.0-99-7b368146`, `1.0.0-273-21d7efa6`...  
-By default, WUD will report bad positive matches because of the `sha-1` part at the end of the tag value (`-7b368146`...).  
+By default, Hosaka will report bad positive matches because of the `sha-1` part at the end of the tag value (`-7b368146`...).  
 That's a shame because `1.0.0-99` and `1.0.0-273` would have been valid semver values (`$major.$minor.$patch-$prerelease`).
 
 You can get around this issue by providing a function that keeps only the part you are interested in.  

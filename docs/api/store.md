@@ -5,7 +5,7 @@ This API allows to query the configuration of the Store.
 This operation lets you get the state of the Store.
 
 ```bash
-curl http://wud:3000/api/store
+curl http://hosaka:3000/api/store
 
 {
    "configuration":{

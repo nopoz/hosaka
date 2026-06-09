@@ -21,8 +21,8 @@ The `gitlab` registry lets you configure [GITLAB](https://docs.gitlab.com/ee/use
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
       - HOSAKA_REGISTRY_GITLAB_TOKEN=xxxxx 
@@ -32,7 +32,7 @@ services:
 docker run \
   -e HOSAKA_REGISTRY_GITLAB_TOKEN="xxxxx" \
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->
 
@@ -44,8 +44,8 @@ docker run \
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
       - HOSAKA_REGISTRY_GITLAB_URL=https://registry.mygitlab.acme.com
@@ -59,7 +59,7 @@ docker run \
   -e HOSAKA_REGISTRY_GITLAB_AUTHURL="https://mygitlab.acme.com"
   -e HOSAKA_REGISTRY_GITLAB_TOKEN="xxxxx" \
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->
 
@@ -68,7 +68,7 @@ docker run \
 [Click here](https://gitlab.com/-/profile/personal_access_tokens)
 
 #### Enter the details of the token to be created
-Choose an expiration time & appropriate scopes (`read_registry` is only needed for wud) and generate.
+Choose an expiration time & appropriate scopes (`read_registry` is only needed for Hosaka) and generate.
 ![image](gitlab_01.png)
 
 #### Copy the token & use it as the HOSAKA_REGISTRY_GITLAB_TOKEN value

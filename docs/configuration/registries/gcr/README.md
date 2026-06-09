@@ -19,8 +19,8 @@ The `gcr` registry lets you configure [GCR](https://cloud.google.com/container-r
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
       - HOSAKA_REGISTRY_GCR=
@@ -30,7 +30,7 @@ services:
 docker run \
   -e HOSAKA_REGISTRY_GCR="" \
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->
 
@@ -41,8 +41,8 @@ docker run \
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
       - HOSAKA_REGISTRY_GCR_CLIENTEMAIL=johndoe@mysuperproject.iam.gserviceaccount.com
@@ -54,7 +54,7 @@ docker run \
   -e HOSAKA_REGISTRY_GCR_CLIENTEMAIL="johndoe@mysuperproject.iam.gserviceaccount.com" \
   -e HOSAKA_REGISTRY_GCR_PRIVATEKEY="-----BEGIN PRIVATE KEY-----xxxxxxxxxxx\n-----END PRIVATE KEY-----\n" \
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->
 
@@ -78,4 +78,4 @@ docker run \
 #### 6. Download the keyfile JSON file and store it securely
 ![image](gcr_06.png)
 
-#### 7. Open the JSON file, get the client_email and private_key values and configure WUD with them.
+#### 7. Open the JSON file, get the client_email and private_key values and configure Hosaka with them.

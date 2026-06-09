@@ -21,8 +21,8 @@ The `telegram` trigger lets you send realtime notifications using [Telegram](htt
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
       - HOSAKA_TRIGGER_TELEGRAM_1_BOTTOKEN=your-telegram-bot-token
@@ -35,7 +35,7 @@ docker run \
   -e HOSAKA_TRIGGER_TELEGRAM_1_BOTTOKEN="your-telegram-bot-token" \
   -e HOSAKA_TRIGGER_TELEGRAM_1_CHATID="9876543210" \
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->
 

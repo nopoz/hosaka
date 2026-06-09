@@ -8,7 +8,7 @@ This API allows to query the state of the registries.
 This operation lets you get all the configured registries.
 
 ```bash
-curl http://wud:3000/api/registries
+curl http://hosaka:3000/api/registries
 
 [
     {
@@ -36,7 +36,7 @@ curl http://wud:3000/api/registries
 This operation lets you get a specific Registry.
 
 ```bash
-curl http://wud:3000/api/registries/hub
+curl http://hosaka:3000/api/registries/hub
 
 {
     "id": "hub",

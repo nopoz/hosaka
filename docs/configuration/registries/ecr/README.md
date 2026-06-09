@@ -20,8 +20,8 @@ The `ecr` registry lets you configure [ECR](https://aws.amazon.com/ecr/) integra
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
       - HOSAKA_REGISTRY_ECR_ACCESSKEYID=xxx
@@ -35,7 +35,7 @@ docker run \
   -e HOSAKA_REGISTRY_ECR_SECRETACCESSKEY="xxx" \
   -e HOSAKA_REGISTRY_ECR_REGION="eu-west-1" \
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->
 
@@ -47,5 +47,5 @@ docker run \
 #### 2. Attach the AmazonEC2ContainerRegistryReadOnly policy to the user
 ![image](ecr_02.png)
 
-#### 3. Get your AccessKeyId and your Secret Access Key and configure WUD with them
+#### 3. Get your AccessKeyId and your Secret Access Key and configure Hosaka with them
 ![image](ecr_03.png)

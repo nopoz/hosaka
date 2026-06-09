@@ -18,8 +18,8 @@ The `acr`registry lets you configure [ACR](https://azure.microsoft.com/services/
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
       - HOSAKA_REGISTRY_ACR_CLIENTID=7c0195aa-112d-4ac3-be24-6664a13f3d2b
@@ -31,7 +31,7 @@ docker run \
   -e HOSAKA_REGISTRY_ACR_CLIENTID=7c0195aa-112d-4ac3-be24-6664a13f3d2b \
   -e HOSAKA_REGISTRY_ACR_CLIENTSECRET=your-azure-client-secret \
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->
 

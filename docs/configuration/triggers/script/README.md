@@ -11,7 +11,7 @@ Parameters passed to the script in this order are:
 2. image name
 3. current version
 4. upgrade version
-5. WUD watcher name
+5. Hosaka watcher name
 6. compose project name
 
 For example, `/script/myscript.sh 'my plex container' 'plex' '1.0.0' '2.0.0' 'local' 'plex compose project'`
@@ -57,7 +57,7 @@ ghcr.io/nopoz/hosaka:latest
 ```
 <!-- tabs:end -->
 
-#### Example of parameters passed to script - container name, container image name, current version, upgrade version, WUD watcher name, compose project name
+#### Example of parameters passed to script - container name, container image name, current version, upgrade version, Hosaka watcher name, compose project name
 ```bash
 /scripts/myscript.sh 'my plex container' 'plex' '1.0.0' '2.0.0' 'local' 'plex compose project'
 ```

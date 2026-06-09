@@ -1,15 +1,13 @@
 # Introduction
 
-![Docker pulls](https://img.shields.io/docker/pulls/getwud/wud)
-![License](https://img.shields.io/github/license/getwud/wud)
-![Travis](https://img.shields.io/travis/getwud/wud/main)
-![Maintainability](https://img.shields.io/codeclimate/maintainability/getwud/wud)
-![Coverage](https://img.shields.io/codeclimate/coverage/getwud/wud)
+[![CI](https://github.com/nopoz/hosaka/actions/workflows/ci.yml/badge.svg)](https://github.com/nopoz/hosaka/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/nopoz/hosaka?sort=semver)](https://github.com/nopoz/hosaka/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/nopoz/hosaka/blob/main/LICENSE)
 
-## What's up Docker? <small>(aka **WUD**)</small>
+## Hosaka
 Gets you notified when new versions of your Docker containers are available and lets you react the way you want.
 
-#### WUD is built on 3 concepts:
+#### Hosaka is built on 3 concepts:
 
 > `WATCHERS` query your Docker hosts to get the containers to watch
 
@@ -52,10 +50,8 @@ Gets you notified when new versions of your Docker containers are available and 
 
 
 ## Contact & Support
-- Create a [GitHub issue](https://github.com/getwud/wud/issues) for bug reports, feature requests, or questions
-- Add a ⭐️ [star on GitHub](https://github.com/getwud/wud) or [Buy me coffee](https://www.buymeacoffee.com/61rUNMm)&nbsp;to support the project!
-
-<a href="https://www.buymeacoffee.com/61rUNMm" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" ></a>
+- Create a [GitHub issue](https://github.com/nopoz/hosaka/issues) for bug reports, feature requests, or questions
+- Add a star on [GitHub](https://github.com/nopoz/hosaka) to support the project!
 
 ## License
-This project is licensed under the [MIT license](https://github.com/getwud/wud/blob/main/LICENSE).
+This project is licensed under the [MIT license](https://github.com/nopoz/hosaka/blob/main/LICENSE).

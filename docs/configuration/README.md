@@ -1,5 +1,5 @@
 # Configuration
-WUD is relying on **Environment Variables** and **[Docker labels](https://docs.docker.com/config/labels-custom-metadata/)** to configure all the components.
+Hosaka is relying on **Environment Variables** and **[Docker labels](https://docs.docker.com/config/labels-custom-metadata/)** to configure all the components.
 
 Please find below the documentation for each of them:
 > [**Authentication**](/configuration/authentications/)
@@ -62,13 +62,13 @@ services:
       - 'hosaka.tag.include=latest'
       - 'hosaka.watch.digest=true'
 
-  # Wud self tracking :)
-  whatsupdocker:
-    image: getwud/wud:5.1.0
-    container_name: wud
+  # Hosaka self tracking :)
+  hosaka:
+    image: ghcr.io/nopoz/hosaka:5.1.0
+    container_name: hosaka
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - /opt/wud/store:/store
+      - /opt/hosaka/store:/store
     healthcheck:
       test: wget --no-verbose --tries=1 --no-check-certificate --spider http://localhost:3000
       interval: 10s
@@ -77,7 +77,7 @@ services:
       start_period: 10s       
     labels:
       - 'hosaka.tag.include=^\d+\.\d+\.\d+$$'
-      - 'hosaka.link.template=https://github.com/getwud/wud/releases/tag/$${major}.$${minor}.$${patch}'
+      - 'hosaka.link.template=https://github.com/nopoz/hosaka/releases/tag/$${major}.$${minor}.$${patch}'
 ```
 
 ## Secret management
@@ -94,4 +94,4 @@ Then you need to reference this file by using the following env var
 HOSAKA_AUTH_BASIC_JOHN_HASH__FILE=/tmp/john_hash
 ```
 
-?> This feature can be used for any WUD env var (no restrictions).
+?> This feature can be used for any Hosaka env var (no restrictions).

@@ -8,7 +8,7 @@ The `ifttt` trigger lets you send container update notifications to Ifttt via th
 | Env var                                  | Required       | Description     | Supported values | Default value when missing |
 | ---------------------------------------- |:--------------:| --------------- | ---------------- | -------------------------- | 
 | `HOSAKA_TRIGGER_IFTTT_{trigger_name}_KEY`   | :red_circle:   | The Webhook key |                  |                            |
-| `HOSAKA_TRIGGER_IFTTT_{trigger_name}_EVENT` | :white_circle: | The event name  |                  | `wud-image`.               |
+| `HOSAKA_TRIGGER_IFTTT_{trigger_name}_EVENT` | :white_circle: | The event name  |                  | `hosaka-image`.            |
 
 ?> This trigger also supports the [common configuration variables](configuration/triggers/?id=common-trigger-configuration).
 
@@ -30,8 +30,8 @@ On Webhook call, Ifttt captures the following ingredients:
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
       - HOSAKA_TRIGGER_IFTTT_PROD_KEY=*******************************************
@@ -42,12 +42,12 @@ services:
 docker run \
   -e HOSAKA_TRIGGER_IFTTT_PROD_KEY="*******************************************" \
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->
 
 #### Ifttt captured ingredients
-- EventName: `wud-container`
+- EventName: `hosaka-container`
 - OccuredAt: `August 30, 2019 at 06:51PM`
 - Value1: `homeassistant`
 - Value2: `2021.6.5`
@@ -78,7 +78,7 @@ And copy the key from the URL
 #### Select the 'Receive a web request' trigger
 ![image](ifttt_request_trigger.png)
 
-#### Enter the trigger event name (wud-container by default)
+#### Enter the trigger event name (hosaka-container by default)
 ![image](ifttt_event.png)
 
 #### Define the 'then that' action

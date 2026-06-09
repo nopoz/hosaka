@@ -1,15 +1,12 @@
 {
-  "name": "wud-doc",
+  "name": "hosaka-doc",
   "version": "1.0.0",
-  "description": "What'up Docker? the doc",
+  "description": "Hosaka documentation",
   "main": "index.js",
   "scripts": {
-    "doc": "docsify serve"
+    "doc": "npx docsify-cli@latest serve docs"
   },
-  "author": "fmartinou",
-  "repository": "getwud/wud",
-  "license": "MIT",
-  "devDependencies": {
-    "docsify-cli": "4.4.4"
-  }
+  "author": "nopoz",
+  "repository": "nopoz/hosaka",
+  "license": "MIT"
 }

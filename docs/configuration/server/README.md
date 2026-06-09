@@ -26,8 +26,8 @@ You can adjust the server configuration with the following environment variables
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
       - HOSAKA_SERVER_ENABLED=false
@@ -37,7 +37,7 @@ services:
 docker run \
   -e HOSAKA_SERVER_ENABLED=false \
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->
 
@@ -49,8 +49,8 @@ docker run \
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
       - HOSAKA_SERVER_PORT=8080
@@ -60,7 +60,7 @@ services:
 docker run \
   -e HOSAKA_SERVER_PORT=8080 \
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->
 
@@ -72,21 +72,21 @@ docker run \
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
       - HOSAKA_SERVER_TLS_ENABLED=true
-      - HOSAKA_SERVER_TLS_KEY=/wud_certs/server.key
-      - HOSAKA_SERVER_TLS_CERT=/wud_certs/server.crt
+      - HOSAKA_SERVER_TLS_KEY=/hosaka_certs/server.key
+      - HOSAKA_SERVER_TLS_CERT=/hosaka_certs/server.crt
 ```
 #### **Docker**
 ```bash
 docker run \
   -e "HOSAKA_SERVER_TLS_ENABLED=true" \
-  -e "HOSAKA_SERVER_TLS_KEY=/wud_certs/server.key" \
-  -e "HOSAKA_SERVER_TLS_CERT=/wud_certs/server.crt" \
+  -e "HOSAKA_SERVER_TLS_KEY=/hosaka_certs/server.key" \
+  -e "HOSAKA_SERVER_TLS_CERT=/hosaka_certs/server.crt" \
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->

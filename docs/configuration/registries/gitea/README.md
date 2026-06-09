@@ -20,8 +20,8 @@ The `gitea` registry lets you configure a self-hosted [Gitea](https://gitea.com)
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
       - HOSAKA_REGISTRY_GITEA_URL=https://gitea.acme.com
@@ -35,6 +35,6 @@ docker run \
   -e "HOSAKA_REGISTRY_GITEA_LOGIN=john" \
   -e "HOSAKA_REGISTRY_GITEA_PASSWORD=doe" \
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->

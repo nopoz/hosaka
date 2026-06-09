@@ -19,15 +19,15 @@ You can adjust the log level with env var HOSAKA_LOG_LEVEL.
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
       - HOSAKA_LOG_LEVEL=debug
 ```
 #### **Docker**
 ```bash
-docker run -e HOSAKA_LOG_LEVEL=debug ... getwud/wud
+docker run -e HOSAKA_LOG_LEVEL=debug ... ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->
 
@@ -36,7 +36,7 @@ docker run -e HOSAKA_LOG_LEVEL=debug ... getwud/wud
 <!-- tabs:start -->
 #### **Docker**
 ```bash
-docker run -e HOSAKA_LOG_FORMAT=json ... getwud/wud
+docker run -e HOSAKA_LOG_FORMAT=json ... ghcr.io/nopoz/hosaka
 ```
 
 #### **Docker Compose**
@@ -44,8 +44,8 @@ docker run -e HOSAKA_LOG_FORMAT=json ... getwud/wud
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
       - HOSAKA_LOG_FORMAT=json

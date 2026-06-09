@@ -1,6 +1,6 @@
 # Registries
 
-WUD supports most registries:
+Hosaka supports most registries:
 
 ?> [**ACR** (Azure Container Registry)](configuration/registries/acr/)
 
@@ -20,7 +20,7 @@ WUD supports most registries:
 
 ?> [**Quay**](configuration/registries/quay/)
 
-!> By default, without any further configuration, WUD is handling _out-of-the-box_ public images hosted on \
+!> By default, without any further configuration, Hosaka is handling _out-of-the-box_ public images hosted on \
 ECR (public.ecr.aws) \
 GCR \
 GHCR \
