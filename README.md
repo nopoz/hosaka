@@ -141,7 +141,7 @@ marked done until the new container comes back healthy.
 - Health-aware progress: the run streams to the UI line by line and waits for the
   container to come back healthy on the new image before reporting success
 - Reference stack in [`docker-compose.example.yml`](docker-compose.example.yml);
-  details in the [Portainer update script docs](docs/configuration/triggers/script/portainer.md)
+  details in the [Portainer update script docs](https://nopoz.github.io/hosaka/#/configuration/triggers/script/portainer)
 
 **Built to run in your stack**
 - Web UI and a full REST API
@@ -176,7 +176,23 @@ The UI is now at [http://localhost:3000](http://localhost:3000).
 
 For a hardened setup (read-only Docker socket proxy, plus watcher, registry, and
 trigger config), copy [`docker-compose.example.yml`](docker-compose.example.yml)
-and adjust it. Full configuration reference lives in [`docs/`](docs/).
+and adjust it. Full configuration reference lives in the
+[documentation](https://nopoz.github.io/hosaka/).
+
+## Documentation
+
+Full docs are published at **[nopoz.github.io/hosaka](https://nopoz.github.io/hosaka/)**.
+
+- [Quick start](https://nopoz.github.io/hosaka/#/quickstart/)
+- [How it works](https://nopoz.github.io/hosaka/#/how-it-works/)
+- [Configuration](https://nopoz.github.io/hosaka/#/configuration/)
+  - [Watchers](https://nopoz.github.io/hosaka/#/configuration/watchers/)
+  - [Registries](https://nopoz.github.io/hosaka/#/configuration/registries/)
+  - [Triggers](https://nopoz.github.io/hosaka/#/configuration/triggers/)
+  - [Authentication](https://nopoz.github.io/hosaka/#/configuration/authentications/)
+- [UI](https://nopoz.github.io/hosaka/#/ui/)
+- [REST API](https://nopoz.github.io/hosaka/#/api/)
+- [Monitoring](https://nopoz.github.io/hosaka/#/monitoring/)
 
 ## Triggers
 - Send notifications using [**SMTP**](https://en.wikipedia.org/wiki/Simple_Mail_Transfer_Protocol), [**Apprise**](https://github.com/caronc/apprise-api), [**IFTTT**](https://ifttt.com), [**Pushover**](https://pushover.net), [**Slack**](https://slack.com), [**Telegram**](https://telegram.org/), and [**Discord**](https://discord.com/)
