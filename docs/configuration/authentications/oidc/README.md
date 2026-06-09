@@ -153,16 +153,16 @@ services:
     image: ghcr.io/nopoz/hosaka
     ...
     environment:
-      - HOSAKA_AUTH_OIDC_AUTHENTIK_CLIENTID=<paste the Client ID from authentik wud_oidc provider>
-      - HOSAKA_AUTH_OIDC_AUTHENTIK_CLIENTSECRET=<paste the Client Secret from authentik wud_oidc provider>
+      - HOSAKA_AUTH_OIDC_AUTHENTIK_CLIENTID=<paste the Client ID from authentik hosaka_oidc provider>
+      - HOSAKA_AUTH_OIDC_AUTHENTIK_CLIENTSECRET=<paste the Client Secret from authentik hosaka_oidc provider>
       - HOSAKA_AUTH_OIDC_AUTHENTIK_DISCOVERY=<authentik_url>/application/o/<authentik_application_name>/.well-known/openid-configuration
       - HOSAKA_AUTH_OIDC_AUTHENTIK_REDIRECT=true # optional (to skip internal login page)
 ```
 #### **Docker**
 ```bash
 docker run \
-  -e HOSAKA_AUTH_OIDC_AUTHENTIK_CLIENTID="<paste the Client ID from authentik wud_oidc provider>" \
-  -e HOSAKA_AUTH_OIDC_AUTHENTIK_CLIENTSECRET="<paste the Client Secret from authentik wud_oidc provider>" \
+  -e HOSAKA_AUTH_OIDC_AUTHENTIK_CLIENTID="<paste the Client ID from authentik hosaka_oidc provider>" \
+  -e HOSAKA_AUTH_OIDC_AUTHENTIK_CLIENTSECRET="<paste the Client Secret from authentik hosaka_oidc provider>" \
   -e HOSAKA_AUTH_OIDC_AUTHENTIK_DISCOVERY="<authentik_url>/application/o/<authentik_application_name>/.well-known/openid-configuration" \
   -e HOSAKA_AUTH_OIDC_AUTHENTIK_REDIRECT=true # optional (to skip internal login page) \  
   ...
