@@ -140,7 +140,7 @@ marked done until the new container comes back healthy.
   Update button does the rest
 - Health-aware progress: the run streams to the UI line by line and waits for the
   container to come back healthy on the new image before reporting success
-- Reference stack in [`docker-compose.portainer.example.yml`](docker-compose.portainer.example.yml);
+- Reference stack in [`docker-compose.example.yml`](docker-compose.example.yml);
   details in the [Portainer update script docs](docs/configuration/triggers/script/portainer.md)
 
 **Built to run in your stack**
