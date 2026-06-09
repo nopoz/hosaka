@@ -7,23 +7,23 @@ The `mqtt` trigger lets you send container update notifications to an MQTT broke
 
 | Env var                                                  | Required       | Description                                                                                         | Supported values                    | Default value when missing |
 |----------------------------------------------------------|:--------------:|-----------------------------------------------------------------------------------------------------|-------------------------------------|----------------------------| 
-| `WUD_TRIGGER_MQTT_{trigger_name}_URL`                    | :red_circle:   | The URL of the MQTT broker                                                                          | Valid mqtt, mqtts, tcp, ws, wss url |                            |
-| `WUD_TRIGGER_MQTT_{trigger_name}_USER`                   | :white_circle: | The username if broker authentication is enabled                                                    |                                     |                            |
-| `WUD_TRIGGER_MQTT_{trigger_name}_PASSWORD`               | :white_circle: | The password if broker authentication is enabled                                                    |                                     |                            |
-| `WUD_TRIGGER_MQTT_{trigger_name}_CLIENTID`               | :white_circle: | The Mqtt client Id to use                                                                           |                                     | `wud_$random`              |
-| `WUD_TRIGGER_MQTT_{trigger_name}_TOPIC`                  | :white_circle: | The base topic where the updates are published to                                                   |                                     | `wud/container`            |
-| `WUD_TRIGGER_MQTT_{trigger_name}_HASS_ENABLED`           | :white_circle: | Enable [Home-assistant](https://www.home-assistant.io/) integration and deliver additional topics   | `true`, `false`                     | `false`                    |
-| `WUD_TRIGGER_MQTT_{trigger_name}_HASS_DISCOVERY`         | :white_circle: | Enable [Home-assistant](https://www.home-assistant.io/) integration including discovery             | `true`, `false`                     | `false`                    |
-| `WUD_TRIGGER_MQTT_{trigger_name}_HASS_PREFIX`            | :white_circle: | Base topic for hass entity discovery                                                                |                                     | `homeassistant`            |
-| `WUD_TRIGGER_MQTT_{trigger_name}_TLS_CACHAIN`            | :white_circle: | The path to the file containing the server CA chain (when TLS with a private Certificate Authority) | Any valid file path                 |                            |
-| `WUD_TRIGGER_MQTT_{trigger_name}_TLS_CLIENTCERT`         | :white_circle: | The path to the file containing the client public certificate (when TLS mutual authzentication)     | Any valid file path                 |                            |
-| `WUD_TRIGGER_MQTT_{trigger_name}_TLS_CLIENTKEY`          | :white_circle: | The path to the file containing the client private key (when TLS mutual authzentication)            | Any valid file path                 |                            |
-| `WUD_TRIGGER_MQTT_{trigger_name}_TLS_REJECTUNAUTHORIZED` | :white_circle: | Accept or reject when the TLS server certificate cannot be trusted                                  | `true`, `false`                     | `true`                     |
+| `HOSAKA_TRIGGER_MQTT_{trigger_name}_URL`                    | :red_circle:   | The URL of the MQTT broker                                                                          | Valid mqtt, mqtts, tcp, ws, wss url |                            |
+| `HOSAKA_TRIGGER_MQTT_{trigger_name}_USER`                   | :white_circle: | The username if broker authentication is enabled                                                    |                                     |                            |
+| `HOSAKA_TRIGGER_MQTT_{trigger_name}_PASSWORD`               | :white_circle: | The password if broker authentication is enabled                                                    |                                     |                            |
+| `HOSAKA_TRIGGER_MQTT_{trigger_name}_CLIENTID`               | :white_circle: | The Mqtt client Id to use                                                                           |                                     | `wud_$random`              |
+| `HOSAKA_TRIGGER_MQTT_{trigger_name}_TOPIC`                  | :white_circle: | The base topic where the updates are published to                                                   |                                     | `wud/container`            |
+| `HOSAKA_TRIGGER_MQTT_{trigger_name}_HASS_ENABLED`           | :white_circle: | Enable [Home-assistant](https://www.home-assistant.io/) integration and deliver additional topics   | `true`, `false`                     | `false`                    |
+| `HOSAKA_TRIGGER_MQTT_{trigger_name}_HASS_DISCOVERY`         | :white_circle: | Enable [Home-assistant](https://www.home-assistant.io/) integration including discovery             | `true`, `false`                     | `false`                    |
+| `HOSAKA_TRIGGER_MQTT_{trigger_name}_HASS_PREFIX`            | :white_circle: | Base topic for hass entity discovery                                                                |                                     | `homeassistant`            |
+| `HOSAKA_TRIGGER_MQTT_{trigger_name}_TLS_CACHAIN`            | :white_circle: | The path to the file containing the server CA chain (when TLS with a private Certificate Authority) | Any valid file path                 |                            |
+| `HOSAKA_TRIGGER_MQTT_{trigger_name}_TLS_CLIENTCERT`         | :white_circle: | The path to the file containing the client public certificate (when TLS mutual authzentication)     | Any valid file path                 |                            |
+| `HOSAKA_TRIGGER_MQTT_{trigger_name}_TLS_CLIENTKEY`          | :white_circle: | The path to the file containing the client private key (when TLS mutual authzentication)            | Any valid file path                 |                            |
+| `HOSAKA_TRIGGER_MQTT_{trigger_name}_TLS_REJECTUNAUTHORIZED` | :white_circle: | Accept or reject when the TLS server certificate cannot be trusted                                  | `true`, `false`                     | `true`                     |
 
 ?> This trigger also supports the [common configuration variables](configuration/triggers/?id=common-trigger-configuration). but only supports the `simple` mode.
 
 ?> You want to customize the name & icon of the Home-Assistant entity? \
-[Use the `wud.display.name` and `wud.display.icon` labels](configuration/watchers/?id=labels).
+[Use the `hosaka.display.name` and `hosaka.display.icon` labels](configuration/watchers/?id=labels).
 
 ### Examples
 
@@ -39,13 +39,13 @@ services:
     image: getwud/wud
     ...
     environment:
-      - WUD_TRIGGER_MQTT_MOSQUITTO_URL=mqtt://localhost:1883
+      - HOSAKA_TRIGGER_MQTT_MOSQUITTO_URL=mqtt://localhost:1883
 ```
 
 #### **Docker**
 ```bash
 docker run \
-    -e WUD_TRIGGER_MQTT_MOSQUITTO_URL="mqtt://localhost:1883" \
+    -e HOSAKA_TRIGGER_MQTT_MOSQUITTO_URL="mqtt://localhost:1883" \
   ...
   getwud/wud
 ```
@@ -63,10 +63,10 @@ services:
     image: getwud/wud
     ...
     environment:
-      - WUD_TRIGGER_MQTT_MOSQUITTO_URL=mqtts://localhost:8883
-      - WUD_TRIGGER_MQTT_MOSQUITTO_TLS_CLIENTKEY=/wud/mqtt/client-key.pem
-      - WUD_TRIGGER_MQTT_MOSQUITTO_TLS_CLIENTCERT=/wud/mqtt/client-cert.pem
-      - WUD_TRIGGER_MQTT_MOSQUITTO_TLS_CACHAIN=/wud/mqtt/ca.pem
+      - HOSAKA_TRIGGER_MQTT_MOSQUITTO_URL=mqtts://localhost:8883
+      - HOSAKA_TRIGGER_MQTT_MOSQUITTO_TLS_CLIENTKEY=/wud/mqtt/client-key.pem
+      - HOSAKA_TRIGGER_MQTT_MOSQUITTO_TLS_CLIENTCERT=/wud/mqtt/client-cert.pem
+      - HOSAKA_TRIGGER_MQTT_MOSQUITTO_TLS_CACHAIN=/wud/mqtt/ca.pem
     volumes:
       - /mosquitto/tls/client/client-key.pem:/wud/mqtt/client-key.pem
       - /mosquitto/tls/client/client-cert.pem:/wud/mqtt/client-cert.pem
@@ -76,10 +76,10 @@ services:
 #### **Docker**
 ```bash
 docker run \
-    -e WUD_TRIGGER_MQTT_MOSQUITTO_URL="mqtts://localhost:8883" \
-    -e WUD_TRIGGER_MQTT_MOSQUITTO_TLS_CLIENTKEY="/wud/mqtt/client-key.pem" \
-    -e WUD_TRIGGER_MQTT_MOSQUITTO_TLS_CLIENTCERT="/wud/mqtt/client-cert.pem" \
-    -e WUD_TRIGGER_MQTT_MOSQUITTO_TLS_CACHAIN="/wud/mqtt/ca.pem" \
+    -e HOSAKA_TRIGGER_MQTT_MOSQUITTO_URL="mqtts://localhost:8883" \
+    -e HOSAKA_TRIGGER_MQTT_MOSQUITTO_TLS_CLIENTKEY="/wud/mqtt/client-key.pem" \
+    -e HOSAKA_TRIGGER_MQTT_MOSQUITTO_TLS_CLIENTCERT="/wud/mqtt/client-cert.pem" \
+    -e HOSAKA_TRIGGER_MQTT_MOSQUITTO_TLS_CACHAIN="/wud/mqtt/ca.pem" \
   ...
   getwud/wud
 ```
@@ -97,19 +97,19 @@ services:
     image: getwud/wud
     ...
     environment:
-      - WUD_TRIGGER_MQTT_MAQIATTO_URL=tcp://maqiatto.com:1883
-      - WUD_TRIGGER_MQTT_MAQIATTO_USER=john@doe.com
-      - WUD_TRIGGER_MQTT_MAQIATTO_PASSWORD=mysecretpassword
-      - WUD_TRIGGER_MQTT_MAQIATTO_TOPIC=john@doe.com/wud/image
+      - HOSAKA_TRIGGER_MQTT_MAQIATTO_URL=tcp://maqiatto.com:1883
+      - HOSAKA_TRIGGER_MQTT_MAQIATTO_USER=john@doe.com
+      - HOSAKA_TRIGGER_MQTT_MAQIATTO_PASSWORD=mysecretpassword
+      - HOSAKA_TRIGGER_MQTT_MAQIATTO_TOPIC=john@doe.com/wud/image
 ```
 
 #### **Docker**
 ```bash
 docker run \
-    -e WUD_TRIGGER_MQTT_MAQIATTO_URL="tcp://maqiatto.com:1883" \
-    -e WUD_TRIGGER_MQTT_MAQIATTO_USER="john@doe.com" \
-    -e WUD_TRIGGER_MQTT_MAQIATTO_PASSWORD="mysecretpassword" \
-    -e WUD_TRIGGER_MQTT_MAQIATTO_TOPIC="john@doe.com/wud/image" \
+    -e HOSAKA_TRIGGER_MQTT_MAQIATTO_URL="tcp://maqiatto.com:1883" \
+    -e HOSAKA_TRIGGER_MQTT_MAQIATTO_USER="john@doe.com" \
+    -e HOSAKA_TRIGGER_MQTT_MAQIATTO_PASSWORD="mysecretpassword" \
+    -e HOSAKA_TRIGGER_MQTT_MAQIATTO_TOPIC="john@doe.com/wud/image" \
   ...
   getwud/wud
 ```
@@ -152,17 +152,17 @@ services:
     image: getwud/wud
     ...
     environment:
-      - WUD_TRIGGER_MQTT_MOSQUITTO_URL=mqtt://localhost:1883
-      - WUD_TRIGGER_MQTT_MOSQUITTO_HASS_ENABLED=true
-      - WUD_TRIGGER_MQTT_MOSQUITTO_HASS_DISCOVERY=true
+      - HOSAKA_TRIGGER_MQTT_MOSQUITTO_URL=mqtt://localhost:1883
+      - HOSAKA_TRIGGER_MQTT_MOSQUITTO_HASS_ENABLED=true
+      - HOSAKA_TRIGGER_MQTT_MOSQUITTO_HASS_DISCOVERY=true
 ```
 
 #### **Docker**
 ```bash
 docker run \
-    -e WUD_TRIGGER_MQTT_MOSQUITTO_URL="mqtt://localhost:1883" \
-    -e WUD_TRIGGER_MQTT_MOSQUITTO_HASS_ENABLED="true" \
-    -e WUD_TRIGGER_MQTT_MOSQUITTO_HASS_DISCOVERY="true" \
+    -e HOSAKA_TRIGGER_MQTT_MOSQUITTO_URL="mqtt://localhost:1883" \
+    -e HOSAKA_TRIGGER_MQTT_MOSQUITTO_HASS_ENABLED="true" \
+    -e HOSAKA_TRIGGER_MQTT_MOSQUITTO_HASS_DISCOVERY="true" \
   ...
   getwud/wud
 ```

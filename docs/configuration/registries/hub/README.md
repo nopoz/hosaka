@@ -15,10 +15,10 @@ Don't forget to configure authentication if you're using [Docker Hub Private Rep
 
 | Env var                     | Required       | Description                                                                   | Supported values                                  | Default value when missing |
 | --------------------------- |:--------------:| ----------------------------------------------------------------------------- | ------------------------------------------------- | -------------------------- | 
-| `WUD_REGISTRY_HUB_LOGIN`    | :white_circle: | A valid Docker Hub Login                                                      | WUD_REGISTRY_HUB_TOKEN must be defined            |                            |
-| `WUD_REGISTRY_HUB_PASSWORD` | :white_circle: | A valid Docker Hub Token                                                      | WUD_REGISTRY_HUB_LOGIN must be defined            |                            |
-| `WUD_REGISTRY_HUB_TOKEN`    | :white_circle: | A valid Docker Hub Token (deprecated; replaced by `WUD_REGISTRY_HUB_PASSWORD` | WUD_REGISTRY_HUB_LOGIN must be defined            |                            |
-| `WUD_REGISTRY_HUB_AUTH`     | :white_circle: | A valid Docker Hub Base64 Auth String                                         | WUD_REGISTRY_HUB_LOGIN/TOKEN  must not be defined |                            |
+| `HOSAKA_REGISTRY_HUB_LOGIN`    | :white_circle: | A valid Docker Hub Login                                                      | HOSAKA_REGISTRY_HUB_TOKEN must be defined            |                            |
+| `HOSAKA_REGISTRY_HUB_PASSWORD` | :white_circle: | A valid Docker Hub Token                                                      | HOSAKA_REGISTRY_HUB_LOGIN must be defined            |                            |
+| `HOSAKA_REGISTRY_HUB_TOKEN`    | :white_circle: | A valid Docker Hub Token (deprecated; replaced by `HOSAKA_REGISTRY_HUB_PASSWORD` | HOSAKA_REGISTRY_HUB_LOGIN must be defined            |                            |
+| `HOSAKA_REGISTRY_HUB_AUTH`     | :white_circle: | A valid Docker Hub Base64 Auth String                                         | HOSAKA_REGISTRY_HUB_LOGIN/TOKEN  must not be defined |                            |
 
 ### Examples
 
@@ -33,12 +33,12 @@ services:
     image: getwud/wud
     ...
     environment:
-      - WUD_REGISTRY_HUB=
+      - HOSAKA_REGISTRY_HUB=
 ```
 #### **Docker**
 ```bash
 docker run \
-  -e WUD_REGISTRY_HUB= \
+  -e HOSAKA_REGISTRY_HUB= \
   ...
   getwud/wud
 ```
@@ -51,7 +51,7 @@ docker run \
 
 ##### 2. Go to your&nbsp;[Security Settings](https://hub.docker.com/settings/security)
 - Create a new Access Token
-- Copy it and use it as the `WUD_REGISTRY_HUB_TOKEN` value
+- Copy it and use it as the `HOSAKA_REGISTRY_HUB_TOKEN` value
 
 ![image](hub_token.png)
 
@@ -65,14 +65,14 @@ services:
     image: getwud/wud
     ...
     environment:
-      - WUD_REGISTRY_HUB_LOGIN=mylogin
-      - WUD_REGISTRY_HUB_PASSWORD=fb4d5db9-e64d-3648-8846-74d0846e55de
+      - HOSAKA_REGISTRY_HUB_LOGIN=mylogin
+      - HOSAKA_REGISTRY_HUB_PASSWORD=fb4d5db9-e64d-3648-8846-74d0846e55de
 ```
 #### **Docker**
 ```bash
 docker run \
-  -e WUD_REGISTRY_HUB_LOGIN="mylogin"
-  -e WUD_REGISTRY_HUB_PASSWORD="fb4d5db9-e64d-3648-8846-74d0846e55de"
+  -e HOSAKA_REGISTRY_HUB_LOGIN="mylogin"
+  -e HOSAKA_REGISTRY_HUB_PASSWORD="fb4d5db9-e64d-3648-8846-74d0846e55de"
   ...
   getwud/wud
 ```
@@ -101,12 +101,12 @@ services:
     image: getwud/wud
     ...
     environment:
-      - WUD_REGISTRY_HUB_AUTH=am9obmRvZToyYzFiZDg3Mi1lZmI2LTRmM2EtODFhYS03MjQ1MThhMGE1OTI=
+      - HOSAKA_REGISTRY_HUB_AUTH=am9obmRvZToyYzFiZDg3Mi1lZmI2LTRmM2EtODFhYS03MjQ1MThhMGE1OTI=
 ```
 #### **Docker**
 ```bash
 docker run \
-  -e WUD_REGISTRY_HUB_AUTH="am9obmRvZToyYzFiZDg3Mi1lZmI2LTRmM2EtODFhYS03MjQ1MThhMGE1OTI="
+  -e HOSAKA_REGISTRY_HUB_AUTH="am9obmRvZToyYzFiZDg3Mi1lZmI2LTRmM2EtODFhYS03MjQ1MThhMGE1OTI="
   ...
   getwud/wud
 ```

@@ -7,8 +7,8 @@ The `gcr` registry lets you configure [GCR](https://cloud.google.com/container-r
 
 | Env var                        |    Required    | Description                                                       | Supported values                                                                                                     | Default value when missing |
 | ------------------------------ |:--------------:|-------------------------------------------------------------------| -------------------------------------------------------------------------------------------------------------------- | -------------------------- | 
-| `WUD_REGISTRY_GCR_CLIENTEMAIL` | :white_circle: | Service Account Client Email (required for private images access) | See [Service Account credentials](https://cloud.google.com/container-registry/docs/advanced-authentication#json-key) |                            |
-| `WUD_REGISTRY_GCR_PRIVATEKEY`  | :white_circle: | Service Account Private Key (required for private images access)  | See [Service Account credentials](https://cloud.google.com/container-registry/docs/advanced-authentication#json-key) |                            |
+| `HOSAKA_REGISTRY_GCR_CLIENTEMAIL` | :white_circle: | Service Account Client Email (required for private images access) | See [Service Account credentials](https://cloud.google.com/container-registry/docs/advanced-authentication#json-key) |                            |
+| `HOSAKA_REGISTRY_GCR_PRIVATEKEY`  | :white_circle: | Service Account Private Key (required for private images access)  | See [Service Account credentials](https://cloud.google.com/container-registry/docs/advanced-authentication#json-key) |                            |
 
 ### Examples
 
@@ -23,12 +23,12 @@ services:
     image: getwud/wud
     ...
     environment:
-      - WUD_REGISTRY_GCR=
+      - HOSAKA_REGISTRY_GCR=
 ```
 #### **Docker**
 ```bash
 docker run \
-  -e WUD_REGISTRY_GCR="" \
+  -e HOSAKA_REGISTRY_GCR="" \
   ...
   getwud/wud
 ```
@@ -45,14 +45,14 @@ services:
     image: getwud/wud
     ...
     environment:
-      - WUD_REGISTRY_GCR_CLIENTEMAIL=johndoe@mysuperproject.iam.gserviceaccount.com
-      - WUD_REGISTRY_GCR_PRIVATEKEY=-----BEGIN PRIVATE KEY-----xxxxxxxxxxx\n-----END PRIVATE KEY-----\n 
+      - HOSAKA_REGISTRY_GCR_CLIENTEMAIL=johndoe@mysuperproject.iam.gserviceaccount.com
+      - HOSAKA_REGISTRY_GCR_PRIVATEKEY=-----BEGIN PRIVATE KEY-----xxxxxxxxxxx\n-----END PRIVATE KEY-----\n 
 ```
 #### **Docker**
 ```bash
 docker run \
-  -e WUD_REGISTRY_GCR_CLIENTEMAIL="johndoe@mysuperproject.iam.gserviceaccount.com" \
-  -e WUD_REGISTRY_GCR_PRIVATEKEY="-----BEGIN PRIVATE KEY-----xxxxxxxxxxx\n-----END PRIVATE KEY-----\n" \
+  -e HOSAKA_REGISTRY_GCR_CLIENTEMAIL="johndoe@mysuperproject.iam.gserviceaccount.com" \
+  -e HOSAKA_REGISTRY_GCR_PRIVATEKEY="-----BEGIN PRIVATE KEY-----xxxxxxxxxxx\n-----END PRIVATE KEY-----\n" \
   ...
   getwud/wud
 ```

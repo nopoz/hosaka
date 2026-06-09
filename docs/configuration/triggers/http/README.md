@@ -6,14 +6,14 @@ The `http` trigger lets you send container update notifications via HTTP.
 
 | Env var                                         |    Required    | Description                                       | Supported values             | Default value when missing |
 |-------------------------------------------------|:--------------:|---------------------------------------------------|------------------------------|----------------------------| 
-| `WUD_TRIGGER_HTTP_{trigger_name}_URL`           |  :red_circle:  | The URL of the webhook                            | Valid http or https endpoint |                            |
-| `WUD_TRIGGER_HTTP_{trigger_name}_METHOD`        | :white_circle: | The HTTP method to use                            | `GET`, `POST`                | `POST`                     |
-| `WUD_TRIGGER_HTTP_{trigger_name}_AUTH_TYPE`     | :white_circle: | The Auth type (among )                            | `BASIC`, `BEARER`            | `BASIC`                    |
-| `WUD_TRIGGER_HTTP_{trigger_name}_AUTH_USER`     | :white_circle: | The Auth user if BASIC Auth is enabled            |                              |                            |
-| `WUD_TRIGGER_HTTP_{trigger_name}_AUTH_PASSWORD` | :white_circle: | The Auth user password if `BASIC` Auth is enabled |                              |                            |
-| `WUD_TRIGGER_HTTP_{trigger_name}_AUTH_BEARER`   | :white_circle: | The Auth bearer token if `BEARER` Auth is enabled |                              |                            |
-| `WUD_TRIGGER_HTTP_{trigger_name}_PROXY`         | :white_circle: | The HTTP Proxy                                    |                              |                            |
-| `WUD_TRIGGER_HTTP_{trigger_name}_INSTALL`       | :white_circle: | Sets this HTTP trigger as an install type\*       | `true`, or `false`           | `false`                    |
+| `HOSAKA_TRIGGER_HTTP_{trigger_name}_URL`           |  :red_circle:  | The URL of the webhook                            | Valid http or https endpoint |                            |
+| `HOSAKA_TRIGGER_HTTP_{trigger_name}_METHOD`        | :white_circle: | The HTTP method to use                            | `GET`, `POST`                | `POST`                     |
+| `HOSAKA_TRIGGER_HTTP_{trigger_name}_AUTH_TYPE`     | :white_circle: | The Auth type (among )                            | `BASIC`, `BEARER`            | `BASIC`                    |
+| `HOSAKA_TRIGGER_HTTP_{trigger_name}_AUTH_USER`     | :white_circle: | The Auth user if BASIC Auth is enabled            |                              |                            |
+| `HOSAKA_TRIGGER_HTTP_{trigger_name}_AUTH_PASSWORD` | :white_circle: | The Auth user password if `BASIC` Auth is enabled |                              |                            |
+| `HOSAKA_TRIGGER_HTTP_{trigger_name}_AUTH_BEARER`   | :white_circle: | The Auth bearer token if `BEARER` Auth is enabled |                              |                            |
+| `HOSAKA_TRIGGER_HTTP_{trigger_name}_PROXY`         | :white_circle: | The HTTP Proxy                                    |                              |                            |
+| `HOSAKA_TRIGGER_HTTP_{trigger_name}_INSTALL`       | :white_circle: | Sets this HTTP trigger as an install type\*       | `true`, or `false`           | `false`                    |
 
 \* By setting the INSTALL variable to `true`, this trigger is only executed manually in the containers UI page by clicking the "Install" button next to the upgrade version. Typical scheduled watch triggers for this http trigger will not occur when INSTALL is `true`. Only one INSTALL variable can be set across all trigger types - if more than one is set the UI will throw an error and the trigger will not be executed. 
 
@@ -33,12 +33,12 @@ services:
     image: getwud/wud
     ...
     environment:
-      - WUD_TRIGGER_HTTP_MYREMOTEHOST_URL=https://my-remote-host/new-version
+      - HOSAKA_TRIGGER_HTTP_MYREMOTEHOST_URL=https://my-remote-host/new-version
 ```
 #### **Docker**
 ```bash
 docker run \
-  -e WUD_TRIGGER_HTTP_MYREMOTEHOST_URL="https://my-remote-host/new-version" \
+  -e HOSAKA_TRIGGER_HTTP_MYREMOTEHOST_URL="https://my-remote-host/new-version" \
   ...
   getwud/wud
 ```

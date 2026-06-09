@@ -10,7 +10,7 @@ curl http://wud:3000/api/store
 {
    "configuration":{
       "path":".store",
-      "file":"wud.json"
+      "file":"hosaka.json"
    }
 }
 ```

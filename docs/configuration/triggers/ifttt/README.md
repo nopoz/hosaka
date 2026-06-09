@@ -7,8 +7,8 @@ The `ifttt` trigger lets you send container update notifications to Ifttt via th
 
 | Env var                                  | Required       | Description     | Supported values | Default value when missing |
 | ---------------------------------------- |:--------------:| --------------- | ---------------- | -------------------------- | 
-| `WUD_TRIGGER_IFTTT_{trigger_name}_KEY`   | :red_circle:   | The Webhook key |                  |                            |
-| `WUD_TRIGGER_IFTTT_{trigger_name}_EVENT` | :white_circle: | The event name  |                  | `wud-image`.               |
+| `HOSAKA_TRIGGER_IFTTT_{trigger_name}_KEY`   | :red_circle:   | The Webhook key |                  |                            |
+| `HOSAKA_TRIGGER_IFTTT_{trigger_name}_EVENT` | :white_circle: | The event name  |                  | `wud-image`.               |
 
 ?> This trigger also supports the [common configuration variables](configuration/triggers/?id=common-trigger-configuration).
 
@@ -34,13 +34,13 @@ services:
     image: getwud/wud
     ...
     environment:
-      - WUD_TRIGGER_IFTTT_PROD_KEY=*******************************************
+      - HOSAKA_TRIGGER_IFTTT_PROD_KEY=*******************************************
 ```
 
 #### **Docker**
 ```bash
 docker run \
-  -e WUD_TRIGGER_IFTTT_PROD_KEY="*******************************************" \
+  -e HOSAKA_TRIGGER_IFTTT_PROD_KEY="*******************************************" \
   ...
   getwud/wud
 ```
