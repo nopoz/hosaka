@@ -1,10 +1,26 @@
 # Reference docker-compose for Hosaka.
-# Watches a Docker host for container image updates and triggers notify/update
-# actions. Copy to docker-compose.yml (kept untracked), adjust the env vars and
-# labels, then `docker compose up -d`. Full config reference: see the docs/ dir.
 #
-# This stack talks to Docker through a read-only socket proxy rather than
-# mounting the socket directly into Hosaka. Every HOSAKA_* value below is an example.
+# Hosaka watches a Docker host for container image updates and fires triggers
+# (notify or auto-update) when a newer tag/digest is available.
+#
+# This single file is the full reference: the active (uncommented) settings are a
+# sensible, secure starting stack; everything else is commented out and grouped by
+# topic so you can enable what you need without hunting through the docs. Copy it to
+# docker-compose.yml (kept untracked), adjust, then `docker compose up -d`.
+#
+# Conventions
+#   - Every value is an EXAMPLE. Replace placeholders before use.
+#   - Var naming: HOSAKA_<SECTION>_<INSTANCE>_<FIELD>, uppercase, underscores.
+#     Config-path dots become underscores (wud.watcher.local.cron ->
+#     HOSAKA_WATCHER_LOCAL_CRON). <INSTANCE> is a name you pick; declare several to
+#     run multiple watchers/registries/triggers (e.g. _LOCAL_ and _REMOTE_).
+#   - Secrets: append __FILE to any var to read its value from a file (Docker
+#     secrets), e.g. HOSAKA_REGISTRY_HUB_DEFAULT_TOKEN__FILE=/run/secrets/hub.
+#   - Full reference: see the docs/ dir.
+#
+# By default this stack talks to Docker through a read-only socket proxy instead of
+# mounting the socket directly into Hosaka. The proxy only exposes the read
+# endpoints Hosaka needs.
 
 services:
   hosaka:
@@ -15,30 +31,206 @@ services:
       dockerproxy:
         condition: service_healthy
     environment:
+      # ── Core ────────────────────────────────────────────────────────────────
       - TZ=Etc/UTC
-      - HOSAKA_LOG_LEVEL=info            # error | info | debug | trace
+      - HOSAKA_LOG_LEVEL=info              # error | warn | info | debug | trace
+      # - HOSAKA_PUBLIC_URL=https://hosaka.example.com   # used to build ${link} in notifications
+
+      # ── One-click updates (Portainer) ───────────────────────────────────────
+      # This is on by default: it puts an "Update" button on every container in the
+      # UI. The bundled script (image: /scripts/portainer_stack_update.sh) rewrites
+      # the container's Portainer stack to the new tag and redeploys via the
+      # Portainer API. INSTALL=true is all the button needs.
+      #
+      # >>> To make the button actually WORK, set the two vars below. <<<
+      # Until you do, the button still shows; clicking it just reports a friendly
+      # "set PORTAINER_API_ENDPOINT / PORTAINER_API_KEY" error in the UI log. These
+      # are plain env vars read by the script (not HOSAKA_*).
+      - HOSAKA_TRIGGER_SCRIPT_PORTAINER_INSTALL=true
+      # - PORTAINER_API_ENDPOINT=https://portainer.example.com:9443/api   # must include /api
+      # - PORTAINER_API_KEY=ptr_xxxxxxxxxxxxxxxx                          # Portainer access token
+      # - UPDATE_TIMEOUT=300                                              # script: wait for healthy (s)
+      # - POLL_INTERVAL=5                                                 # script: health poll interval (s)
+      # - HOSAKA_TRIGGER_SCRIPT_PORTAINER_TIMEOUT=300000                  # hard kill the script after (ms)
+      # Only ONE trigger may have install=true, else the button is disabled.
+      # To turn the button off entirely, comment out the INSTALL line above.
+
+      # ── Server / API / UI ───────────────────────────────────────────────────
       - HOSAKA_SERVER_PORT=3000
+      # - HOSAKA_SERVER_ENABLED=true              # serve the API + UI (default true)
+      # - HOSAKA_SERVER_FEATURE_DELETE=true       # allow deleting containers from the UI/API
+      # - HOSAKA_SERVER_CORS_ENABLED=false        # enable CORS (default off)
+      # - HOSAKA_SERVER_CORS_ORIGIN=*
+      # - HOSAKA_SERVER_COOKIE_SECURE=false       # set true when served over HTTPS
+      # Terminate TLS in Hosaka itself (usually better to use a reverse proxy):
+      # - HOSAKA_SERVER_TLS_ENABLED=true
+      # - HOSAKA_SERVER_TLS_KEY=/certs/server.key
+      # - HOSAKA_SERVER_TLS_CERT=/certs/server.crt
 
-      # Watchers: where to look for running containers.
-      # The local watcher points at the socket proxy below. Add remote hosts by
-      # declaring extra watchers, e.g. HOSAKA_WATCHER_<NAME>_HOST.
-      - HOSAKA_WATCHER_LOCAL_HOST=dockerproxy
+      # ── Store (LokiJS state) ────────────────────────────────────────────────
+      # - HOSAKA_STORE_PATH=/store               # directory for the state DB (default /store)
+      # - HOSAKA_STORE_FILE=hosaka.json          # state DB filename
+
+      # ── Watcher: local Docker host (via the proxy below) ────────────────────
+      # Replace LOCAL with any name to define more watchers (e.g. _REMOTE_).
+      - HOSAKA_WATCHER_LOCAL_HOST=dockerproxy    # TCP host; when set, SOCKET is ignored
+      # - HOSAKA_WATCHER_LOCAL_PORT=2375         # TCP port (default 2375)
+      # - HOSAKA_WATCHER_LOCAL_SOCKET=/var/run/docker.sock  # used only when HOST is unset
+      # - HOSAKA_WATCHER_LOCAL_CRON=0 * * * *    # scan schedule (default hourly)
+      # - HOSAKA_WATCHER_LOCAL_WATCHBYDEFAULT=true   # watch every container unless labeled hosaka.watch=false
+      # - HOSAKA_WATCHER_LOCAL_WATCHALL=false        # also include stopped containers
+      # - HOSAKA_WATCHER_LOCAL_WATCHEVENTS=true      # react to Docker daemon events between scans
+      # - HOSAKA_WATCHER_LOCAL_WATCHATSTART=true     # run one scan immediately on startup
+      #
+      # Remote watcher over TCP/mTLS (own proxy or a TLS-secured daemon):
       # - HOSAKA_WATCHER_REMOTE_HOST=192.0.2.10
+      # - HOSAKA_WATCHER_REMOTE_PORT=2376
+      # - HOSAKA_WATCHER_REMOTE_CAFILE=/certs/ca.pem
+      # - HOSAKA_WATCHER_REMOTE_CERTFILE=/certs/cert.pem
+      # - HOSAKA_WATCHER_REMOTE_KEYFILE=/certs/key.pem
 
-      # Registries: credentials for private repositories (optional).
-      # - HOSAKA_REGISTRY_HUB_LOGIN=your-docker-hub-user
-      # - HOSAKA_REGISTRY_HUB_PASSWORD=your-docker-hub-token
+      # ── Registries: credentials for private/rate-limited repositories ───────
+      # Public images need none of this. ecr/gcr/ghcr/hub/quay are always available;
+      # set creds only where you pull from a private repo. Replace DEFAULT with any name.
+      #
+      # Docker Hub (raises anonymous pull rate limits; use a token, not your password):
+      # - HOSAKA_REGISTRY_HUB_DEFAULT_LOGIN=your-docker-hub-user
+      # - HOSAKA_REGISTRY_HUB_DEFAULT_TOKEN=dckr_pat_xxxxxxxx
+      #
+      # GitHub Container Registry (ghcr.io):
+      # - HOSAKA_REGISTRY_GHCR_DEFAULT_USERNAME=your-gh-user
+      # - HOSAKA_REGISTRY_GHCR_DEFAULT_TOKEN=ghp_xxxxxxxx
+      #
+      # AWS ECR (omit keys to use the instance IAM role):
+      # - HOSAKA_REGISTRY_ECR_DEFAULT_REGION=eu-west-1
+      # - HOSAKA_REGISTRY_ECR_DEFAULT_ACCESSKEYID=AKIA...
+      # - HOSAKA_REGISTRY_ECR_DEFAULT_SECRETACCESSKEY=xxxxxxxx
+      #
+      # Azure ACR:
+      # - HOSAKA_REGISTRY_ACR_DEFAULT_CLIENTID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+      # - HOSAKA_REGISTRY_ACR_DEFAULT_CLIENTSECRET=xxxxxxxx
+      #
+      # Google GCR (service account; omit to use Application Default Credentials):
+      # - HOSAKA_REGISTRY_GCR_DEFAULT_CLIENTEMAIL=sa@project.iam.gserviceaccount.com
+      # - HOSAKA_REGISTRY_GCR_DEFAULT_PRIVATEKEY=-----BEGIN PRIVATE KEY-----\n...
+      #
+      # GitLab Container Registry:
+      # - HOSAKA_REGISTRY_GITLAB_DEFAULT_TOKEN=glpat-xxxxxxxx
+      # - HOSAKA_REGISTRY_GITLAB_DEFAULT_URL=https://registry.gitlab.com     # default
+      # - HOSAKA_REGISTRY_GITLAB_DEFAULT_AUTHURL=https://gitlab.com          # default
+      #
+      # Red Hat Quay:
+      # - HOSAKA_REGISTRY_QUAY_DEFAULT_NAMESPACE=your-namespace
+      # - HOSAKA_REGISTRY_QUAY_DEFAULT_ACCOUNT=your-robot-account
+      # - HOSAKA_REGISTRY_QUAY_DEFAULT_TOKEN=xxxxxxxx
+      #
+      # LinuxServer (lscr.io):
+      # - HOSAKA_REGISTRY_LSCR_DEFAULT_USERNAME=your-gh-user
+      # - HOSAKA_REGISTRY_LSCR_DEFAULT_TOKEN=ghp_xxxxxxxx
+      #
+      # Gitea / Forgejo (same fields; LOGIN+PASSWORD or base64 AUTH):
+      # - HOSAKA_REGISTRY_GITEA_DEFAULT_URL=https://gitea.example.com
+      # - HOSAKA_REGISTRY_GITEA_DEFAULT_LOGIN=your-user
+      # - HOSAKA_REGISTRY_GITEA_DEFAULT_PASSWORD=xxxxxxxx
+      # - HOSAKA_REGISTRY_FORGEJO_DEFAULT_URL=https://forgejo.example.com
+      # - HOSAKA_REGISTRY_FORGEJO_DEFAULT_LOGIN=your-user
+      # - HOSAKA_REGISTRY_FORGEJO_DEFAULT_PASSWORD=xxxxxxxx
+      #
+      # Generic self-hosted OCI registry (LOGIN+PASSWORD, or base64 AUTH, or empty for anonymous):
+      # - HOSAKA_REGISTRY_CUSTOM_MYREG_URL=https://registry.example.com
+      # - HOSAKA_REGISTRY_CUSTOM_MYREG_LOGIN=your-user
+      # - HOSAKA_REGISTRY_CUSTOM_MYREG_PASSWORD=xxxxxxxx
 
-      # Triggers: actions to run when an update is found (optional).
-      # - HOSAKA_TRIGGER_HTTP_EXAMPLE_URL=https://example.com/webhook
-      # - HOSAKA_TRIGGER_PUSHOVER_EXAMPLE_TOKEN=your-app-token
-      # - HOSAKA_TRIGGER_PUSHOVER_EXAMPLE_USER=your-user-key
+      # ── Triggers: what to do when an update is found ────────────────────────
+      # Replace the instance name (NOTIFY/UPDATE/...) freely. These base fields work
+      # on EVERY trigger below (shown once here):
+      # - HOSAKA_TRIGGER_<TYPE>_<NAME>_THRESHOLD=all   # all | major | minor | patch (semver gate)
+      # - HOSAKA_TRIGGER_<TYPE>_<NAME>_MODE=simple     # simple (per container) | batch (one digest)
+      # - HOSAKA_TRIGGER_<TYPE>_<NAME>_ONCE=true       # fire only on first detection per update
+      #
+      # Bundled Portainer one-click updater: configured in the "One-click updates"
+      # section near the top of this file (on by default).
+      #
+      # Docker auto-update (pull + recreate the container in place):
+      # - HOSAKA_TRIGGER_DOCKER_UPDATE_PRUNE=false    # remove the old image afterwards
+      # - HOSAKA_TRIGGER_DOCKER_UPDATE_DRYRUN=false    # log only, do not recreate
+      #
+      # docker-compose auto-update (rewrites a compose file then redeploys; always batch):
+      # - HOSAKA_TRIGGER_DOCKERCOMPOSE_UPDATE_FILE=/compose/docker-compose.yml
+      # - HOSAKA_TRIGGER_DOCKERCOMPOSE_UPDATE_BACKUP=true
+      # - HOSAKA_TRIGGER_DOCKERCOMPOSE_UPDATE_PRUNE=false
+      #
+      # Custom script of your own (receives name, image, current, target, watcher, project):
+      # - HOSAKA_TRIGGER_SCRIPT_MY_PATH=/scripts/update.sh
+      # - HOSAKA_TRIGGER_SCRIPT_MY_INSTALL=true
+      #
+      # HTTP webhook:
+      # - HOSAKA_TRIGGER_HTTP_NOTIFY_URL=https://example.com/webhook
+      # - HOSAKA_TRIGGER_HTTP_NOTIFY_METHOD=POST          # GET | POST
+      # - HOSAKA_TRIGGER_HTTP_NOTIFY_AUTH_TYPE=BEARER     # BASIC | BEARER
+      # - HOSAKA_TRIGGER_HTTP_NOTIFY_AUTH_BEARER=xxxxxxxx
+      # - HOSAKA_TRIGGER_HTTP_NOTIFY_AUTH_USER=user       # for BASIC
+      # - HOSAKA_TRIGGER_HTTP_NOTIFY_AUTH_PASSWORD=xxxxxxxx
+      #
+      # Email (SMTP):
+      # - HOSAKA_TRIGGER_SMTP_NOTIFY_HOST=smtp.example.com
+      # - HOSAKA_TRIGGER_SMTP_NOTIFY_PORT=587
+      # - HOSAKA_TRIGGER_SMTP_NOTIFY_USER=alerts@example.com
+      # - HOSAKA_TRIGGER_SMTP_NOTIFY_PASS=xxxxxxxx
+      # - HOSAKA_TRIGGER_SMTP_NOTIFY_FROM=alerts@example.com
+      # - HOSAKA_TRIGGER_SMTP_NOTIFY_TO=admin@example.com
+      # - HOSAKA_TRIGGER_SMTP_NOTIFY_TLS_ENABLED=true
+      #
+      # Discord:
+      # - HOSAKA_TRIGGER_DISCORD_NOTIFY_URL=https://discord.com/api/webhooks/xxx/yyy
+      #
+      # Slack:
+      # - HOSAKA_TRIGGER_SLACK_NOTIFY_TOKEN=xoxb-xxxxxxxx
+      # - HOSAKA_TRIGGER_SLACK_NOTIFY_CHANNEL=#updates
+      #
+      # Telegram:
+      # - HOSAKA_TRIGGER_TELEGRAM_NOTIFY_BOTTOKEN=123456:ABC-xxxxxxxx
+      # - HOSAKA_TRIGGER_TELEGRAM_NOTIFY_CHATID=-1001234567890
+      #
+      # Pushover:
+      # - HOSAKA_TRIGGER_PUSHOVER_NOTIFY_USER=xxxxxxxx
+      # - HOSAKA_TRIGGER_PUSHOVER_NOTIFY_TOKEN=xxxxxxxx
+      #
+      # Apprise API server (set exactly one of URLS or CONFIG):
+      # - HOSAKA_TRIGGER_APPRISE_NOTIFY_URL=http://apprise:8000
+      # - HOSAKA_TRIGGER_APPRISE_NOTIFY_URLS=tgram://bottoken/chatid
+      #
+      # IFTTT:
+      # - HOSAKA_TRIGGER_IFTTT_NOTIFY_KEY=xxxxxxxx
+      #
+      # MQTT (with optional Home Assistant discovery):
+      # - HOSAKA_TRIGGER_MQTT_HASS_URL=mqtt://mosquitto:1883
+      # - HOSAKA_TRIGGER_MQTT_HASS_TOPIC=hosaka/container
+      # - HOSAKA_TRIGGER_MQTT_HASS_USER=mqttuser
+      # - HOSAKA_TRIGGER_MQTT_HASS_PASSWORD=xxxxxxxx
+      # - HOSAKA_TRIGGER_MQTT_HASS_HASS_ENABLED=true
+      #
+      # Kafka:
+      # - HOSAKA_TRIGGER_KAFKA_NOTIFY_BROKERS=kafka1:9092,kafka2:9092
+      # - HOSAKA_TRIGGER_KAFKA_NOTIFY_TOPIC=hosaka-container
+      # - HOSAKA_TRIGGER_KAFKA_NOTIFY_SSL=false
+
+      # ── Authentication (anonymous by default; lock down before exposing) ────
+      # Basic auth (HASH is a bcrypt hash of the password):
+      # - HOSAKA_AUTH_BASIC_ADMIN_USER=admin
+      # - HOSAKA_AUTH_BASIC_ADMIN_HASH=$$2b$$10$$xxxxxxxxxxxxxxxxxxxxxx
+      #
+      # OpenID Connect (SSO):
+      # - HOSAKA_AUTH_OIDC_DEFAULT_DISCOVERY=https://sso.example.com/.well-known/openid-configuration
+      # - HOSAKA_AUTH_OIDC_DEFAULT_CLIENTID=hosaka
+      # - HOSAKA_AUTH_OIDC_DEFAULT_CLIENTSECRET=xxxxxxxx
+      # - HOSAKA_AUTH_OIDC_DEFAULT_REDIRECT=true     # auto-redirect straight to the IdP
     volumes:
-      - ./store:/store               # persisted container state (hosaka.json)
+      - ./store:/store                   # persisted container state (hosaka.json)
     ports:
       - 3000:3000
     labels:
-      hosaka.watch: false               # don't watch Hosaka itself
+      hosaka.watch: false                # don't watch Hosaka itself
     healthcheck:
       test: wget --spider http://127.0.0.1:3000/ || exit 1
       interval: 30s
@@ -52,9 +244,9 @@ services:
     container_name: hosaka_dockerproxy
     restart: unless-stopped
     environment:
-      - CONTAINERS=1                 # list/inspect containers
-      - IMAGES=1                     # inspect images (required by Hosaka)
-      - POST=0                       # read-only: block all write operations
+      - CONTAINERS=1                     # list/inspect containers
+      - IMAGES=1                         # inspect images (required by Hosaka)
+      - POST=0                           # read-only: block all write operations
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     healthcheck:

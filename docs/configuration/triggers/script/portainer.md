@@ -93,8 +93,8 @@ ghcr.io/nopoz/hosaka:latest
 ```
 <!-- tabs:end -->
 
-A full reference stack is provided at `docker-compose.portainer.example.yml` in
-the project root.
+A full reference stack is provided at `docker-compose.example.yml` in the project
+root (the Portainer script trigger is one of the documented sections there).
 
 ## Using your own script instead
 
