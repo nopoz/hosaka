@@ -189,16 +189,18 @@ docker run \
 
 To fine-tune the behaviour of Hosaka _per container_, you can add labels on them.
 
-| Label               |    Required    | Description                                        | Supported values                                                                                                                                                            | Default value when missing                                                            |
-|---------------------|:--------------:|----------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------|
-| `hosaka.watch`         | :white_circle: | Watch this container                               | Valid Boolean                                                                                                                                                               | `true` when `HOSAKA_WATCHER_{watcher_name}_WATCHBYDEFAULT` is `true` (`false` otherwise) |
-| `hosaka.watch.digest`  | :white_circle: | Watch this container digest                        | Valid Boolean                                                                                                                                                               | `false`                                                                               |
-| `hosaka.tag.include`   | :white_circle: | Regex to include specific tags only                | Valid JavaScript Regex                                                                                                                                                      |                                                                                       |
-| `hosaka.tag.exclude`   | :white_circle: | Regex to exclude specific tags                     | Valid JavaScript Regex                                                                                                                                                      |                                                                                       |
-| `hosaka.tag.transform` | :white_circle: | Transform function to apply to the tag             | `$valid_regex => $valid_string_with_placeholders` (see below)                                                                                                               |                                                                                       |
-| `hosaka.link.template` | :white_circle: | Browsable link associated to the container version | String template with placeholders `${raw}` `${major}` `${minor}` `${patch}` `${prerelease}`                                                                                 |                                                                                       |
-| `hosaka.display.name`  | :white_circle: | Custom display name for the container              | Valid String                                                                                                                                                                | Container name                                                                        |
-| `hosaka.display.icon`  | :white_circle: | Custom display icon for the container              | Valid [Material Design Icon](https://materialdesignicons.com/), [Fontawesome Icon](https://fontawesome.com/) or [Simple icon](https://simpleicons.org/) (see details below) | `mdi:docker`                                                                          |
+| Label                    |    Required    | Description                                        | Supported values                                                                                                                                                            | Default value when missing                                                            |
+|--------------------------|:--------------:|----------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------|
+| `hosaka.watch`           | :white_circle: | Watch this container                               | Valid Boolean                                                                                                                                                               | `true` when `HOSAKA_WATCHER_{watcher_name}_WATCHBYDEFAULT` is `true` (`false` otherwise) |
+| `hosaka.watch.digest`    | :white_circle: | Watch this container digest                        | Valid Boolean                                                                                                                                                               | `false`                                                                               |
+| `hosaka.tag.include`     | :white_circle: | Regex to include specific tags only                | Valid JavaScript Regex                                                                                                                                                      |                                                                                       |
+| `hosaka.tag.exclude`     | :white_circle: | Regex to exclude specific tags                     | Valid JavaScript Regex                                                                                                                                                      |                                                                                       |
+| `hosaka.tag.transform`   | :white_circle: | Transform function to apply to the tag             | `$valid_regex => $valid_string_with_placeholders` (see below)                                                                                                               |                                                                                       |
+| `hosaka.link.template`   | :white_circle: | Browsable link associated to the container version | String template with placeholders `${raw}` `${major}` `${minor}` `${patch}` `${prerelease}`                                                                                 |                                                                                       |
+| `hosaka.display.name`    | :white_circle: | Custom display name for the container              | Valid String                                                                                                                                                                | Container name                                                                        |
+| `hosaka.display.icon`    | :white_circle: | Custom display icon for the container              | Valid [Material Design Icon](https://materialdesignicons.com/), [Fontawesome Icon](https://fontawesome.com/) or [Simple icon](https://simpleicons.org/) (see details below) | `mdi:docker`                                                                          |
+| `hosaka.trigger.include` | :white_circle: | Triggers that may fire for this container          | Comma-separated trigger ids, each optionally suffixed with `:threshold` (see [Per-container trigger routing](#per-container-trigger-routing) below)                         | All configured triggers fire                                                          |
+| `hosaka.trigger.exclude` | :white_circle: | Triggers that must not fire for this container     | Comma-separated trigger ids, each optionally suffixed with `:threshold` (see [Per-container trigger routing](#per-container-trigger-routing) below)                         | No triggers excluded                                                                  |
 
 ## Label examples
 
@@ -427,3 +429,75 @@ services:
 docker run -d --name mariadb --label 'hosaka.display.name=Maria DB' --label 'hosaka.display.icon=mdi-database' mariadb:10
 ```
 <!-- tabs:end -->
+
+## Per-container trigger routing
+
+By default every configured trigger fires for every container that has an update.
+The `hosaka.trigger.include` and `hosaka.trigger.exclude` labels let you override
+that on a per-container basis.
+
+**Label values** are comma-separated trigger ids (the name you gave the trigger in
+its env var, lowercased). Each entry may optionally carry a per-entry threshold
+suffix of the form `id:threshold`.
+
+**Threshold vocabulary**
+
+| Value        | Fires when the semver diff is...          |
+|--------------|-------------------------------------------|
+| `all`        | Any change (default when omitted)         |
+| `major`      | Any change (same as `all`)                |
+| `minor`      | minor, patch, or prerelease (not major)   |
+| `patch`      | patch or prerelease (not major or minor)  |
+| `major-only` | major only (exact)                        |
+| `minor-only` | minor only (exact)                        |
+
+?> `minor` and `patch` are cumulative: each also fires on anything less severe (a `minor` threshold fires on minor, patch, and prerelease updates). `major` currently behaves the same as `all`. `major-only` and `minor-only` are exact matches.
+
+**Precedence:** `hosaka.trigger.include` is evaluated first. If set, only the
+listed triggers are eligible. `hosaka.trigger.exclude` is then evaluated against
+the remaining set and removes matching entries. A container with neither label
+fires all triggers as normal.
+
+### Examples
+
+#### Route a container to one trigger only
+```yaml
+labels:
+  - hosaka.trigger.include=notify
+```
+
+#### Route major updates to a pager trigger, minor/patch to a chat trigger
+```yaml
+labels:
+  - hosaka.trigger.include=pager:major-only,chat:minor
+```
+
+#### Exclude a noisy container from one trigger
+```yaml
+labels:
+  - hosaka.trigger.exclude=smtp
+```
+
+?> See [Triggers](configuration/triggers/) for the full trigger configuration reference.
+
+## Tag candidate filters
+
+Hosaka applies the following automatic filters to the tag list returned by the
+registry before comparing candidates to the running tag. These run in addition to
+any `hosaka.tag.include` / `hosaka.tag.exclude` regex you set on the container.
+
+- **`.sig` tags are always dropped.** Cosign signature tags (e.g. `1.2.3.sig`)
+  would otherwise coerce to a semver value and appear as bogus candidates.
+
+- **`sha`-prefixed tags are dropped** when `hosaka.tag.include` is not set on
+  the container. Content-addressed tags (e.g. `sha256-abc123`) are not version
+  candidates and would coerce to very high semver values if left in.
+
+- **Tag-prefix propagation** is applied when `hosaka.tag.include` is not set.
+  Candidates are limited to tags that share the non-numeric prefix of the
+  currently-running tag. For example, a container running `v1.2.3` will only be
+  offered `v*` candidates, not bare `1.3.0`. This prevents cross-stream updates
+  when an image publishes both prefixed and unprefixed variants.
+
+!> Setting `hosaka.tag.include` disables both the `sha`-prefix drop and the
+tag-prefix propagation, giving your regex full control over the candidate set.

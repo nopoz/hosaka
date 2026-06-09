@@ -35,6 +35,21 @@ All implemented triggers, in addition to their specific configuration, also supp
 
 ?> `HOSAKA_TRIGGER_{{trigger_type}}}_{trigger_name}_ONCE=false` can be useful when `HOSAKA_TRIGGER_{{trigger_type}}}_{trigger_name}_MODE=batch` to get a report with all pending updates.
 
+### Per-container trigger routing
+
+By default every configured trigger fires for every container that reports an
+update. You can override this on individual containers using Docker labels:
+
+- `hosaka.trigger.include` - comma-separated list of trigger ids that are
+  allowed to fire for the container. Only triggers in this list will run.
+- `hosaka.trigger.exclude` - comma-separated list of trigger ids that must not
+  fire for the container.
+
+Each entry in either label can carry an optional per-entry threshold suffix
+(`id:threshold`) so a single container can route major updates to one trigger
+and patch updates to another.
+
+?> See the [watcher label reference](configuration/watchers/) for the full threshold vocabulary and examples.
 
 ### Examples
 

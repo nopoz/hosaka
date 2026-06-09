@@ -6,6 +6,30 @@ The `script` trigger executes a local script file mounted inside the Hosaka cont
 > want one-click Portainer updates, see [Portainer update script](configuration/triggers/script/portainer.md)
 > - you do not need to set `PATH` or mount anything.
 
+## Notify mode vs install mode
+
+The script trigger operates in one of two modes depending on the `INSTALL` setting.
+
+**Notify mode** (`INSTALL=false`, the default): the script fires automatically
+on the normal watch schedule whenever an update is detected. Use this to send a
+notification, run a webhook, or do any automated action that does not require
+user confirmation.
+
+**Install mode** (`INSTALL=true`): the script is only executed when a user
+clicks the **Update** button in the container row. The scheduled watch still
+detects the update and shows the button, but the script itself does not run
+automatically. Only one install-mode trigger may exist across all trigger types;
+configuring more than one causes the UI to surface an error.
+
+## Live script output
+
+In install mode, the script's stdout and stderr are streamed line-by-line to the
+UI in real time over a Server-Sent Events connection. A console dialog opens
+automatically when the install starts and stays open until the script exits,
+letting you watch progress without polling.
+
+## Script parameters
+
 Parameters passed to the script in this order are:
 1. container name
 2. image name
@@ -20,13 +44,11 @@ Supported shells for scripts are `/bin/bash`, `/bin/ash`, and `/bin/sh`.
 
 #### Variables
 
-| Env var                                       |    Required    | Description                                                                   | Supported values             | Default value when missing |
-|-----------------------------------------------|:--------------:|-------------------------------------------------------------------------------|------------------------------|----------------------------|
-| `HOSAKA_TRIGGER_SCRIPT_{trigger_name}_PATH`      | :white_circle: | The absolute path with script file name. Omit to use the bundled Portainer script. | Any local path               | `/scripts/portainer_stack_update.sh` |
-| `HOSAKA_TRIGGER_SCRIPT_{trigger_name}_INSTALL`   | :white_circle: | If `true`, makes this a manual Update button trigger in the UI\*              | `true`, `false`              | `false`                    |
-| `HOSAKA_TRIGGER_SCRIPT_{trigger_name}_TIMEOUT`   | :white_circle: | The amount of time in milliseconds before considering the script timed out    | integer in ms                | `300000` (5 minutes)       |
-
-\* By setting the INSTALL variable to `true`, this trigger is only executed manually in the containers UI page by clicking the "Update" button next to the upgrade version. Typical scheduled watch triggers for this trigger will not occur when INSTALL is `true`. Only one INSTALL variable can be set across all trigger types - if more than one is set the UI will throw an error and the trigger will not be executed.
+| Env var                                          |    Required    | Description                                                                                  | Supported values             | Default value when missing           |
+|--------------------------------------------------|:--------------:|----------------------------------------------------------------------------------------------|------------------------------|--------------------------------------|
+| `HOSAKA_TRIGGER_SCRIPT_{trigger_name}_PATH`      | :white_circle: | Absolute path to the script file inside the container. Omit to use the bundled Portainer script. | Any local path               | `/scripts/portainer_stack_update.sh` |
+| `HOSAKA_TRIGGER_SCRIPT_{trigger_name}_INSTALL`   | :white_circle: | If `true`, switches to install mode (manual Update button only - see above)                  | `true`, `false`              | `false`                              |
+| `HOSAKA_TRIGGER_SCRIPT_{trigger_name}_TIMEOUT`   | :white_circle: | Milliseconds before the script execution is considered timed out                             | integer in ms                | `300000` (5 minutes)                 |
 
 ### Examples
 
