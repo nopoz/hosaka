@@ -31,8 +31,8 @@ The trigger will:
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
       - HOSAKA_TRIGGER_DOCKER_EXAMPLE_PRUNE=true
@@ -42,6 +42,6 @@ services:
 docker run \
   -e "HOSAKA_TRIGGER_DOCKER_EXAMPLE_PRUNE=true" \
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->

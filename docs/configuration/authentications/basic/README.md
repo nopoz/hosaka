@@ -1,6 +1,6 @@
 # Basic Authentication
 
-The `basic` authentication lets you protect WUD access using the [Http Basic auth standard](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication).
+The `basic` authentication lets you protect Hosaka access using the [Http Basic auth standard](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication).
 
 ### Variables
 
@@ -28,8 +28,8 @@ or escape them in Bash commands \
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
       - HOSAKA_AUTH_BASIC_JOHN_USER=john
@@ -49,7 +49,7 @@ docker run \
   -e HOSAKA_AUTH_BASIC_JANE_USER="bob" \
   -e HOSAKA_AUTH_BASIC_JANE_HASH='$apr1$aefKbZEa$ZSA5Y3zv9vDQOxr283NGx/' \    
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->
 

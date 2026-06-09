@@ -20,8 +20,8 @@ The `custom` registry lets you configure a self-hosted [Docker Registry](https:/
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
       - HOSAKA_REGISTRY_CUSTOM_URL=http://localhost:5000
@@ -31,7 +31,7 @@ services:
 docker run \
   -e "HOSAKA_REGISTRY_CUSTOM_URL=http://localhost:5000" \
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->
 
@@ -42,8 +42,8 @@ docker run \
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
       - HOSAKA_REGISTRY_CUSTOM_URL=http://localhost:5000
@@ -57,6 +57,6 @@ docker run \
   -e "HOSAKA_REGISTRY_CUSTOM_LOGIN=john" \
   -e "HOSAKA_REGISTRY_CUSTOM_PASSWORD=doe" \
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->

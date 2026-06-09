@@ -10,8 +10,8 @@ The `mqtt` trigger lets you send container update notifications to an MQTT broke
 | `HOSAKA_TRIGGER_MQTT_{trigger_name}_URL`                    | :red_circle:   | The URL of the MQTT broker                                                                          | Valid mqtt, mqtts, tcp, ws, wss url |                            |
 | `HOSAKA_TRIGGER_MQTT_{trigger_name}_USER`                   | :white_circle: | The username if broker authentication is enabled                                                    |                                     |                            |
 | `HOSAKA_TRIGGER_MQTT_{trigger_name}_PASSWORD`               | :white_circle: | The password if broker authentication is enabled                                                    |                                     |                            |
-| `HOSAKA_TRIGGER_MQTT_{trigger_name}_CLIENTID`               | :white_circle: | The Mqtt client Id to use                                                                           |                                     | `wud_$random`              |
-| `HOSAKA_TRIGGER_MQTT_{trigger_name}_TOPIC`                  | :white_circle: | The base topic where the updates are published to                                                   |                                     | `wud/container`            |
+| `HOSAKA_TRIGGER_MQTT_{trigger_name}_CLIENTID`               | :white_circle: | The Mqtt client Id to use                                                                           |                                     | `hosaka_$random`           |
+| `HOSAKA_TRIGGER_MQTT_{trigger_name}_TOPIC`                  | :white_circle: | The base topic where the updates are published to                                                   |                                     | `hosaka/container`         |
 | `HOSAKA_TRIGGER_MQTT_{trigger_name}_HASS_ENABLED`           | :white_circle: | Enable [Home-assistant](https://www.home-assistant.io/) integration and deliver additional topics   | `true`, `false`                     | `false`                    |
 | `HOSAKA_TRIGGER_MQTT_{trigger_name}_HASS_DISCOVERY`         | :white_circle: | Enable [Home-assistant](https://www.home-assistant.io/) integration including discovery             | `true`, `false`                     | `false`                    |
 | `HOSAKA_TRIGGER_MQTT_{trigger_name}_HASS_PREFIX`            | :white_circle: | Base topic for hass entity discovery                                                                |                                     | `homeassistant`            |
@@ -35,8 +35,8 @@ The `mqtt` trigger lets you send container update notifications to an MQTT broke
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
       - HOSAKA_TRIGGER_MQTT_MOSQUITTO_URL=mqtt://localhost:1883
@@ -47,7 +47,7 @@ services:
 docker run \
     -e HOSAKA_TRIGGER_MQTT_MOSQUITTO_URL="mqtt://localhost:1883" \
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->
 
@@ -59,29 +59,29 @@ docker run \
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
       - HOSAKA_TRIGGER_MQTT_MOSQUITTO_URL=mqtts://localhost:8883
-      - HOSAKA_TRIGGER_MQTT_MOSQUITTO_TLS_CLIENTKEY=/wud/mqtt/client-key.pem
-      - HOSAKA_TRIGGER_MQTT_MOSQUITTO_TLS_CLIENTCERT=/wud/mqtt/client-cert.pem
-      - HOSAKA_TRIGGER_MQTT_MOSQUITTO_TLS_CACHAIN=/wud/mqtt/ca.pem
+      - HOSAKA_TRIGGER_MQTT_MOSQUITTO_TLS_CLIENTKEY=/hosaka/mqtt/client-key.pem
+      - HOSAKA_TRIGGER_MQTT_MOSQUITTO_TLS_CLIENTCERT=/hosaka/mqtt/client-cert.pem
+      - HOSAKA_TRIGGER_MQTT_MOSQUITTO_TLS_CACHAIN=/hosaka/mqtt/ca.pem
     volumes:
-      - /mosquitto/tls/client/client-key.pem:/wud/mqtt/client-key.pem
-      - /mosquitto/tls/client/client-cert.pem:/wud/mqtt/client-cert.pem
-      - /mosquitto/tls/ca.pem:/wud/mqtt/ca.pem
+      - /mosquitto/tls/client/client-key.pem:/hosaka/mqtt/client-key.pem
+      - /mosquitto/tls/client/client-cert.pem:/hosaka/mqtt/client-cert.pem
+      - /mosquitto/tls/ca.pem:/hosaka/mqtt/ca.pem
 ```
 
 #### **Docker**
 ```bash
 docker run \
     -e HOSAKA_TRIGGER_MQTT_MOSQUITTO_URL="mqtts://localhost:8883" \
-    -e HOSAKA_TRIGGER_MQTT_MOSQUITTO_TLS_CLIENTKEY="/wud/mqtt/client-key.pem" \
-    -e HOSAKA_TRIGGER_MQTT_MOSQUITTO_TLS_CLIENTCERT="/wud/mqtt/client-cert.pem" \
-    -e HOSAKA_TRIGGER_MQTT_MOSQUITTO_TLS_CACHAIN="/wud/mqtt/ca.pem" \
+    -e HOSAKA_TRIGGER_MQTT_MOSQUITTO_TLS_CLIENTKEY="/hosaka/mqtt/client-key.pem" \
+    -e HOSAKA_TRIGGER_MQTT_MOSQUITTO_TLS_CLIENTCERT="/hosaka/mqtt/client-cert.pem" \
+    -e HOSAKA_TRIGGER_MQTT_MOSQUITTO_TLS_CACHAIN="/hosaka/mqtt/ca.pem" \
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->
 
@@ -93,8 +93,8 @@ docker run \
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
       - HOSAKA_TRIGGER_MQTT_MAQIATTO_URL=tcp://maqiatto.com:1883
@@ -111,7 +111,7 @@ docker run \
     -e HOSAKA_TRIGGER_MQTT_MAQIATTO_PASSWORD="mysecretpassword" \
     -e HOSAKA_TRIGGER_MQTT_MAQIATTO_TOPIC="john@doe.com/wud/image" \
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->
 
@@ -140,7 +140,7 @@ docker run \
 ### Home-Assistant integration
 ![logo](hass.png)
 
-WUD can be easily integrated into [Home-Assistant](https://www.home-assistant.io/) using [MQTT Discovery](https://www.home-assistant.io/docs/mqtt/discovery/).
+Hosaka can be easily integrated into [Home-Assistant](https://www.home-assistant.io/) using [MQTT Discovery](https://www.home-assistant.io/docs/mqtt/discovery/).
 
 <!-- tabs:start -->
 #### **Docker Compose**
@@ -148,8 +148,8 @@ WUD can be easily integrated into [Home-Assistant](https://www.home-assistant.io
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
       - HOSAKA_TRIGGER_MQTT_MOSQUITTO_URL=mqtt://localhost:1883
@@ -164,14 +164,14 @@ docker run \
     -e HOSAKA_TRIGGER_MQTT_MOSQUITTO_HASS_ENABLED="true" \
     -e HOSAKA_TRIGGER_MQTT_MOSQUITTO_HASS_DISCOVERY="true" \
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->
 
 #### Check that mqtt integration is properly configured.
 ![image](hass_01.png)
 
-#### A WUD device is automatically added to the hass registry
+#### A Hosaka device is automatically added to the hass registry
 ![image](hass_02.png)
 
 #### Entities are automatically created (per Docker image)

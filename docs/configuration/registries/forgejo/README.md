@@ -20,8 +20,8 @@ The `forgejo` registry lets you configure a self-hosted [Forgejo](https://forgej
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
       - HOSAKA_REGISTRY_FORGEJO_URL=https://forgejo.acme.com
@@ -35,6 +35,6 @@ docker run \
   -e "HOSAKA_REGISTRY_FORGEJO_LOGIN=john" \
   -e "HOSAKA_REGISTRY_FORGEJO_PASSWORD=doe" \
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->

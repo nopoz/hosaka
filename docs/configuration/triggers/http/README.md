@@ -29,8 +29,8 @@ The `http` trigger lets you send container update notifications via HTTP.
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
       - HOSAKA_TRIGGER_HTTP_MYREMOTEHOST_URL=https://my-remote-host/new-version
@@ -40,7 +40,7 @@ services:
 docker run \
   -e HOSAKA_TRIGGER_HTTP_MYREMOTEHOST_URL="https://my-remote-host/new-version" \
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->
 

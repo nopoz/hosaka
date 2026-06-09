@@ -8,7 +8,7 @@ This API allows to query the state of the triggers.
 This operation lets you get all the configured triggers.
 
 ```bash
-curl http://wud:3000/api/triggers
+curl http://hosaka:3000/api/triggers
 
 [
    {
@@ -20,7 +20,7 @@ curl http://wud:3000/api/triggers
          "port":465,
          "user":"xxx@gmail.com",
          "pass":"secret",
-         "from":"admin@wud.com",
+         "from":"admin@hosaka.com",
          "to":"xxx@gmail.com"
       }
    }
@@ -31,7 +31,7 @@ curl http://wud:3000/api/triggers
 This operation lets you get a specific Trigger.
 
 ```bash
-curl http://wud:3000/api/triggers/smtp.gmail
+curl http://hosaka:3000/api/triggers/smtp.gmail
 
 {
   "id":"smtp.gmail",
@@ -42,7 +42,7 @@ curl http://wud:3000/api/triggers/smtp.gmail
      "port":465,
      "user":"xxx@gmail.com",
      "pass":"secret",
-     "from":"admin@wud.com",
+     "from":"admin@hosaka.com",
      "to":"xxx@gmail.com"
   }
 }

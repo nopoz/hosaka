@@ -1,7 +1,7 @@
 # Openid Connect Authentication
 ![logo](oidc.png)
 
-The `oidc` authentication lets you protect WUD access using the [Openid Connect standard](https://openid.net/).
+The `oidc` authentication lets you protect Hosaka access using the [Openid Connect standard](https://openid.net/).
 
 ### Variables
 
@@ -13,15 +13,15 @@ The `oidc` authentication lets you protect WUD access using the [Openid Connect 
 | `HOSAKA_AUTH_OIDC_{auth_name}_REDIRECT`     | :white_circle: | Skip internal login page & automatically redirect to the OIDC provider | `true`, `false`  | `false`                    |
 | `HOSAKA_AUTH_OIDC_{auth_name}_TIMEOUT`      | :white_circle: | Timeout (in ms) when calling the OIDC provider                         | Minimum is 500   | `5000`                     |
 
-?> The callback URL (to configure in the IDP is built as `${wud_public_url}/auth/oidc/${auth_name}/cb`
+?> The callback URL (to configure in the IDP is built as `${hosaka_public_url}/auth/oidc/${auth_name}/cb`
 
-!> WUD tries its best to determine the public address to forge redirections on its own. \
+!> Hosaka tries its best to determine the public address to forge redirections on its own. \
 If it fails (irregular reverse proxy configuration...), you can enforce the value using the env var `HOSAKA_PUBLIC_URL` 
 
 ### How to integrate with&nbsp;[Authelia](https://www.authelia.com)
 ![logo](authelia.png)
 
-#### Configure an Openid Client for WUD in Authelia configuration.yml ([see official authelia documentation](https://www.authelia.com/docs/configuration/identity-providers/oidc.html))
+#### Configure an Openid Client for Hosaka in Authelia configuration.yml ([see official authelia documentation](https://www.authelia.com/docs/configuration/identity-providers/oidc.html))
 ```yaml
 identity_providers:
   oidc:
@@ -35,8 +35,8 @@ identity_providers:
     id_token_lifespan: 1h
     refresh_token_lifespan: 90m
     clients:
-      - id: my-wud-client-id
-        description: WUD openid client
+      - id: my-hosaka-client-id
+        description: Hosaka openid client
         secret: this-is-a-very-secure-secret
         public: false
         authorization_policy: one_factor
@@ -46,7 +46,7 @@ identity_providers:
           - profile
           - email
         redirect_uris:
-          - https://<your_wud_public_domain>/auth/oidc/authelia/cb
+          - https://<your_hosaka_public_domain>/auth/oidc/authelia/cb
         grant_types:
           - refresh_token
           - authorization_code
@@ -59,29 +59,29 @@ identity_providers:
         userinfo_signing_algorithm: none
 ```
 
-#### Configure WUD
+#### Configure Hosaka
 <!-- tabs:start -->
 #### **Docker Compose**
 ```yaml
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
-      - HOSAKA_AUTH_OIDC_AUTHELIA_CLIENTID=my-wud-client-id
+      - HOSAKA_AUTH_OIDC_AUTHELIA_CLIENTID=my-hosaka-client-id
       - HOSAKA_AUTH_OIDC_AUTHELIA_CLIENTSECRET=this-is-a-very-secure-secret
       - HOSAKA_AUTH_OIDC_AUTHELIA_DISCOVERY=https://<your_authelia_public_domain>/.well-known/openid-configuration
 ```
 #### **Docker**
 ```bash
 docker run \
-  -e HOSAKA_AUTH_OIDC_AUTHELIA_CLIENTID="my-wud-client-id" \
+  -e HOSAKA_AUTH_OIDC_AUTHELIA_CLIENTID="my-hosaka-client-id" \
   -e HOSAKA_AUTH_OIDC_AUTHELIA_CLIENTSECRET="this-is-a-very-secure-secret" \
   -e HOSAKA_AUTH_OIDC_AUTHELIA_DISCOVERY="https://<your_authelia_public_domain>/.well-known/openid-configuration" \
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->
 
@@ -93,17 +93,17 @@ docker run \
 ![logo](auth0.png)
 
 #### Create an application (Regular Web Application)
-- `Allowed Callback URLs`: `https://<your_wud_public_domain>/auth/oidc/auth0/cb`
+- `Allowed Callback URLs`: `https://<your_hosaka_public_domain>/auth/oidc/auth0/cb`
 
-#### Configure WUD
+#### Configure Hosaka
 <!-- tabs:start -->
 #### **Docker Compose**
 ```yaml
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
       - HOSAKA_AUTH_OIDC_AUTH0_CLIENTID=<paste the Client ID from auth0 application settings>
@@ -117,7 +117,7 @@ docker run \
   -e HOSAKA_AUTH_OIDC_AUTH0_CLIENTSECRET="<paste the Client Secret from auth0 application settings>" \
   -e HOSAKA_AUTH_OIDC_AUTH0_DISCOVERY="https://<paste the domain from auth0 application settings>/.well-known/openid-configuration" \
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->
 
@@ -136,21 +136,21 @@ docker run \
 - Client Type: `Confidential`
 - Client ID: `<generated value>`
 - Client Secret: `<generated value>`
-- Redirect URIs/Origins: `https://<your_wud_public_domain>/auth/oidc/authentik/cb`
+- Redirect URIs/Origins: `https://<your_hosaka_public_domain>/auth/oidc/authentik/cb`
 - Scopes: `email`, `openid`, `profile`
 
 #### On Authentik, create an application associated to the previously created provider
 ![image](authentik_01.png)
 
-#### Configure WUD
+#### Configure Hosaka
 <!-- tabs:start -->
 #### **Docker Compose**
 ```yaml
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
       - HOSAKA_AUTH_OIDC_AUTHENTIK_CLIENTID=<paste the Client ID from authentik wud_oidc provider>
@@ -166,6 +166,6 @@ docker run \
   -e HOSAKA_AUTH_OIDC_AUTHENTIK_DISCOVERY="<authentik_url>/application/o/<authentik_application_name>/.well-known/openid-configuration" \
   -e HOSAKA_AUTH_OIDC_AUTHENTIK_REDIRECT=true # optional (to skip internal login page) \  
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->

@@ -21,8 +21,8 @@ The `quay` registry lets you configure [QUAY](https://quay.io/) integration.
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
       - HOSAKA_REGISTRY_QUAY
@@ -32,7 +32,7 @@ services:
 docker run \
   -e HOSAKA_REGISTRY_QUAY= \
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->
 
@@ -44,8 +44,8 @@ docker run \
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
       - HOSAKA_REGISTRY_QUAY_NAMESPACE=mynamespace
@@ -59,7 +59,7 @@ docker run \
   -e HOSAKA_REGISTRY_QUAY_ACCOUNT="myaccount" \
   -e HOSAKA_REGISTRY_QUAY_TOKEN="BA8JI3Y2BWQDH849RYT3YD5J0J6CYEORYTQMMJK364B4P88VPTJIAI704L0BBP8D6CYE4P88V" \
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->
 

@@ -2,7 +2,7 @@
 
 ## HealthCheck
 
-WUD exposes an endpoint to check the service healthiness.
+Hosaka exposes an endpoint to check the service healthiness.
 
 ### Endpoint
 The healthiness is exposed at [/health](http://localhost:3000/health).
@@ -23,8 +23,8 @@ version: '3'
 
 services:
 
-  whatsupdocker:
-    image: getwud/wud:5.1.0
+  hosaka:
+    image: ghcr.io/nopoz/hosaka:5.1.0
     ...
     healthcheck:
       test: wget --no-verbose --tries=1 --no-check-certificate --spider http://localhost:3000
@@ -38,44 +38,44 @@ services:
 ## Prometheus metrics
 ![logo](prometheus.png)
 
-WUD exposes various metrics that [Prometheus](https://prometheus.io/) can scrape.
+Hosaka exposes various metrics that [Prometheus](https://prometheus.io/) can scrape.
 
 ### Endpoint
 The metrics are exposed at [/metrics](http://localhost:3000/metrics).
 
 ### Metrics
 
-#### WUD specific metrics
+#### Hosaka specific metrics
 ```bash
 
-# HELP wud_containers The watched containers
-# TYPE wud_containers gauge
-wud_containers{id="8a787a1bb3fdf9cfcfc3fe73abcb714655b6232049b9b61c31252b1df59066d8",name="homeassistant",watcher="local",include_tags="^\\d+\\.\\d+.\\d+$",image_id="sha256:d4a6fafb7d4da37495e5c9be3242590be24a87d7edcc4f79761098889c54fca6",image_registry_url="https://registry-1.docker.io/v2",image_registry_name="hub",image_name="homeassistant/home-assistant",image_tag_value="2021.6.4",image_tag_semver="true",image_digest_watch="false",image_digest_repo="sha256:ca0edc3fb0b4647963629bdfccbb3ccfa352184b45a9b4145832000c2878dd72",image_architecture="amd64",image_os="linux",image_created="2021-06-12T05:33:38.440Z",result_tag="2021.6.5",update_available="true"} 1
-wud_containers{id="f653ec203d78d36b087c537226589e48f8af4a0899488c0d6a9e0beacbe9604e",name="nginx",watcher="local",image_id="sha256:d1a364dc548d5357f0da3268c888e1971bbdb957ee3f028fe7194f1d61c6fdee",image_registry_url="https://registry-1.docker.io/v2",image_registry_name="hub",image_name="library/nginx",image_tag_value="latest",image_tag_semver="false",image_digest_watch="true",image_digest_repo="sha256:6d75c99af15565a301e48297fa2d121e15d80ad526f8369c526324f0f7ccb750",image_digest_value="sha256:61191087790c31e43eb37caa10de1135b002f10c09fdda7fa8a5989db74033aa",image_architecture="amd64",image_os="linux",image_created="2021-05-25T15:43:43.382Z",result_tag="latest",result_digest="sha256:61191087790c31e43eb37caa10de1135b002f10c09fdda7fa8a5989db74033aa",update_available="false"} 1
-wud_containers{id="0ca61f4adc859eb9cbb90bfb1b66bae0c78451c364df9b84a1859006da03d7dc",name="pihole",watcher="local",include_tags="^\\d+\\.\\d+.\\d+$",exclude_tags="undefined",image_id="sha256:eb777ee00e0c6ea00a2bbdc273a06b57acf232a4fd5495ce70ab94346550cea0",image_registry_url="https://registry-1.docker.io/v2",image_registry_name="hub",image_name="pihole/pihole",image_tag_value="v5.7",image_tag_semver="true",image_digest_watch="false",image_digest_repo="sha256:3a39992f3e0879a4705d87d0b059513af0749e6ea2579744653fe54ceae360a0",image_architecture="amd64",image_os="linux",image_variant="undefined",image_created="2021-02-16T23:37:05.436Z",result_tag="v5.7",update_available="false"} 1
-wud_containers{id="387ef114a1096a16e643058793ce86cee3e062586907bc5b9f8b1d62b1aad42f",name="portainer",watcher="local",include_tags="^\\d+\\.\\d+.\\d+-alpine$",image_id="sha256:ae2a1948dd22ecbee4aac30564064416ace33629cf3028598d4e132d9c091fd0",image_registry_url="https://registry-1.docker.io/v2",image_registry_name="hub",image_name="portainer/portainer-ce",image_tag_value="2.5.0-alpine",image_tag_semver="true",image_digest_watch="false",image_digest_repo="sha256:e73d6096d4ef9d6f1d88df821ac3ec99cb2227d7778b123b1f417e18d2d013c8",image_architecture="amd64",image_os="linux",image_created="2021-05-23T21:04:34.891Z",result_tag="2.5.1-alpine",update_available="true"} 1
-wud_containers{id="ee084217c982f67255e438020128312be1f41ccad5af5c572d8c913cd10e1f66",name="pyload",watcher="local",include_tags="^latest$",exclude_tags="undefined",image_id="sha256:dd54794e01d18d33f8efb3eef99774d915e307e1508987bb999fdb0f8d33019e",image_registry_url="https://registry-1.docker.io/v2",image_registry_name="hub",image_name="writl/pyload",image_tag_value="latest",image_tag_semver="false",image_digest_watch="false",image_digest_repo="sha256:55a0efec296fae88c5fa21dfbda3bfc51635ee1c824e41c4f866fc42b9f42a15",image_architecture="amd64",image_os="linux",image_variant="undefined",image_created="2021-01-10T18:07:48.691Z",result_tag="latest",update_available="false"} 1
-wud_containers{id="8baa7e6537b4a2c477bbc49ad1b0efa6bd1484a2c6ecdd7284f370df6f39eb75",name="traefik",watcher="local",include_tags="^\\d+\\.\\d+.\\d+$",exclude_tags="undefined",image_id="sha256:da4c4921aee8ad7a7f66870bb726a8fa4d18f9b0b927ab1ef572e06be5241d65",image_registry_url="https://registry-1.docker.io/v2",image_registry_name="hub",image_name="library/traefik",image_tag_value="2.4.5",image_tag_semver="true",image_digest_watch="false",image_digest_repo="sha256:062dff1b5c54845f34147e04a251a645f3a5318c42da7127bf25a6e0d3c6e4d5",image_architecture="amd64",image_os="linux",image_variant="undefined",image_created="2021-02-25T03:23:47.339Z",result_tag="2.4.8",update_available="true"} 1
+# HELP hosaka_containers The watched containers
+# TYPE hosaka_containers gauge
+hosaka_containers{id="8a787a1bb3fdf9cfcfc3fe73abcb714655b6232049b9b61c31252b1df59066d8",name="homeassistant",watcher="local",include_tags="^\\d+\\.\\d+.\\d+$",image_id="sha256:d4a6fafb7d4da37495e5c9be3242590be24a87d7edcc4f79761098889c54fca6",image_registry_url="https://registry-1.docker.io/v2",image_registry_name="hub",image_name="homeassistant/home-assistant",image_tag_value="2021.6.4",image_tag_semver="true",image_digest_watch="false",image_digest_repo="sha256:ca0edc3fb0b4647963629bdfccbb3ccfa352184b45a9b4145832000c2878dd72",image_architecture="amd64",image_os="linux",image_created="2021-06-12T05:33:38.440Z",result_tag="2021.6.5",update_available="true"} 1
+hosaka_containers{id="f653ec203d78d36b087c537226589e48f8af4a0899488c0d6a9e0beacbe9604e",name="nginx",watcher="local",image_id="sha256:d1a364dc548d5357f0da3268c888e1971bbdb957ee3f028fe7194f1d61c6fdee",image_registry_url="https://registry-1.docker.io/v2",image_registry_name="hub",image_name="library/nginx",image_tag_value="latest",image_tag_semver="false",image_digest_watch="true",image_digest_repo="sha256:6d75c99af15565a301e48297fa2d121e15d80ad526f8369c526324f0f7ccb750",image_digest_value="sha256:61191087790c31e43eb37caa10de1135b002f10c09fdda7fa8a5989db74033aa",image_architecture="amd64",image_os="linux",image_created="2021-05-25T15:43:43.382Z",result_tag="latest",result_digest="sha256:61191087790c31e43eb37caa10de1135b002f10c09fdda7fa8a5989db74033aa",update_available="false"} 1
+hosaka_containers{id="0ca61f4adc859eb9cbb90bfb1b66bae0c78451c364df9b84a1859006da03d7dc",name="pihole",watcher="local",include_tags="^\\d+\\.\\d+.\\d+$",exclude_tags="undefined",image_id="sha256:eb777ee00e0c6ea00a2bbdc273a06b57acf232a4fd5495ce70ab94346550cea0",image_registry_url="https://registry-1.docker.io/v2",image_registry_name="hub",image_name="pihole/pihole",image_tag_value="v5.7",image_tag_semver="true",image_digest_watch="false",image_digest_repo="sha256:3a39992f3e0879a4705d87d0b059513af0749e6ea2579744653fe54ceae360a0",image_architecture="amd64",image_os="linux",image_variant="undefined",image_created="2021-02-16T23:37:05.436Z",result_tag="v5.7",update_available="false"} 1
+hosaka_containers{id="387ef114a1096a16e643058793ce86cee3e062586907bc5b9f8b1d62b1aad42f",name="portainer",watcher="local",include_tags="^\\d+\\.\\d+.\\d+-alpine$",image_id="sha256:ae2a1948dd22ecbee4aac30564064416ace33629cf3028598d4e132d9c091fd0",image_registry_url="https://registry-1.docker.io/v2",image_registry_name="hub",image_name="portainer/portainer-ce",image_tag_value="2.5.0-alpine",image_tag_semver="true",image_digest_watch="false",image_digest_repo="sha256:e73d6096d4ef9d6f1d88df821ac3ec99cb2227d7778b123b1f417e18d2d013c8",image_architecture="amd64",image_os="linux",image_created="2021-05-23T21:04:34.891Z",result_tag="2.5.1-alpine",update_available="true"} 1
+hosaka_containers{id="ee084217c982f67255e438020128312be1f41ccad5af5c572d8c913cd10e1f66",name="pyload",watcher="local",include_tags="^latest$",exclude_tags="undefined",image_id="sha256:dd54794e01d18d33f8efb3eef99774d915e307e1508987bb999fdb0f8d33019e",image_registry_url="https://registry-1.docker.io/v2",image_registry_name="hub",image_name="writl/pyload",image_tag_value="latest",image_tag_semver="false",image_digest_watch="false",image_digest_repo="sha256:55a0efec296fae88c5fa21dfbda3bfc51635ee1c824e41c4f866fc42b9f42a15",image_architecture="amd64",image_os="linux",image_variant="undefined",image_created="2021-01-10T18:07:48.691Z",result_tag="latest",update_available="false"} 1
+hosaka_containers{id="8baa7e6537b4a2c477bbc49ad1b0efa6bd1484a2c6ecdd7284f370df6f39eb75",name="traefik",watcher="local",include_tags="^\\d+\\.\\d+.\\d+$",exclude_tags="undefined",image_id="sha256:da4c4921aee8ad7a7f66870bb726a8fa4d18f9b0b927ab1ef572e06be5241d65",image_registry_url="https://registry-1.docker.io/v2",image_registry_name="hub",image_name="library/traefik",image_tag_value="2.4.5",image_tag_semver="true",image_digest_watch="false",image_digest_repo="sha256:062dff1b5c54845f34147e04a251a645f3a5318c42da7127bf25a6e0d3c6e4d5",image_architecture="amd64",image_os="linux",image_variant="undefined",image_created="2021-02-25T03:23:47.339Z",result_tag="2.4.8",update_available="true"} 1
 
-# HELP wud_registry_response The Registry response time (in second)
-# TYPE wud_registry_response summary
-wud_registry_response{quantile="0.01",type="hub",name="hub"} 0.628
-wud_registry_response{quantile="0.05",type="hub",name="hub"} 0.6284
-wud_registry_response{quantile="0.5",type="hub",name="hub"} 0.863
-wud_registry_response{quantile="0.9",type="hub",name="hub"} 1.0332999999999999
-wud_registry_response{quantile="0.95",type="hub",name="hub"} 1.0444
-wud_registry_response{quantile="0.99",type="hub",name="hub"} 1.046
-wud_registry_response{quantile="0.999",type="hub",name="hub"} 1.046
-wud_registry_response_sum{type="hub",name="hub"} 14.61
-wud_registry_response_count{type="hub",name="hub"} 18
+# HELP hosaka_registry_response The Registry response time (in second)
+# TYPE hosaka_registry_response summary
+hosaka_registry_response{quantile="0.01",type="hub",name="hub"} 0.628
+hosaka_registry_response{quantile="0.05",type="hub",name="hub"} 0.6284
+hosaka_registry_response{quantile="0.5",type="hub",name="hub"} 0.863
+hosaka_registry_response{quantile="0.9",type="hub",name="hub"} 1.0332999999999999
+hosaka_registry_response{quantile="0.95",type="hub",name="hub"} 1.0444
+hosaka_registry_response{quantile="0.99",type="hub",name="hub"} 1.046
+hosaka_registry_response{quantile="0.999",type="hub",name="hub"} 1.046
+hosaka_registry_response_sum{type="hub",name="hub"} 14.61
+hosaka_registry_response_count{type="hub",name="hub"} 18
 
-# HELP wud_trigger_count Total count of trigger events
-# TYPE wud_trigger_count counter
-wud_trigger_count{type="mock",name="example",status="success"} 1
+# HELP hosaka_trigger_count Total count of trigger events
+# TYPE hosaka_trigger_count counter
+hosaka_trigger_count{type="mock",name="example",status="success"} 1
 
-# HELP wud_watcher_total The number of watched containers
-# TYPE wud_watcher_total gauge
-wud_watcher_total{type="docker",name="local"} 6
+# HELP hosaka_watcher_total The number of watched containers
+# TYPE hosaka_watcher_total gauge
+hosaka_watcher_total{type="docker",name="local"} 6
 ```
 
 #### Standard process metrics
@@ -264,15 +264,15 @@ nodejs_gc_duration_seconds_count{kind="weakcb"} 1
 You can use [Grafana](https://grafana.com/) to display charts and graphs using the Prometheus metrics.
 
 ### Watched images
-You can also display WUD watched images on Grafana.
+You can also display Hosaka watched images on Grafana.
 
 #### Example to display the container Table
 
 ![image](./grafana_table.png)
 
 ```bash
-sum by(image_registry_url, image_name, image_os, image_architecture, image_tag_value, result_tag) (wud_containers)
+sum by(image_registry_url, image_name, image_os, image_architecture, image_tag_value, result_tag) (hosaka_containers)
 
 # or if you want to display images to be updated only 
-sum by(image_registry_url, image_name, image_os, image_architecture, image_tag_value, result_tag) (wud_containers{update_available="true"})
+sum by(image_registry_url, image_name, image_os, image_architecture, image_tag_value, result_tag) (hosaka_containers{update_available="true"})
 ```

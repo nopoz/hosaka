@@ -8,7 +8,7 @@ The `discord` trigger lets you send realtime notifications using [Discord](https
 | Env var                                          | Required       | Description                              | Supported values      | Default value when missing  |
 |--------------------------------------------------|:--------------:|------------------------------------------|-----------------------|-----------------------------|
 | `HOSAKA_TRIGGER_DISCORD_{trigger_name}_URL`         | :red_circle:   | The Discord webhook URL                  | HTTPS URL             |                             |
-| `HOSAKA_TRIGGER_DISCORD_{trigger_name}_BOTUSERNAME` | :white_circle: | The bot username                         |                       | WUD                         |
+| `HOSAKA_TRIGGER_DISCORD_{trigger_name}_BOTUSERNAME` | :white_circle: | The bot username                         |                       | Hosaka                      |
 | `HOSAKA_TRIGGER_DISCORD_{trigger_name}_CARDCOLOR`   | :white_circle: | Color of the message card                | Color in decimal base | 65280                       |
 | `HOSAKA_TRIGGER_DISCORD_{trigger_name}_CARDLABEL`   | :white_circle: | Optional label to display in the message | String                |                             |
 
@@ -23,21 +23,21 @@ The `discord` trigger lets you send realtime notifications using [Discord](https
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
       - HOSAKA_TRIGGER_DISCORD_1_URL=https://discord.com/api/webhooks/123/456
-      - HOSAKA_TRIGGER_DISCORD_1_BOTUSERNAME=WUD
+      - HOSAKA_TRIGGER_DISCORD_1_BOTUSERNAME=Hosaka
 ```
 
 #### **Docker**
 ```bash
 docker run \
   -e HOSAKA_TRIGGER_DISCORD_1_URL="https://discord.com/api/webhooks/123/456" \
-  -e HOSAKA_TRIGGER_DISCORD_1_BOTUSERNAME="WUD" \
+  -e HOSAKA_TRIGGER_DISCORD_1_BOTUSERNAME="Hosaka" \
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->
 

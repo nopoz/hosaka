@@ -22,20 +22,20 @@ The `slack` trigger lets you post image update notifications to a Slack channel.
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
         - HOSAKA_TRIGGER_SLACK_TEST_TOKEN=xoxp-743817063446-xxx
-        - HOSAKA_TRIGGER_SLACK_TEST_CHANNEL=wud
+        - HOSAKA_TRIGGER_SLACK_TEST_CHANNEL=hosaka
 ```
 
 #### **Docker**
 ```bash
 docker run \
     -e HOSAKA_TRIGGER_SLACK_TEST_TOKEN="xoxp-743817063446-xxx" \
-    -e HOSAKA_TRIGGER_SLACK_TEST_CHANNEL="wud" \
+    -e HOSAKA_TRIGGER_SLACK_TEST_CHANNEL="hosaka" \
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->

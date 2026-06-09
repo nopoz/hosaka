@@ -10,8 +10,8 @@ If you want the state to persist after the container removal, you need to mount 
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     volumes:
       - /path-on-my-host:/store
@@ -21,6 +21,6 @@ services:
 docker run \
   -v /path-on-my-host:/store
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->

@@ -29,8 +29,8 @@ The `pushover` trigger lets you send realtime notifications to your devices (And
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
       - HOSAKA_TRIGGER_PUSHOVER_1_TOKEN=*****************************
@@ -43,7 +43,7 @@ docker run \
   -e HOSAKA_TRIGGER_PUSHOVER_1_TOKEN="*****************************" \
   -e HOSAKA_TRIGGER_PUSHOVER_1_USER="******************************" \
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->
 
@@ -54,8 +54,8 @@ docker run \
 version: '3'
 
 services:
-  whatsupdocker:
-    image: getwud/wud
+  hosaka:
+    image: ghcr.io/nopoz/hosaka
     ...
     environment:
         - HOSAKA_TRIGGER_PUSHOVER_1_TOKEN=*****************************
@@ -74,7 +74,7 @@ docker run \
     -e HOSAKA_TRIGGER_PUSHOVER_1_SOUND="cosmic" \
     -e HOSAKA_TRIGGER_PUSHOVER_1_PRIORITY="2" \
   ...
-  getwud/wud
+  ghcr.io/nopoz/hosaka
 ```
 <!-- tabs:end -->
 
