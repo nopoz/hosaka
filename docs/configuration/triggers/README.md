@@ -20,7 +20,7 @@ All implemented triggers, in addition to their specific configuration, also supp
 |------------------------------------------------------------|:--------------:|----------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
 | `HOSAKA_TRIGGER_{{trigger_type}}}_{trigger_name}_MODE`        | :white_circle: | Trigger for each container update or trigger once with all available updates as a list | `simple`, `batch`                                                                                                    | `simple`                                                                                         |
 | `HOSAKA_TRIGGER_{{trigger_type}}}_{trigger_name}_ONCE`        | :white_circle: | Run trigger once (do not repeat previous results)                                      | `true`, `false`                                                                                                      | `true`                                                                                           |
-| `HOSAKA_TRIGGER_{{trigger_type}}}_{trigger_name}_THRESHOLD`   | :white_circle: | The threshold to reach to run the trigger                                              | `all`, `major`, `minor`, `patch`                                                                                     | `all`                                                                                            |
+| `HOSAKA_TRIGGER_{{trigger_type}}}_{trigger_name}_THRESHOLD`   | :white_circle: | The threshold to reach to run the trigger                                              | `all`, `major`, `minor`, `patch`, `major-only`, `minor-only`                                                         | `all`                                                                                            |
 | `HOSAKA_TRIGGER_{{trigger_type}}}_{trigger_name}_SIMPLETITLE` | :white_circle: | The template to use to render the title of the notification (simple mode)              | String template with placeholders `${id}` `${name}` `${watcher}` `${kind}` `${semver}` `${local}` `${remote}` `${link}` | `New ${kind} found for container ${name}`                                                        |
 | `HOSAKA_TRIGGER_{{trigger_type}}}_{trigger_name}_BATCHTITLE`  | :white_circle: | The template to use to render the title of the notification (batch mode)               | String template with placeholders `${count}`                                                                         | `${count} updates available`                                                                     |
 | `HOSAKA_TRIGGER_{{trigger_type}}}_{trigger_name}_SIMPLEBODY`  | :white_circle: | The template to use to render the body of the notification                             | String template with placeholders `${id}` `${name}` `${watcher}` `${kind}` `${semver}` `${local}` `${remote}` `${link}` | `Container ${name} running with ${kind} ${local} can be updated to ${kind} ${remote} \n ${link}` |
@@ -32,6 +32,10 @@ All implemented triggers, in addition to their specific configuration, also supp
 ?> Threshold `minor` means that the trigger will run only if this is a `minor` or `patch` semver change
 
 ?> Threshold `patch` means that the trigger will run only if this is a `patch` semver change
+
+?> Threshold `major-only` means that the trigger will run only if this is a `major` semver change (minor and patch are excluded)
+
+?> Threshold `minor-only` means that the trigger will run only if this is a `minor` semver change (major and patch are excluded)
 
 ?> `HOSAKA_TRIGGER_{{trigger_type}}}_{trigger_name}_ONCE=false` can be useful when `HOSAKA_TRIGGER_{{trigger_type}}}_{trigger_name}_MODE=batch` to get a report with all pending updates.
 
