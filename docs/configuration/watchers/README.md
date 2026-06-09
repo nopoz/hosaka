@@ -445,13 +445,13 @@ suffix of the form `id:threshold`.
 | Value        | Fires when the semver diff is...          |
 |--------------|-------------------------------------------|
 | `all`        | Any change (default when omitted)         |
-| `major`      | major, minor, or patch                    |
-| `minor`      | minor or patch (not major)                |
-| `patch`      | patch only (not minor or major)           |
+| `major`      | Any change (same as `all`)                |
+| `minor`      | minor, patch, or prerelease (not major)   |
+| `patch`      | patch or prerelease (not major or minor)  |
 | `major-only` | major only (exact)                        |
 | `minor-only` | minor only (exact)                        |
 
-?> `major`, `minor`, and `patch` are cumulative: `minor` means "minor or anything less severe". `major-only` and `minor-only` are exact matches.
+?> `minor` and `patch` are cumulative: each also fires on anything less severe (a `minor` threshold fires on minor, patch, and prerelease updates). `major` currently behaves the same as `all`. `major-only` and `minor-only` are exact matches.
 
 **Precedence:** `hosaka.trigger.include` is evaluated first. If set, only the
 listed triggers are eligible. `hosaka.trigger.exclude` is then evaluated against

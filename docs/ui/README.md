@@ -11,9 +11,9 @@ In addition to the REST API, Hosaka exposes a web UI on the same port.
 Each container row with an available update shows an **Update** button. Clicking
 it sends `POST /api/containers/:id/install` to the backend, which hands off to
 whichever trigger has `INSTALL=true` configured (typically the
-[script trigger](configuration/triggers/script/)). The button is only visible
-when exactly one install-mode trigger is configured; if more than one is set the
-UI surfaces an error instead.
+[script trigger](configuration/triggers/script/)). The button is shown whenever
+an install-mode trigger is configured; if more than one is set, clicking it
+surfaces an error notification instead of running the install.
 
 ## Live install output
 
