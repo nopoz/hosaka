@@ -1,10 +1,8 @@
 # Introduction
 
-![Docker pulls](https://img.shields.io/docker/pulls/getwud/wud)
-![License](https://img.shields.io/github/license/getwud/wud)
-![Travis](https://img.shields.io/travis/getwud/wud/main)
-![Maintainability](https://img.shields.io/codeclimate/maintainability/getwud/wud)
-![Coverage](https://img.shields.io/codeclimate/coverage/getwud/wud)
+[![CI](https://github.com/nopoz/hosaka/actions/workflows/ci.yml/badge.svg)](https://github.com/nopoz/hosaka/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/nopoz/hosaka?sort=semver)](https://github.com/nopoz/hosaka/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/nopoz/hosaka/blob/main/LICENSE)
 
 ## Hosaka
 Gets you notified when new versions of your Docker containers are available and lets you react the way you want.
