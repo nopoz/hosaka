@@ -2,7 +2,7 @@
 
 # **Hosaka**
 
-> Get notified when a new version of your Docker Container is available.
+> Watch your Docker containers for new versions, then notify or update with one click.
 
 [Getting Started](introduction/)
 

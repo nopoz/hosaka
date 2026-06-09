@@ -11,5 +11,3 @@
     - [Trigger](api/trigger)
     - [Watcher](api/watcher)
 - [Monitoring](monitoring/)
-- [FAQ](faq/)
-- [Changelog](changelog/)

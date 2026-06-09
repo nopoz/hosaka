@@ -7,10 +7,11 @@ The `kafka` trigger lets you publish container update notifications to a Kafka t
 
 | Env var                                                    | Required       | Description                                                      | Supported values                         | Default value when missing |
 | ---------------------------------------------------------- |:--------------:| ---------------------------------------------------------------- | ---------------------------------------- | -------------------------- | 
-| `HOSAKA_TRIGGER_KAFKA_{trigger_name}_BROKERS`                 | :red_circle:   | Comma separated list of Kafka brokers                            |                                          |                            |
-| `HOSAKA_TRIGGER_KAFKA_{trigger_name}_SSL`                     | :white_circle: | Is SSL enabled on the TLS connection                             | `true`, `false`                          | `false`                    |
-| `HOSAKA_TRIGGER_KAFKA_{trigger_name}_TOPIC`                   | :white_circle: | The name of the topic to publish                                 |                                          | `hosaka-container`         |
-| `HOSAKA_TRIGGER_KAFKA_{trigger_name}_AUTHENTICATION_TYPE`     | :white_circle: | The type for authentication                                      | `PLAIN`, `SCRAM-SHA-256`, `SCRAM-SHA-12` | `PLAIN`                    |
+| `HOSAKA_TRIGGER_KAFKA_{trigger_name}_BROKERS`                 | :red_circle:   | Comma separated list of Kafka brokers                            |                                            |                            |
+| `HOSAKA_TRIGGER_KAFKA_{trigger_name}_SSL`                     | :white_circle: | Is SSL enabled on the TLS connection                             | `true`, `false`                            | `false`                    |
+| `HOSAKA_TRIGGER_KAFKA_{trigger_name}_TOPIC`                   | :white_circle: | The name of the topic to publish                                 |                                            | `hosaka-container`         |
+| `HOSAKA_TRIGGER_KAFKA_{trigger_name}_CLIENTID`                | :white_circle: | The Kafka client ID                                              |                                            | `hosaka`                   |
+| `HOSAKA_TRIGGER_KAFKA_{trigger_name}_AUTHENTICATION_TYPE`     | :white_circle: | The type for authentication                                      | `PLAIN`, `SCRAM-SHA-256`, `SCRAM-SHA-512`  | `PLAIN`                    |
 | `HOSAKA_TRIGGER_KAFKA_{trigger_name}_AUTHENTICATION_USER`     | :white_circle: | The name of the user (required if authentication is enabled)     |                                          |                            |
 | `HOSAKA_TRIGGER_KAFKA_{trigger_name}_AUTHENTICATION_PASSWORD` | :white_circle: | The password of the user (required if authentication is enabled) |                                          |                            |
 

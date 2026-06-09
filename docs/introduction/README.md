@@ -4,50 +4,44 @@
 [![Release](https://img.shields.io/github/v/release/nopoz/hosaka?sort=semver)](https://github.com/nopoz/hosaka/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/nopoz/hosaka/blob/main/LICENSE)
 
-## Hosaka
-Gets you notified when new versions of your Docker containers are available and lets you react the way you want.
+**Hosaka** watches your Docker hosts for new container image versions, then lets
+you react: get notified, or update the container with a single click and watch
+the update run live. It keeps pinned versions in your stacks so you always know
+what is running, and it never changes anything until you tell it to.
 
-#### Hosaka is built on 3 concepts:
+Hosaka is a fork of [What's Up Docker (WUD)](https://github.com/getwud/wud),
+rebuilt around a faster, mobile-friendly UI and one-click updates.
 
-> `WATCHERS` query your Docker hosts to get the containers to watch
+## Three concepts
 
-> `REGISTRIES` query the Docker registries to find available updates
+Hosaka is a pipeline built from three kinds of components:
 
-> `TRIGGERS` perform actions when updates are available
+> `WATCHERS` connect to your Docker hosts and list the containers to watch.
+
+> `REGISTRIES` query the Docker registries to find newer image versions.
+
+> `TRIGGERS` perform actions when an update is available (notify, or update).
 
 ![image](wud_arch.png)
 
-## Many supported triggers
-> Send notifications using **Smtp**, [**Apprise**](https://github.com/caronc/apprise-api), [**Ifttt**](https://ifttt.com), [**Pushover**](https://pushover.net), [**Slack**](https://slack.com), [**Telegram**](https://telegram.org/), [**Discord**](https://discord.com/)...
+See [How it works](how-it-works/) for the full watch-and-update cycle.
 
-> Automatically update your [**docker**](https://www.docker.com) containers or your [**docker-compose**](https://docs.docker.com/compose) stack.
+## Fork highlights
 
-> Integrate with third-party systems using [**Kafka**](https://kafka.apache.org), [**Mqtt**](https://mqtt.org), **Http Webhooks**...
+- **One-click updates from the UI**, with the update script's output streamed
+  live, line by line.
+- **A bundled Portainer stack updater**: rewrites the stack file to the new image
+  tag and redeploys through the Portainer API, so your stack stays the source of
+  truth and rollback is just redeploying the old tag.
+- **A responsive UI** that works on mobile, with live container state over SSE.
+- **Semver-aware updates** classified as major, minor, patch, or prerelease, so
+  you can take a patch and hold back a major.
 
-## Many supported registries
-> [**Azure Container Registry**](https://azure.microsoft.com/services/container-registry)
-
-> [**AWS Elastic Container Registry**](https://aws.amazon.com/ecr)
-
-> [**Google Container Registry**](https://cloud.google.com/container-registry)
-
-> [**Github Container Registry**](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-docker-registry)
-
-> [**Docker Hub (public & private repositories)**](http://hub.docker.com)
-
-## REST API & Web UI
-![image](../ui/ui.png)
-
-## Good integration with
-> [**Home-Assistant**](https://www.home-assistant.io/)
-
-> [**Prometheus**](https://prometheus.io/)
-
-> [**Grafana**](https://grafana.com/)
+For the full pitch and a side-by-side comparison with WUD, see the project
+[README](https://github.com/nopoz/hosaka#readme).
 
 ## Ready to go?
 > [**Follow the quick start guide!**](quickstart/)
-
 
 ## Contact & Support
 - Create a [GitHub issue](https://github.com/nopoz/hosaka/issues) for bug reports, feature requests, or questions

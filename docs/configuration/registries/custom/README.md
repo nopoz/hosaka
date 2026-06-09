@@ -10,7 +10,7 @@ The `custom` registry lets you configure a self-hosted [Docker Registry](https:/
 | `HOSAKA_REGISTRY_CUSTOM_URL`      | :red_circle:   | Registry URL (e.g. http://localhost:5000)                       |                                                      |                            |
 | `HOSAKA_REGISTRY_CUSTOM_LOGIN`    | :white_circle: | Login (when htpasswd auth is enabled on the registry)           | HOSAKA_REGISTRY_CUSTOM_PASSWORD must be defined         |                            |
 | `HOSAKA_REGISTRY_CUSTOM_PASSWORD` | :white_circle: | Password (when htpasswd auth is enabled on the registry)        | HOSAKA_REGISTRY_CUSTOM_LOGIN must be defined            |                            |
-| `HOSAKA_REGISTRY_CUSTOM_AUTH`     | :white_circle: | Htpasswd string (when htpasswd auth is enabled on the registry) | HOSAKA_REGISTRY_CUSTOM_LOGIN/TOKEN  must not be defined |                            |
+| `HOSAKA_REGISTRY_CUSTOM_AUTH`     | :white_circle: | Base64-encoded credentials (alternative to login/password)      | `HOSAKA_REGISTRY_CUSTOM_LOGIN` must not be defined      |                            |
 ### Examples
 
 #### Configure for anonymous access

@@ -14,6 +14,7 @@ You can adjust the server configuration with the following environment variables
 | `HOSAKA_SERVER_CORS_ENABLED`  | :white_circle: | Enable [CORS](https://developer.mozilla.org/fr/docs/Web/HTTP/CORS) Requests  | `true`, `false`                          | `false`                          |
 | `HOSAKA_SERVER_CORS_ORIGIN`   | :white_circle: | Supported CORS origin                                                        |                                          | `*`                              |
 | `HOSAKA_SERVER_CORS_METHODS`  | :white_circle: | Supported CORS methods                                                       | Comma separated list of valid HTTP verbs | `GET,HEAD,PUT,PATCH,POST,DELETE` |
+| `HOSAKA_SERVER_COOKIE_SECURE` | :white_circle: | Mark the session cookie as Secure (set this when Hosaka sits behind a TLS-terminating reverse proxy) | `true`, `false`             | `false`                          |
 | `HOSAKA_SERVER_FEATURE_DELETE`| :white_circle: | If deleting operations are enabled through API & UI                          | `true`, `false`                          | `true`                           |
 
 ### Examples

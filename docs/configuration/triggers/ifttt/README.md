@@ -47,7 +47,7 @@ docker run \
 <!-- tabs:end -->
 
 #### Ifttt captured ingredients
-- EventName: `hosaka-container`
+- EventName: `hosaka-image`
 - OccuredAt: `August 30, 2019 at 06:51PM`
 - Value1: `homeassistant`
 - Value2: `2021.6.5`
@@ -78,7 +78,7 @@ And copy the key from the URL
 #### Select the 'Receive a web request' trigger
 ![image](ifttt_request_trigger.png)
 
-#### Enter the trigger event name (hosaka-container by default)
+#### Enter the trigger event name (hosaka-image by default)
 ![image](ifttt_event.png)
 
 #### Define the 'then that' action

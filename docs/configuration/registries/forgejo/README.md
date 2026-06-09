@@ -8,9 +8,9 @@ The `forgejo` registry lets you configure a self-hosted [Forgejo](https://forgej
 | Env var                         |    Required    | Description                                                     | Supported values                                      | Default value when missing |
 |---------------------------------|:--------------:|-----------------------------------------------------------------|-------------------------------------------------------|----------------------------| 
 | `HOSAKA_REGISTRY_FORGEJO_URL`      |  :red_circle:  | Registry URL (e.g. https://forgejo.acme.com)                      |                                                       |                            |
-| `HOSAKA_REGISTRY_FORGEJO_LOGIN`    | :red_circle:   | Gitea username                                                  | HOSAKA_REGISTRY_FORGEJO_PASSWORD must be defined         |                            |
-| `HOSAKA_REGISTRY_FORGEJO_PASSWORD` |  :red_circle:  | Gitea password                                                  | HOSAKA_REGISTRY_FORGEJO_LOGIN must be defined            |                            |
-| `HOSAKA_REGISTRY_FORGEJO_AUTH`     | :white_circle: | Htpasswd string (when htpasswd auth is enabled on the registry) | HOSAKA_REGISTRY_FORGEJO_LOGIN/TOKEN  must not be defined |                            |
+| `HOSAKA_REGISTRY_FORGEJO_LOGIN`    | :white_circle: | Forgejo username                                                | `HOSAKA_REGISTRY_FORGEJO_PASSWORD` must be defined       |                            |
+| `HOSAKA_REGISTRY_FORGEJO_PASSWORD` | :white_circle: | Forgejo password                                                | `HOSAKA_REGISTRY_FORGEJO_LOGIN` must be defined          |                            |
+| `HOSAKA_REGISTRY_FORGEJO_AUTH`     | :white_circle: | Base64-encoded credentials (alternative to login/password)     | `HOSAKA_REGISTRY_FORGEJO_LOGIN` must not be defined      |                            |
 ### Examples
 
 #### Configure
