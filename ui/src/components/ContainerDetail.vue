@@ -41,7 +41,7 @@
     </v-list-item>
     <v-list-item>
       <template #prepend>
-        <v-icon color="secondary">ri-arrow-up-circle-line</v-icon>
+        <v-icon color="secondary">ri-radar-line</v-icon>
       </template>
       <v-list-item-title>Watcher</v-list-item-title>
       <v-list-item-subtitle>
