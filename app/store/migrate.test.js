@@ -19,3 +19,11 @@ test('migrate should create collection app when not exist', () => {
     migrate.migrate(undefined, '2.0.0');
     expect(spy).toHaveBeenCalledTimes(2);
 });
+
+test('addDisplayNameAndIcon should set displayIcon to ri:box-3-line when missing', () => {
+    const spy = jest.spyOn(container, 'updateContainer');
+    migrate.migrate('2.0.0', '2.1.0');
+    expect(spy).toHaveBeenCalledWith(expect.objectContaining({
+        displayIcon: 'ri:box-3-line',
+    }));
+});
