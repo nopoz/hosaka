@@ -78,7 +78,7 @@
          clear of the expand chevron so it can't be mis-tapped. -->
     <div v-else class="mobile-header">
       <div
-        class="d-flex align-center px-3 py-2"
+        class="d-flex align-center px-2 py-2"
         @click="collapseDetail()"
         style="cursor: pointer"
       >
@@ -100,7 +100,7 @@
       </div>
       <div
         v-if="container.updateAvailable"
-        class="d-flex align-center px-3 pb-2"
+        class="d-flex align-center px-2 pb-2"
       >
         <span class="text-caption text-truncate">
           <span class="text-medium-emphasis">{{
@@ -522,5 +522,11 @@ export default {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+}
+
+/* Trim the desktop toolbar's default 16px side padding so the chips sit closer
+   to the row edges and reclaim horizontal space. */
+.v-toolbar :deep(.v-toolbar__content) {
+  padding-inline: 8px;
 }
 </style>

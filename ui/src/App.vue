@@ -13,8 +13,8 @@
 
     <!-- Sizes your content based upon application components -->
     <v-main>
-      <v-row>
-        <v-col>
+      <v-row no-gutters>
+        <v-col class="pa-0">
           <router-view></router-view>
         </v-col>
       </v-row>

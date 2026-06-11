@@ -13,7 +13,12 @@
 
     <v-toolbar-title
       v-if="viewName && 'home'.toLowerCase() !== viewName.toLowerCase()"
-      class="text-body-1 text-uppercase ma-0 pl-4"
+      :class="[
+        'text-body-1',
+        'text-uppercase',
+        'ma-0',
+        $vuetify.display.smAndDown ? 'pl-2' : 'pl-4',
+      ]"
       style="letter-spacing: 0.12em; font-weight: 600"
       >{{ viewName }}</v-toolbar-title
     >

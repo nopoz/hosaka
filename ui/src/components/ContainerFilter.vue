@@ -30,7 +30,6 @@
           v-model="watcherSelected"
           :items="withEmptyOption(watchers)"
           @update:model-value="emitWatcherChanged"
-          :clearable="$vuetify.display.mdAndUp"
           label="Watcher"
           variant="outlined"
           density="compact"
@@ -42,7 +41,6 @@
           v-model="registrySelected"
           :items="withEmptyOption(registries)"
           @update:model-value="emitRegistryChanged"
-          :clearable="$vuetify.display.mdAndUp"
           label="Registry"
           variant="outlined"
           density="compact"
@@ -54,7 +52,6 @@
           v-model="updateKindSelected"
           :items="withEmptyOption(updateKinds)"
           @update:model-value="emitUpdateKindChanged"
-          :clearable="$vuetify.display.mdAndUp"
           label="Update kind"
           variant="outlined"
           density="compact"
@@ -71,7 +68,7 @@
           density="compact"
         ></v-select>
       </v-col>
-      <v-col cols="6" sm="4" md="2" class="d-flex align-center">
+      <v-col cols="6" sm="4" md="2" class="d-flex align-center ps-md-3">
         <v-switch
           class="switch-top"
           color="secondary"
@@ -159,11 +156,11 @@ export default {
   },
 
   methods: {
-    // Mobile has no clear (X) button on the selects; prepend an empty option so
-    // the user can pick the blank row to reset a filter (matches the unselected
-    // empty state). Desktop keeps the native clear button and the plain list.
+    // The selects have no clear (X) button on either layout; prepend an empty
+    // option so the user can pick the blank row to reset a filter (matches the
+    // unselected empty state). Keeps mobile and desktop selection identical.
     withEmptyOption(items) {
-      return this.$vuetify.display.smAndDown ? ["", ...items] : items;
+      return ["", ...items];
     },
     emitRegistryChanged() {
       this.$emit("registry-changed", this.registrySelected);
