@@ -59,10 +59,7 @@
             variant="outlined"
             :color="newVersionClass"
             v-bind="props"
-            @click="
-              copyToClipboard('container new version', newVersion);
-              $event.stopImmediatePropagation();
-            "
+            @click.stop="copyToClipboard('container new version', newVersion)"
           >
             {{ newVersion }}
             <v-icon end size="small">mdi-clipboard-outline</v-icon>
@@ -128,7 +125,7 @@
       <div v-show="showDetail">
         <v-tabs fixed-tabs v-model="tab" ref="tabs">
           <v-tab>
-            <span v-if="$vuetify.display.mdAndUp">Container</span>
+            <span v-if="$vuetify.display.mdAndUp" class="me-2">Container</span>
             <img
               :src="selfhstContainerIconUrl"
               style="width: 24px; height: 24px"
@@ -140,15 +137,15 @@
             </v-icon>
           </v-tab>
           <v-tab>
-            <span v-if="$vuetify.display.mdAndUp">Image</span>
+            <span v-if="$vuetify.display.mdAndUp" class="me-2">Image</span>
             <v-icon>mdi-package-variant-closed</v-icon>
           </v-tab>
           <v-tab v-if="container.result">
-            <span v-if="$vuetify.display.mdAndUp">Update</span>
+            <span v-if="$vuetify.display.mdAndUp" class="me-2">Update</span>
             <v-icon>mdi-package-down</v-icon>
           </v-tab>
           <v-tab v-if="container.error">
-            <span v-if="$vuetify.display.mdAndUp">Error</span>
+            <span v-if="$vuetify.display.mdAndUp" class="me-2">Error</span>
             <v-icon>mdi-alert</v-icon>
           </v-tab>
         </v-tabs>
@@ -433,8 +430,38 @@ export default {
     },
 
     copyToClipboard(kind, value) {
-      navigator.clipboard.writeText(value);
-      this.$bus.emit("notify", { message: `${kind} copied to clipboard` });
+      const ok = () =>
+        this.$bus.emit("notify", { message: `${kind} copied to clipboard` });
+      const fail = () =>
+        this.$bus.emit("notify", {
+          message: `Unable to copy ${kind} to clipboard`,
+          level: "error",
+        });
+      // Prefer the async Clipboard API; it is only available in secure contexts
+      // (https / localhost), so fall back to a hidden-textarea execCommand copy
+      // for plain-http LAN access.
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(value).then(ok, fail);
+        return;
+      }
+      try {
+        const textarea = document.createElement("textarea");
+        textarea.value = value;
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        const copied = document.execCommand("copy");
+        document.body.removeChild(textarea);
+        if (copied) {
+          ok();
+        } else {
+          fail();
+        }
+      } catch (e) {
+        fail();
+      }
     },
 
     collapseDetail() {
@@ -525,8 +552,13 @@ export default {
 }
 
 /* Trim the desktop toolbar's default 16px side padding so the chips sit closer
-   to the row edges and reclaim horizontal space. */
+   to the row edges and reclaim horizontal space. The toolbar title also adds a
+   16px start margin by default; trim it too so the left chips align with the
+   tightened row, keeping just a small gap from the edge. */
 .v-toolbar :deep(.v-toolbar__content) {
   padding-inline: 8px;
+}
+.v-toolbar :deep(.v-toolbar-title) {
+  margin-inline-start: 4px;
 }
 </style>
