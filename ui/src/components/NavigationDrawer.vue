@@ -45,10 +45,43 @@
           >{{ configurationItem.name }}
         </v-list-item-title>
       </v-list-item>
+
+      <v-divider key="info-divider" class="mb-0" />
+
+      <v-list-item
+        href="https://github.com/nopoz/hosaka"
+        target="_blank"
+        rel="noopener"
+        prepend-icon="mdi-github"
+        class="mb-0"
+      >
+        <v-list-item-title class="nav-title text-uppercase"
+          >GitHub</v-list-item-title
+        >
+      </v-list-item>
+
+      <v-list-item
+        href="https://nopoz.github.io/hosaka/"
+        target="_blank"
+        rel="noopener"
+        prepend-icon="mdi-book-open-variant"
+        class="mb-0"
+      >
+        <v-list-item-title class="nav-title text-uppercase"
+          >Docs</v-list-item-title
+        >
+      </v-list-item>
     </v-list>
 
     <template v-slot:append v-if="!isRail">
       <v-list>
+        <v-list-item class="px-4 py-1">
+          <span class="text-caption text-medium-emphasis font-mono"
+            >Hosaka<template v-if="version && version !== 'unknown'">
+              v{{ version }}</template
+            ></span
+          >
+        </v-list-item>
         <v-list-item class="ml-2 mb-2">
           <v-switch
             hide-details
@@ -75,6 +108,7 @@ import { getTriggerIcon } from "@/services/trigger";
 import { getServerIcon } from "@/services/server";
 import { getWatcherIcon } from "@/services/watcher";
 import { getAuthenticationIcon } from "@/services/authentication";
+import { getAppInfos } from "@/services/app";
 
 export default {
   props: {
@@ -87,6 +121,7 @@ export default {
   data: () => ({
     mini: true,
     darkMode: localStorage.darkMode !== "false",
+    version: "unknown",
     containerIcon: getContainerIcon(),
     configurationItems: [
       {
@@ -168,8 +203,17 @@ export default {
     },
   },
 
-  beforeMount() {
+  async beforeMount() {
     this.setDarkMode(this.darkMode);
+    try {
+      const appInfos = await getAppInfos();
+      this.version = appInfos.version || "unknown";
+    } catch (e) {
+      this.$bus.emit("notify", {
+        message: `Error when trying to get app version (${e.message})`,
+        level: "error",
+      });
+    }
   },
 };
 </script>

@@ -45,7 +45,7 @@
         v-if="(container.install === true || container.install === 'multiple') && container.updateAvailable"
         label
         color="success"
-        variant="outlined"
+        variant="flat"
         @click.stop="installContainer"
         class="mr-1"
       >
@@ -115,7 +115,7 @@
         <v-btn
           v-if="(container.install === true || container.install === 'multiple')"
           color="success"
-          variant="tonal"
+          variant="flat"
           size="small"
           class="ml-2 flex-shrink-0"
           @click.stop="installContainer"
