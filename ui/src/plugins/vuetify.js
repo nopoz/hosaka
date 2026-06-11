@@ -1,5 +1,10 @@
-// Google fonts
-import "@fontsource/roboto";
+// UI + mono fonts
+import "@fontsource/rajdhani/400.css";
+import "@fontsource/rajdhani/500.css";
+import "@fontsource/rajdhani/600.css";
+import "@fontsource/rajdhani/700.css";
+import "@fontsource/jetbrains-mono/400.css";
+import "@fontsource/jetbrains-mono/600.css";
 
 // Material design icons
 import "@mdi/font/css/materialdesignicons.css";
@@ -15,13 +20,15 @@ import "vuetify/styles";
 import { createVuetify } from "vuetify";
 
 const colors = {
-  primary: "#00355E",
-  secondary: "#0096C7",
+  primary: "#19E3E3",
+  secondary: "#D633FF",
   accent: "#06D6A0",
-  error: "#E53935",
+  error: "#FF2E5B",
+  warning: "#FF9E2C",
+  success: "#2BE88B",
   // Prerelease is the least-severe update rung; cyan keeps it distinct from
-  // the info-blue metadata chips and the major/minor/patch severity colors.
-  prerelease: "#00BCD4",
+  // the major/minor/patch severity colors on the near-black base.
+  prerelease: "#19E3E3",
 };
 
 export default createVuetify({
@@ -36,9 +43,10 @@ export default createVuetify({
         dark: true,
         colors: {
           ...colors,
-          surface: "#1E1E1E",
-          "surface-light": "#272727",
-          "surface-bright": "#BDBDBD",
+          background: "#0A0A0F",
+          surface: "#101019",
+          "surface-light": "#16161F",
+          "surface-bright": "#3A3A52",
         },
       },
     },
