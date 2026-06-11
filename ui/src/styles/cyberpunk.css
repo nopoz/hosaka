@@ -45,3 +45,11 @@ pre,
 .v-app-bar.v-toolbar {
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
+
+/* Remix icons render through Vuetify's mdi default icon set, which forces the
+   "Material Design Icons" family onto the ::before glyph. Restore the remixicon
+   family so the ri-* glyphs paint (same coexistence pattern the si-/fa- fonts
+   rely on). */
+.v-icon[class*="ri-"]::before {
+  font-family: "remixicon" !important;
+}
