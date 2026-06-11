@@ -1,5 +1,9 @@
 # Hosaka
 
+<p align="center">
+  <img src="docs/hero.png" alt="Hosaka" width="280">
+</p>
+
 [![CI](https://github.com/nopoz/hosaka/actions/workflows/ci.yml/badge.svg)](https://github.com/nopoz/hosaka/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/nopoz/hosaka?sort=semver)](https://github.com/nopoz/hosaka/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)

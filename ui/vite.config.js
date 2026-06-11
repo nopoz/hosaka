@@ -15,8 +15,8 @@ export default defineConfig({
       manifest: {
         name: "Hosaka",
         short_name: "Hosaka",
-        theme_color: "#00355E",
-        background_color: "#00355E",
+        theme_color: "#22D3EE",
+        background_color: "#0B0F17",
         icons: [
           {
             src: "img/icons/android-chrome-192x192.png",
