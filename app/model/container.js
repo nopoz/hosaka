@@ -9,7 +9,7 @@ const schema = joi.object({
     id: joi.string().min(1).required(),
     name: joi.string().min(1).required(),
     displayName: joi.string().default(joi.ref('name')),
-    displayIcon: joi.string().default('mdi:docker'),
+    displayIcon: joi.string().default('ri:box-3-line'),
     status: joi.string().default('unknown'),
     watcher: joi.string().min(1).required(),
     compose_project: joi.string().allow(null).default(null),
