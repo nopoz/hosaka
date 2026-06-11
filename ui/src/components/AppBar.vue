@@ -7,9 +7,9 @@
     >
       <v-icon>mdi-menu</v-icon>
     </v-app-bar-nav-icon>
-    <v-app-bar-nav-icon>
-      <v-img :src="logo" alt="logo" width="48" height="48" />
-    </v-app-bar-nav-icon>
+    <div class="logo-wrap">
+      <v-img :src="logo" alt="logo" width="34" height="34" class="logo-mark" />
+    </div>
 
     <v-toolbar-title
       v-if="viewName && 'home'.toLowerCase() !== viewName.toLowerCase()"
@@ -33,7 +33,7 @@
 </template>
 <script>
 import { logout } from "@/services/auth";
-import logo from "@/assets/wud_logo_white.png";
+import logo from "@/assets/hosaka-logo-dark.svg";
 
 export default {
   props: {
@@ -87,5 +87,19 @@ export default {
    suppress its overlay entirely (avoids relying on (hover:none) detection). */
 .menu-toggle :deep(.v-btn__overlay) {
   opacity: 0 !important;
+}
+
+/* Brand mark: breathing room on all sides so it never bumps the viewport edge
+   or the view title, plus a soft cyan glow that hugs the glyph silhouette. */
+.logo-wrap {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding-inline: 12px;
+  overflow: visible;
+}
+.logo-mark {
+  filter: drop-shadow(0 0 4px rgba(34, 211, 238, 0.55))
+    drop-shadow(0 0 10px rgba(34, 211, 238, 0.3));
 }
 </style>

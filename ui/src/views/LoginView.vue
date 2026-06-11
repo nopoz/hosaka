@@ -55,7 +55,6 @@
 import { getOidcRedirection, getStrategies } from "@/services/auth";
 import LoginBasic from "@/components/LoginBasic";
 import LoginOidc from "@/components/LoginOidc";
-import logo from "@/assets/wud_logo_white.png";
 import bus from "@/event-bus";
 
 export default {
@@ -65,7 +64,6 @@ export default {
   },
   data() {
     return {
-      logo,
       strategies: [],
       strategySelected: 0,
     };

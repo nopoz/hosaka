@@ -68,7 +68,6 @@ import { getTriggerIcon } from "@/services/trigger";
 import { getServerIcon } from "@/services/server";
 import { getWatcherIcon } from "@/services/watcher";
 import { getAuthenticationIcon } from "@/services/authentication";
-import logo from "@/assets/wud_logo_white.png";
 
 export default {
   props: {
@@ -79,7 +78,6 @@ export default {
   },
   emits: ["update:modelValue"],
   data: () => ({
-    logo,
     mini: true,
     darkMode: localStorage.darkMode !== "false",
     containerIcon: getContainerIcon(),
