@@ -27,7 +27,6 @@ export default {
     configurationItem() {
       return {
         name: "logs",
-        icon: "ri-bug-line",
         configuration: {
           level: this.log.level,
         },

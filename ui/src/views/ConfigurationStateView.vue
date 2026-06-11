@@ -26,7 +26,6 @@ export default {
     configurationItem() {
       return {
         name: "state",
-        icon: "ri-save-3-line",
         configuration: this.state.configuration,
       };
     },

@@ -15,7 +15,7 @@
 
 <script>
 import ConfigurationItem from "@/components/ConfigurationItem";
-import { getAllRegistries, getRegistryProviderIcon } from "@/services/registry";
+import { getAllRegistries } from "@/services/registry";
 import bus from "@/event-bus";
 
 export default {
@@ -31,13 +31,10 @@ export default {
   async beforeRouteEnter(to, from, next) {
     try {
       const registries = await getAllRegistries();
-      const registriesWithIcons = registries
-        .map((registry) => ({
-          ...registry,
-          icon: getRegistryProviderIcon(registry.type),
-        }))
-        .sort((r1, r2) => r1.name.localeCompare(r2.name));
-      next((vm) => (vm.registries = registriesWithIcons));
+      const sortedRegistries = registries.sort((r1, r2) =>
+        r1.name.localeCompare(r2.name),
+      );
+      next((vm) => (vm.registries = sortedRegistries));
     } catch (e) {
       bus.emit("notify", {
         message: `Error when trying to load the registries (${e.message})`,

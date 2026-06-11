@@ -40,21 +40,18 @@ export default {
     serverConfiguration() {
       return {
         name: "server",
-        icon: "ri-server-line",
         configuration: this.server.configuration,
       };
     },
     logConfiguration() {
       return {
         name: "logs",
-        icon: "ri-bug-line",
         configuration: this.log,
       };
     },
     storeConfiguration() {
       return {
         name: "store",
-        icon: "ri-stack-line",
         configuration: this.store.configuration,
       };
     },
