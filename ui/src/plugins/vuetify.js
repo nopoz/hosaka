@@ -23,16 +23,19 @@ const colors = {
   primary: "#19E3E3",
   secondary: "#D633FF",
   accent: "#06D6A0",
-  // Acid Matrix severity ladder: high-voltage red / yellow / acid-green / aqua,
-  // with a steel-blue for info/metadata. Each rung stays mutually distinct and
-  // legible on the near-black base.
-  error: "#FF1F4B",
-  warning: "#FFD60A",
-  success: "#5CFF3D",
-  info: "#4D9FFF",
-  // Prerelease is the least-severe update rung; aqua keeps it distinct from the
-  // major/minor/patch severity colors and from the cyan primary.
-  prerelease: "#00F0D0",
+  // Synthwave Sunset severity ladder: hot magenta / sunset orange / mint /
+  // electric violet, with a sky-blue for info/metadata. Each rung stays mutually
+  // distinct and legible on the near-black base.
+  error: "#FF2E97",
+  warning: "#FF7B29",
+  success: "#3DF5B0",
+  info: "#36C5FF",
+  // Prerelease is the least-severe update rung; electric violet keeps it distinct
+  // from the major/minor/patch severity colors and from the cyan primary.
+  prerelease: "#A35BFF",
+  // Dedicated colour for the one-click Update control so it reads as its own
+  // action, distinct from the (mint) patch rung.
+  update: "#5CFF3D",
 };
 
 export default createVuetify({
