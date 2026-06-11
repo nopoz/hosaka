@@ -1,0 +1,47 @@
+/* Neon Noir cyberpunk theme — global typography.
+   Palette tokens live in src/plugins/vuetify.js; this file owns the
+   font-family switch and the mono mapping. */
+
+/* UI font: Rajdhani. Override Vuetify's compiled default (Roboto). */
+.v-application {
+  font-family: "Rajdhani", "Segoe UI", sans-serif;
+}
+
+/* Vuetify's typography utility classes (text-body-1, text-caption, etc.) and
+   the toolbar title pin Roboto with higher specificity than .v-application, so
+   anything using them stays Roboto. Re-point them at Rajdhani so titles,
+   captions, and the footer match the rest of the UI. */
+.v-application .v-toolbar-title,
+.v-application .text-h1,
+.v-application .text-h2,
+.v-application .text-h3,
+.v-application .text-h4,
+.v-application .text-h5,
+.v-application .text-h6,
+.v-application .text-subtitle-1,
+.v-application .text-subtitle-2,
+.v-application .text-body-1,
+.v-application .text-body-2,
+.v-application .text-button,
+.v-application .text-caption,
+.v-application .text-overline {
+  font-family: "Rajdhani", "Segoe UI", sans-serif;
+}
+
+/* Mono: JetBrains Mono for code/console/version strings, and for every chip
+   (metadata + version) so the tag/version readouts stay terminal-legible. */
+code,
+kbd,
+samp,
+pre,
+.font-mono,
+.v-application .v-chip {
+  font-family: "JetBrains Mono", monospace;
+}
+
+/* Hairline that frames the app shell: the nav drawer already draws a 1px
+   right border; give the app bar a matching bottom border so the two meet at
+   the corner and read as one continuous edge around the chrome. */
+.v-app-bar.v-toolbar {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}

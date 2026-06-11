@@ -368,7 +368,7 @@ export default {
 .log-output {
   background-color: #1E1E1E;
   color: #FFFFFF;
-  font-family: monospace;
+  font-family: "JetBrains Mono", monospace;
   white-space: pre;
   height: 400px;
   overflow-y: auto;

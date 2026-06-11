@@ -5,12 +5,17 @@
     :temporary="$vuetify.display.smAndDown"
     :rail="isRail"
     theme="dark"
-    color="#363636"
+    color="#0D0D14"
   >
     <!-- Desktop only: the rail toggle. On mobile the drawer is a temporary
          overlay opened/closed by the AppBar hamburger, so an in-drawer toggle
          would be a duplicate of it. -->
-    <v-toolbar v-if="$vuetify.display.mdAndUp" flat class="ma-0 pa-0">
+    <v-toolbar
+      v-if="$vuetify.display.mdAndUp"
+      flat
+      color="transparent"
+      class="ma-0 pa-0"
+    >
       <v-app-bar-nav-icon class="menu-toggle" @click.stop="onNavIconClick">
         <v-icon>mdi-menu</v-icon>
       </v-app-bar-nav-icon>
@@ -22,7 +27,9 @@
         class="mb-0"
         :prepend-icon="containerIcon"
       >
-        <v-list-item-title>Containers</v-list-item-title>
+        <v-list-item-title class="nav-title text-uppercase"
+          >Containers</v-list-item-title
+        >
       </v-list-item>
 
       <v-divider key="divider" class="mb-0" />
@@ -34,14 +41,47 @@
         :prepend-icon="configurationItem.icon"
         class="mb-0"
       >
-        <v-list-item-title class="text-capitalize"
+        <v-list-item-title class="nav-title text-uppercase"
           >{{ configurationItem.name }}
         </v-list-item-title>
+      </v-list-item>
+
+      <v-divider key="info-divider" class="mb-0" />
+
+      <v-list-item
+        href="https://github.com/nopoz/hosaka"
+        target="_blank"
+        rel="noopener"
+        prepend-icon="mdi-github"
+        class="mb-0"
+      >
+        <v-list-item-title class="nav-title text-uppercase"
+          >GitHub</v-list-item-title
+        >
+      </v-list-item>
+
+      <v-list-item
+        href="https://nopoz.github.io/hosaka/"
+        target="_blank"
+        rel="noopener"
+        prepend-icon="mdi-book-open-variant"
+        class="mb-0"
+      >
+        <v-list-item-title class="nav-title text-uppercase"
+          >Docs</v-list-item-title
+        >
       </v-list-item>
     </v-list>
 
     <template v-slot:append v-if="!isRail">
       <v-list>
+        <v-list-item class="px-4 py-1">
+          <span class="text-caption text-medium-emphasis font-mono"
+            >Hosaka<template v-if="version && version !== 'unknown'">
+              v{{ version }}</template
+            ></span
+          >
+        </v-list-item>
         <v-list-item class="ml-2 mb-2">
           <v-switch
             hide-details
@@ -68,6 +108,7 @@ import { getTriggerIcon } from "@/services/trigger";
 import { getServerIcon } from "@/services/server";
 import { getWatcherIcon } from "@/services/watcher";
 import { getAuthenticationIcon } from "@/services/authentication";
+import { getAppInfos } from "@/services/app";
 
 export default {
   props: {
@@ -80,6 +121,7 @@ export default {
   data: () => ({
     mini: true,
     darkMode: localStorage.darkMode !== "false",
+    version: "unknown",
     containerIcon: getContainerIcon(),
     configurationItems: [
       {
@@ -161,8 +203,17 @@ export default {
     },
   },
 
-  beforeMount() {
+  async beforeMount() {
     this.setDarkMode(this.darkMode);
+    try {
+      const appInfos = await getAppInfos();
+      this.version = appInfos.version || "unknown";
+    } catch (e) {
+      this.$bus.emit("notify", {
+        message: `Error when trying to get app version (${e.message})`,
+        level: "error",
+      });
+    }
   },
 };
 </script>
@@ -172,5 +223,12 @@ export default {
    grey circle after a tap (matches the AppBar hamburger). */
 .menu-toggle :deep(.v-btn__overlay) {
   opacity: 0 !important;
+}
+
+/* All-caps nav labels get a touch of tracking so condensed Rajdhani reads
+   cleanly in uppercase (matches the app-bar title + footer). */
+.nav-title {
+  letter-spacing: 0.1em;
+  font-weight: 600;
 }
 </style>

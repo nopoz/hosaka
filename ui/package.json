@@ -21,7 +21,8 @@
     "vuetify": "3.12.7"
   },
   "devDependencies": {
-    "@fontsource/roboto": "5.1.0",
+    "@fontsource/jetbrains-mono": "5.1.0",
+    "@fontsource/rajdhani": "5.1.0",
     "@mdi/font": "7.4.47",
     "@vitejs/plugin-vue": "5.2.4",
     "@vue/eslint-config-prettier": "9.0.0",

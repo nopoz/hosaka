@@ -3,6 +3,7 @@ import App from "./App.vue";
 import vuetify from "./plugins/vuetify";
 import router from "./router";
 import bus from "./event-bus";
+import "./styles/cyberpunk.css";
 
 const app = createApp(App);
 

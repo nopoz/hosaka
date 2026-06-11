@@ -4,8 +4,9 @@
       <template #prepend>
         <v-icon color="secondary">mdi-identifier</v-icon>
       </template>
-      <v-list-item-title>
-        Id
+      <v-list-item-title>Id</v-list-item-title>
+      <v-list-item-subtitle>
+        {{ image.id }}
         <v-tooltip location="bottom">
           <template v-slot:activator="{ props }">
             <v-btn
@@ -15,13 +16,14 @@
               v-bind="props"
               @click="copyToClipboard('image id', image.id)"
             >
-              <v-icon>mdi-clipboard</v-icon>
+              <v-icon size="small" class="text-medium-emphasis"
+                >mdi-clipboard</v-icon
+              >
             </v-btn>
           </template>
           <span class="text-caption">Copy to clipboard</span>
         </v-tooltip>
-      </v-list-item-title>
-      <v-list-item-subtitle>{{ image.id }}</v-list-item-subtitle>
+      </v-list-item-subtitle>
     </v-list-item>
     <v-list-item>
       <template #prepend>
@@ -58,8 +60,9 @@
       <template #prepend>
         <v-icon color="secondary">mdi-function-variant</v-icon>
       </template>
-      <v-list-item-title>
-        Digest
+      <v-list-item-title>Digest</v-list-item-title>
+      <v-list-item-subtitle>
+        {{ image.digest.value }}
         <v-tooltip location="bottom">
           <template v-slot:activator="{ props }">
             <v-btn
@@ -69,14 +72,13 @@
               v-bind="props"
               @click="copyToClipboard('image digest', image.digest.value)"
             >
-              <v-icon>mdi-clipboard</v-icon>
+              <v-icon size="small" class="text-medium-emphasis"
+                >mdi-clipboard</v-icon
+              >
             </v-btn>
           </template>
           <span class="text-caption">Copy to clipboard</span>
         </v-tooltip>
-      </v-list-item-title>
-      <v-list-item-subtitle>
-        {{ image.digest.value }}
       </v-list-item-subtitle>
     </v-list-item>
     <v-list-item>
@@ -101,6 +103,7 @@
 <script>
 import { getRegistryProviderIcon } from "@/services/registry";
 import { date } from "@/filters";
+import { copyTextToClipboard } from "@/utils/clipboard";
 
 export default {
   props: {
@@ -133,9 +136,14 @@ export default {
 
   methods: {
     date,
-    copyToClipboard(kind, value) {
-      navigator.clipboard.writeText(value);
-      this.$bus.emit("notify", { message: `${kind} copied to clipboard` });
+    async copyToClipboard(kind, value) {
+      const copied = await copyTextToClipboard(value);
+      this.$bus.emit(
+        "notify",
+        copied
+          ? { message: `${kind} copied to clipboard` }
+          : { message: `Unable to copy ${kind} to clipboard`, level: "error" },
+      );
     },
   },
 };

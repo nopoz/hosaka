@@ -44,7 +44,7 @@
       <v-chip
         v-if="(container.install === true || container.install === 'multiple') && container.updateAvailable"
         label
-        color="success"
+        color="update"
         variant="outlined"
         @click.stop="installContainer"
         class="mr-1"
@@ -59,10 +59,7 @@
             variant="outlined"
             :color="newVersionClass"
             v-bind="props"
-            @click="
-              copyToClipboard('container new version', newVersion);
-              $event.stopImmediatePropagation();
-            "
+            @click.stop="copyToClipboard('container new version', newVersion)"
           >
             {{ newVersion }}
             <v-icon end size="small">mdi-clipboard-outline</v-icon>
@@ -78,7 +75,7 @@
          clear of the expand chevron so it can't be mis-tapped. -->
     <div v-else class="mobile-header">
       <div
-        class="d-flex align-center px-3 py-2"
+        class="d-flex align-center px-2 py-2"
         @click="collapseDetail()"
         style="cursor: pointer"
       >
@@ -100,7 +97,7 @@
       </div>
       <div
         v-if="container.updateAvailable"
-        class="d-flex align-center px-3 pb-2"
+        class="d-flex align-center px-2 pb-2"
       >
         <span class="text-caption text-truncate">
           <span class="text-medium-emphasis">{{
@@ -114,8 +111,8 @@
         <v-spacer />
         <v-btn
           v-if="(container.install === true || container.install === 'multiple')"
-          color="success"
-          variant="tonal"
+          color="update"
+          variant="outlined"
           size="small"
           class="ml-2 flex-shrink-0"
           @click.stop="installContainer"
@@ -128,7 +125,7 @@
       <div v-show="showDetail">
         <v-tabs fixed-tabs v-model="tab" ref="tabs">
           <v-tab>
-            <span v-if="$vuetify.display.mdAndUp">Container</span>
+            <span v-if="$vuetify.display.mdAndUp" class="me-2">Container</span>
             <img
               :src="selfhstContainerIconUrl"
               style="width: 24px; height: 24px"
@@ -140,15 +137,15 @@
             </v-icon>
           </v-tab>
           <v-tab>
-            <span v-if="$vuetify.display.mdAndUp">Image</span>
+            <span v-if="$vuetify.display.mdAndUp" class="me-2">Image</span>
             <v-icon>mdi-package-variant-closed</v-icon>
           </v-tab>
           <v-tab v-if="container.result">
-            <span v-if="$vuetify.display.mdAndUp">Update</span>
+            <span v-if="$vuetify.display.mdAndUp" class="me-2">Update</span>
             <v-icon>mdi-package-down</v-icon>
           </v-tab>
           <v-tab v-if="container.error">
-            <span v-if="$vuetify.display.mdAndUp">Error</span>
+            <span v-if="$vuetify.display.mdAndUp" class="me-2">Error</span>
             <v-icon>mdi-alert</v-icon>
           </v-tab>
         </v-tabs>
@@ -257,6 +254,7 @@ import ContainerUpdate from "@/components/ContainerUpdate";
 import ContainerError from "@/components/ContainerError";
 import { getRegistryProviderIcon } from "@/services/registry";
 import { date, short } from "@/filters";
+import { copyTextToClipboard } from "@/utils/clipboard";
 import ScriptOutputDialog from './ScriptOutputDialog.vue';
 
 export default {
@@ -432,9 +430,14 @@ export default {
       this.$emit("delete-container");
     },
 
-    copyToClipboard(kind, value) {
-      navigator.clipboard.writeText(value);
-      this.$bus.emit("notify", { message: `${kind} copied to clipboard` });
+    async copyToClipboard(kind, value) {
+      const copied = await copyTextToClipboard(value);
+      this.$bus.emit(
+        "notify",
+        copied
+          ? { message: `${kind} copied to clipboard` }
+          : { message: `Unable to copy ${kind} to clipboard`, level: "error" },
+      );
     },
 
     collapseDetail() {
@@ -522,5 +525,16 @@ export default {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+}
+
+/* Trim the desktop toolbar's default 16px side padding so the chips sit closer
+   to the row edges and reclaim horizontal space. The toolbar title also adds a
+   16px start margin by default; trim it too so the left chips align with the
+   tightened row, keeping just a small gap from the edge. */
+.v-toolbar :deep(.v-toolbar__content) {
+  padding-inline: 8px;
+}
+.v-toolbar :deep(.v-toolbar-title) {
+  margin-inline-start: 4px;
 }
 </style>

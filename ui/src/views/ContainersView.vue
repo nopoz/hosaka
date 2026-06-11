@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid>
+  <v-container fluid class="px-2 px-md-3 pt-4 pb-2">
     <v-row dense>
       <v-col>
         <container-filter

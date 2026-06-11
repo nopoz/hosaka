@@ -13,14 +13,12 @@
 
     <!-- Sizes your content based upon application components -->
     <v-main>
-      <v-row>
-        <v-col>
+      <v-row no-gutters>
+        <v-col class="pa-0">
           <router-view></router-view>
         </v-col>
       </v-row>
     </v-main>
-
-    <app-footer v-if="authenticated && $vuetify.display.mdAndUp" />
   </v-app>
 </template>
 
@@ -28,7 +26,6 @@
 import NavigationDrawer from "@/components/NavigationDrawer";
 import AppBar from "@/components/AppBar";
 import SnackBar from "@/components/SnackBar";
-import AppFooter from "@/components/AppFooter";
 import { getServer } from "@/services/server";
 
 export default {
@@ -36,7 +33,6 @@ export default {
     NavigationDrawer,
     AppBar,
     SnackBar,
-    AppFooter,
   },
   data() {
     return {
