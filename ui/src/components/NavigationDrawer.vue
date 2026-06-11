@@ -5,7 +5,7 @@
     :temporary="$vuetify.display.smAndDown"
     :rail="isRail"
     theme="dark"
-    color="#363636"
+    color="#0D0D14"
   >
     <!-- Desktop only: the rail toggle. On mobile the drawer is a temporary
          overlay opened/closed by the AppBar hamburger, so an in-drawer toggle
@@ -22,7 +22,9 @@
         class="mb-0"
         :prepend-icon="containerIcon"
       >
-        <v-list-item-title>Containers</v-list-item-title>
+        <v-list-item-title class="nav-title text-uppercase"
+          >Containers</v-list-item-title
+        >
       </v-list-item>
 
       <v-divider key="divider" class="mb-0" />
@@ -34,7 +36,7 @@
         :prepend-icon="configurationItem.icon"
         class="mb-0"
       >
-        <v-list-item-title class="text-capitalize"
+        <v-list-item-title class="nav-title text-uppercase"
           >{{ configurationItem.name }}
         </v-list-item-title>
       </v-list-item>
@@ -172,5 +174,12 @@ export default {
    grey circle after a tap (matches the AppBar hamburger). */
 .menu-toggle :deep(.v-btn__overlay) {
   opacity: 0 !important;
+}
+
+/* All-caps nav labels get a touch of tracking so condensed Rajdhani reads
+   cleanly in uppercase (matches the app-bar title + footer). */
+.nav-title {
+  letter-spacing: 0.1em;
+  font-weight: 600;
 }
 </style>
