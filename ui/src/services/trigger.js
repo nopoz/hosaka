@@ -1,5 +1,5 @@
 function getTriggerIcon() {
-  return "mdi-bell-ring";
+  return "ri-notification-3-line";
 }
 
 async function getAllTriggers() {

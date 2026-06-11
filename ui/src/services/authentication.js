@@ -1,5 +1,5 @@
 function getAuthenticationIcon() {
-  return "mdi-lock";
+  return "ri-lock-2-line";
 }
 
 async function getAllAuthentications() {

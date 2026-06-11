@@ -1,5 +1,5 @@
 function getWatcherIcon() {
-  return "mdi-update";
+  return "ri-radar-line";
 }
 
 async function getAllWatchers() {

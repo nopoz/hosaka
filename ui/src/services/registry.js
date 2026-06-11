@@ -3,7 +3,7 @@
  * @returns {string}
  */
 function getRegistryIcon() {
-  return "mdi-database-search";
+  return "ri-database-2-line";
 }
 
 /**
@@ -12,13 +12,13 @@ function getRegistryIcon() {
  * @returns {string}
  */
 function getRegistryProviderIcon(provider) {
-  let icon = "mdi-help";
+  let icon = "ri-question-line";
   switch (provider) {
     case "acr":
       icon = "si-microsoftazure";
       break;
     case "custom":
-      icon = "mdi-home";
+      icon = "ri-home-4-line";
       break;
     case "ecr":
       icon = "si-amazonaws";

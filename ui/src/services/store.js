@@ -1,5 +1,5 @@
 function getStoreIcon() {
-  return "mdi-file-multiple";
+  return "ri-stack-line";
 }
 
 async function getStore() {
