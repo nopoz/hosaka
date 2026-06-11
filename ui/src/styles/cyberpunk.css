@@ -7,6 +7,13 @@
   font-family: "Rajdhani", "Segoe UI", sans-serif;
 }
 
+/* Vuetify pins Roboto on .v-toolbar-title with higher specificity than
+   .v-application, so the app-bar title needs an explicit override to match
+   the rest of the UI font. */
+.v-application .v-toolbar-title {
+  font-family: "Rajdhani", "Segoe UI", sans-serif;
+}
+
 /* Mono: JetBrains Mono for code/console/version strings. */
 code,
 kbd,
