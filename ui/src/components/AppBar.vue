@@ -1,5 +1,5 @@
 <template>
-  <v-app-bar flat tile density="compact" theme="dark" color="#272727">
+  <v-app-bar flat tile density="compact" theme="dark" color="#0D0D14">
     <v-app-bar-nav-icon
       v-if="$vuetify.display.smAndDown"
       class="menu-toggle"

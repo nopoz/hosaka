@@ -15,3 +15,35 @@ pre,
 .font-mono {
   font-family: "JetBrains Mono", monospace;
 }
+
+/* --- Subtle glow accents (Neon Noir) --- */
+
+/* App bar gets a faint cyan underglow on its bottom edge. */
+.v-app-bar.v-toolbar {
+  box-shadow: 0 1px 16px rgba(25, 227, 227, 0.10);
+}
+
+/* Container rows: calm by default, cyan edge on hover/focus only. */
+.v-list-item:hover,
+.v-list-item:focus-visible {
+  box-shadow: inset 0 0 0 1px rgba(25, 227, 227, 0.35),
+    0 0 14px rgba(25, 227, 227, 0.12);
+}
+
+/* Update severity chips glow in their own color so the ladder pops. */
+.v-chip.text-error,
+.v-chip.bg-error {
+  box-shadow: 0 0 10px rgba(255, 46, 91, 0.45);
+}
+.v-chip.text-warning,
+.v-chip.bg-warning {
+  box-shadow: 0 0 10px rgba(255, 158, 44, 0.4);
+}
+.v-chip.text-success,
+.v-chip.bg-success {
+  box-shadow: 0 0 10px rgba(43, 232, 139, 0.4);
+}
+.v-chip.text-prerelease,
+.v-chip.bg-prerelease {
+  box-shadow: 0 0 10px rgba(25, 227, 227, 0.45);
+}
