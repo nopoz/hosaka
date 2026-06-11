@@ -1,0 +1,17 @@
+/* Neon Noir cyberpunk theme — global typography + accent glow.
+   Palette tokens live in src/plugins/vuetify.js; this file owns the
+   font-family switch, the mono mapping, and the subtle glow accents. */
+
+/* UI font: Rajdhani. Override Vuetify's compiled default (Roboto). */
+.v-application {
+  font-family: "Rajdhani", "Segoe UI", sans-serif;
+}
+
+/* Mono: JetBrains Mono for code/console/version strings. */
+code,
+kbd,
+samp,
+pre,
+.font-mono {
+  font-family: "JetBrains Mono", monospace;
+}
