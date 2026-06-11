@@ -26,7 +26,7 @@ export default {
     configurationItem() {
       return {
         name: "state",
-        icon: "mdi-content-save",
+        icon: "ri-save-3-line",
         configuration: this.state.configuration,
       };
     },

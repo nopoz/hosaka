@@ -40,21 +40,21 @@ export default {
     serverConfiguration() {
       return {
         name: "server",
-        icon: "mdi-connection",
+        icon: "ri-server-line",
         configuration: this.server.configuration,
       };
     },
     logConfiguration() {
       return {
         name: "logs",
-        icon: "mdi-bug",
+        icon: "ri-bug-line",
         configuration: this.log,
       };
     },
     storeConfiguration() {
       return {
         name: "store",
-        icon: "mdi-file-multiple",
+        icon: "ri-stack-line",
         configuration: this.store.configuration,
       };
     },
