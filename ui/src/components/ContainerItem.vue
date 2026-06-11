@@ -294,6 +294,7 @@ export default {
       let icon = this.container.displayIcon;
       icon = icon
         .replace("mdi:", "mdi-")
+        .replace("ri:", "ri-")
         .replace("fa:", "fa-")
         .replace("fab:", "fab-")
         .replace("far:", "far-")
