@@ -7,45 +7,13 @@ function getRegistryIcon() {
 }
 
 /**
- * Get registry provider icon (acr, ecr...).
- * @param provider
+ * Get registry provider icon. A single uniform glyph is used for every
+ * provider (the registry icon is a low-emphasis part of the UI, so per-provider
+ * brand logos aren't worth the off-theme clash with the line icon set).
  * @returns {string}
  */
-function getRegistryProviderIcon(provider) {
-  let icon = "ri-question-line";
-  switch (provider) {
-    case "acr":
-      icon = "si-microsoftazure";
-      break;
-    case "custom":
-      icon = "ri-home-4-line";
-      break;
-    case "ecr":
-      icon = "si-amazonaws";
-      break;
-    case "forgejo":
-      icon = "si-forgejo";
-      break;
-    case "gcr":
-      icon = "si-googlecloud";
-      break;
-    case "ghcr":
-      icon = "si-github";
-      break;
-    case "gitea":
-      icon = "si-gitea";
-      break;
-    case "gitlab":
-      icon = "si-gitlab";
-      break;
-    case "hub":
-      icon = "si-docker";
-      break;
-    case "quay":
-      icon = "si-redhat";
-      break;
-  }
-  return icon;
+function getRegistryProviderIcon() {
+  return "ri-database-2-line";
 }
 
 /**

@@ -51,7 +51,7 @@ pre,
    onto the ::before glyph. Non-mdi icon fonts only declare their family on the
    element, so their glyphs paint in the wrong font (blank/garbled). Restore the
    correct family on the ::before for each font we render through <v-icon>:
-   remixicon (app chrome) and Simple Icons (registry provider logos). */
+   remixicon (app chrome) and Simple Icons (user `si:` display.icon overrides). */
 .v-icon[class*="ri-"]::before {
   font-family: "remixicon" !important;
 }

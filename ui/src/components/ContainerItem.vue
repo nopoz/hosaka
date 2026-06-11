@@ -327,7 +327,7 @@ export default {
     },
 
     registryIcon() {
-      return getRegistryProviderIcon(this.container.image.registry.name);
+      return getRegistryProviderIcon();
     },
 
     osIcon() {
