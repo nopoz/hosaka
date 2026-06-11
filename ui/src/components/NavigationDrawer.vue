@@ -10,7 +10,12 @@
     <!-- Desktop only: the rail toggle. On mobile the drawer is a temporary
          overlay opened/closed by the AppBar hamburger, so an in-drawer toggle
          would be a duplicate of it. -->
-    <v-toolbar v-if="$vuetify.display.mdAndUp" flat class="ma-0 pa-0">
+    <v-toolbar
+      v-if="$vuetify.display.mdAndUp"
+      flat
+      color="transparent"
+      class="ma-0 pa-0"
+    >
       <v-app-bar-nav-icon class="menu-toggle" @click.stop="onNavIconClick">
         <v-icon>mdi-menu</v-icon>
       </v-app-bar-nav-icon>

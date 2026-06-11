@@ -1,16 +1,30 @@
-/* Neon Noir cyberpunk theme — global typography + accent glow.
+/* Neon Noir cyberpunk theme — global typography.
    Palette tokens live in src/plugins/vuetify.js; this file owns the
-   font-family switch, the mono mapping, and the subtle glow accents. */
+   font-family switch and the mono mapping. */
 
 /* UI font: Rajdhani. Override Vuetify's compiled default (Roboto). */
 .v-application {
   font-family: "Rajdhani", "Segoe UI", sans-serif;
 }
 
-/* Vuetify pins Roboto on .v-toolbar-title with higher specificity than
-   .v-application, so the app-bar title needs an explicit override to match
-   the rest of the UI font. */
-.v-application .v-toolbar-title {
+/* Vuetify's typography utility classes (text-body-1, text-caption, etc.) and
+   the toolbar title pin Roboto with higher specificity than .v-application, so
+   anything using them stays Roboto. Re-point them at Rajdhani so titles,
+   captions, and the footer match the rest of the UI. */
+.v-application .v-toolbar-title,
+.v-application .text-h1,
+.v-application .text-h2,
+.v-application .text-h3,
+.v-application .text-h4,
+.v-application .text-h5,
+.v-application .text-h6,
+.v-application .text-subtitle-1,
+.v-application .text-subtitle-2,
+.v-application .text-body-1,
+.v-application .text-body-2,
+.v-application .text-button,
+.v-application .text-caption,
+.v-application .text-overline {
   font-family: "Rajdhani", "Segoe UI", sans-serif;
 }
 
@@ -21,36 +35,4 @@ samp,
 pre,
 .font-mono {
   font-family: "JetBrains Mono", monospace;
-}
-
-/* --- Subtle glow accents (Neon Noir) --- */
-
-/* App bar gets a faint cyan underglow on its bottom edge. */
-.v-app-bar.v-toolbar {
-  box-shadow: 0 1px 16px rgba(25, 227, 227, 0.10);
-}
-
-/* Container rows: calm by default, cyan edge on hover/focus only. */
-.v-list-item:hover,
-.v-list-item:focus-visible {
-  box-shadow: inset 0 0 0 1px rgba(25, 227, 227, 0.35),
-    0 0 14px rgba(25, 227, 227, 0.12);
-}
-
-/* Update severity chips glow in their own color so the ladder pops. */
-.v-chip.text-error,
-.v-chip.bg-error {
-  box-shadow: 0 0 10px rgba(255, 46, 91, 0.45);
-}
-.v-chip.text-warning,
-.v-chip.bg-warning {
-  box-shadow: 0 0 10px rgba(255, 158, 44, 0.4);
-}
-.v-chip.text-success,
-.v-chip.bg-success {
-  box-shadow: 0 0 10px rgba(43, 232, 139, 0.4);
-}
-.v-chip.text-prerelease,
-.v-chip.bg-prerelease {
-  box-shadow: 0 0 10px rgba(25, 227, 227, 0.45);
 }
