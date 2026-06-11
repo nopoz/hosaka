@@ -46,10 +46,15 @@ pre,
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-/* Remix icons render through Vuetify's mdi default icon set, which forces the
-   "Material Design Icons" family onto the ::before glyph. Restore the remixicon
-   family so the ri-* glyphs paint (same coexistence pattern the si-/fa- fonts
-   rely on). */
+/* Vuetify's mdi default icon set adds a base `mdi` class to every <v-icon> and
+   its `.mdi::before { font-family: "Material Design Icons" }` forces that family
+   onto the ::before glyph. Non-mdi icon fonts only declare their family on the
+   element, so their glyphs paint in the wrong font (blank/garbled). Restore the
+   correct family on the ::before for each font we render through <v-icon>:
+   remixicon (app chrome) and Simple Icons (registry provider logos). */
 .v-icon[class*="ri-"]::before {
   font-family: "remixicon" !important;
+}
+.v-icon[class*="si-"]::before {
+  font-family: "Simple Icons" !important;
 }
