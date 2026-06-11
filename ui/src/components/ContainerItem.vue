@@ -10,7 +10,7 @@
     >
       <v-toolbar-title class="text-body-3">
         <v-chip label color="info" variant="outlined" disabled
-          ><v-icon start>mdi-update</v-icon
+          ><v-icon start>ri-arrow-up-circle-line</v-icon
           >{{ container.watcher }}
         </v-chip>
         /
@@ -62,12 +62,12 @@
             @click.stop="copyToClipboard('container new version', newVersion)"
           >
             {{ newVersion }}
-            <v-icon end size="small">mdi-clipboard-outline</v-icon>
+            <v-icon end size="small">ri-file-copy-line</v-icon>
           </v-chip>
         </template>
         <span class="text-caption">Copy to clipboard</span>
       </v-tooltip>
-      <v-icon>{{ showDetail ? "mdi-chevron-up" : "mdi-chevron-down" }}</v-icon>
+      <v-icon>{{ showDetail ? "ri-arrow-up-s-line" : "ri-arrow-down-s-line" }}</v-icon>
     </v-toolbar>
 
     <!-- Mobile: a purpose-built two-line row. Line 1 (name) toggles the detail;
@@ -92,7 +92,7 @@
           {{ container.displayName }}
         </span>
         <v-icon class="ml-2 flex-shrink-0">{{
-          showDetail ? "mdi-chevron-up" : "mdi-chevron-down"
+          showDetail ? "ri-arrow-up-s-line" : "ri-arrow-down-s-line"
         }}</v-icon>
       </div>
       <div
@@ -104,7 +104,7 @@
             container.image.tag.value
           }}</span>
           <v-icon size="x-small" :color="newVersionClass" class="mx-1"
-            >mdi-arrow-right</v-icon
+            >ri-arrow-right-line</v-icon
           >
           <span :class="'text-' + newVersionClass">{{ newVersion }}</span>
         </span>
@@ -138,15 +138,15 @@
           </v-tab>
           <v-tab>
             <span v-if="$vuetify.display.mdAndUp" class="me-2">Image</span>
-            <v-icon>mdi-package-variant-closed</v-icon>
+            <v-icon>ri-archive-2-line</v-icon>
           </v-tab>
           <v-tab v-if="container.result">
             <span v-if="$vuetify.display.mdAndUp" class="me-2">Update</span>
-            <v-icon>mdi-package-down</v-icon>
+            <v-icon>ri-arrow-up-circle-line</v-icon>
           </v-tab>
           <v-tab v-if="container.error">
             <span v-if="$vuetify.display.mdAndUp" class="me-2">Error</span>
-            <v-icon>mdi-alert</v-icon>
+            <v-icon>ri-alert-line</v-icon>
           </v-tab>
         </v-tabs>
 
@@ -182,7 +182,7 @@
                     v-bind="props"
                   >
                     Delete
-                    <v-icon end>mdi-delete</v-icon>
+                    <v-icon end>ri-delete-bin-6-line</v-icon>
                   </v-btn>
                 </template>
 
@@ -294,6 +294,7 @@ export default {
       let icon = this.container.displayIcon;
       icon = icon
         .replace("mdi:", "mdi-")
+        .replace("ri:", "ri-")
         .replace("fa:", "fa-")
         .replace("fab:", "fab-")
         .replace("far:", "far-")
@@ -326,17 +327,17 @@ export default {
     },
 
     registryIcon() {
-      return getRegistryProviderIcon(this.container.image.registry.name);
+      return getRegistryProviderIcon();
     },
 
     osIcon() {
-      let icon = "mdi-help";
+      let icon = "ri-question-line";
       switch (this.container.image.os) {
         case "linux":
-          icon = "mdi-linux";
+          icon = "ri-ubuntu-line";
           break;
         case "windows":
-          icon = "mdi-microsoft-windows";
+          icon = "ri-windows-line";
           break;
       }
       return icon;

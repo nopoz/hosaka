@@ -59,7 +59,7 @@ test('model should be validated when compliant', () => {
         },
         name: 'test',
         displayName: 'test',
-        displayIcon: 'mdi:docker',
+        displayIcon: 'ri:box-3-line',
         // eslint-disable-next-line no-template-curly-in-string
         linkTemplate: 'https://release-${major}.${minor}.${patch}.acme.com',
         link: 'https://release-1.0.0.acme.com',
@@ -307,7 +307,7 @@ test('flatten should be flatten the nested properties with underscores when call
         link_template: 'https://release-${major}.${minor}.${patch}.acme.com',
         name: 'test',
         display_name: 'test',
-        display_icon: 'mdi:docker',
+        display_icon: 'ri:box-3-line',
         result_link: 'https://release-2.0.0.acme.com',
         result_tag: '2.0.0',
         update_available: true,

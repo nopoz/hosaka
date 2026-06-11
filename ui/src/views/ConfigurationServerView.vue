@@ -40,21 +40,18 @@ export default {
     serverConfiguration() {
       return {
         name: "server",
-        icon: "mdi-connection",
         configuration: this.server.configuration,
       };
     },
     logConfiguration() {
       return {
         name: "logs",
-        icon: "mdi-bug",
         configuration: this.log,
       };
     },
     storeConfiguration() {
       return {
         name: "store",
-        icon: "mdi-file-multiple",
         configuration: this.store.configuration,
       };
     },

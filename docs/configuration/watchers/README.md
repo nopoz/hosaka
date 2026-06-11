@@ -198,7 +198,7 @@ To fine-tune the behaviour of Hosaka _per container_, you can add labels on them
 | `hosaka.tag.transform`   | :white_circle: | Transform function to apply to the tag             | `$valid_regex => $valid_string_with_placeholders` (see below)                                                                                                               |                                                                                       |
 | `hosaka.link.template`   | :white_circle: | Browsable link associated to the container version | String template with placeholders `${raw}` `${major}` `${minor}` `${patch}` `${prerelease}`                                                                                 |                                                                                       |
 | `hosaka.display.name`    | :white_circle: | Custom display name for the container              | Valid String                                                                                                                                                                | Container name                                                                        |
-| `hosaka.display.icon`    | :white_circle: | Custom display icon for the container              | Valid [Material Design Icon](https://materialdesignicons.com/), [Fontawesome Icon](https://fontawesome.com/) or [Simple icon](https://simpleicons.org/) (see details below) | `mdi:docker`                                                                          |
+| `hosaka.display.icon`    | :white_circle: | Custom display icon for the container              | Valid [Material Design Icon](https://materialdesignicons.com/), [Fontawesome Icon](https://fontawesome.com/), [Simple icon](https://simpleicons.org/) or [Remix icon](https://remixicon.com/) (see details below) | `ri:box-3-line`                                                                       |
 | `hosaka.trigger.include` | :white_circle: | Triggers that may fire for this container          | Comma-separated trigger ids, each optionally suffixed with `:threshold` (see [Per-container trigger routing](#per-container-trigger-routing) below)                         | All configured triggers fire                                                          |
 | `hosaka.trigger.exclude` | :white_circle: | Triggers that must not fire for this container     | Comma-separated trigger ids, each optionally suffixed with `:threshold` (see [Per-container trigger routing](#per-container-trigger-routing) below)                         | No triggers excluded                                                                  |
 
@@ -402,6 +402,7 @@ You can customize the name & the icon of a container (displayed in the UI, in Ho
 
 Icons must be prefixed with:
 - `mdi:` or `mdi-` for [Material Design icons](https://materialdesignicons.com/) (`mdi:database`, `mdi-server`...)
+- `ri:` or `ri-` for [Remix icons](https://remixicon.com/) (`ri:server-line`, `ri-database-2-line`...)
 - `fab:` or `fab-` for [Fontawesome brand icons](https://fontawesome.com/) (`fab:github`, `fab-mailchimp`...)
 - `far:` or `far-` for [Fontawesome regular icons](https://fontawesome.com/) (`far:heart`, `far-house`...)
 - `fas:` or `fas-` for [Fontawesome solid icons](https://fontawesome.com/) (`fas:heart`, `fas-house`...)

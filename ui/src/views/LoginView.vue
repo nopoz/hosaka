@@ -11,7 +11,7 @@
         <v-container>
           <v-row justify="center" class="ma-1">
             <v-avatar color="primary" size="80">
-              <v-icon size="x-large">mdi-account</v-icon>
+              <v-icon size="x-large">ri-user-line</v-icon>
             </v-avatar>
           </v-row>
           <v-row>

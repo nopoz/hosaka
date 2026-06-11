@@ -27,7 +27,6 @@ export default {
     configurationItem() {
       return {
         name: "logs",
-        icon: "mdi-bug",
         configuration: {
           level: this.log.level,
         },

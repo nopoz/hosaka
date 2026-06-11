@@ -3,7 +3,7 @@
     <v-list density="compact" v-if="updateAvailable">
       <v-list-item v-if="result.tag">
         <template #prepend>
-          <v-icon color="secondary">mdi-tag</v-icon>
+          <v-icon color="secondary">ri-price-tag-3-line</v-icon>
         </template>
         <v-list-item-title>
           Tag
@@ -22,7 +22,7 @@
       </v-list-item>
       <v-list-item v-if="result.digest">
         <template #prepend>
-          <v-icon color="secondary">mdi-function-variant</v-icon>
+          <v-icon color="secondary">ri-fingerprint-line</v-icon>
         </template>
         <v-list-item-title>
           Digest
@@ -35,7 +35,7 @@
                 v-bind="props"
                 @click="copyToClipboard('result digest', result.digest)"
               >
-                <v-icon>mdi-clipboard</v-icon>
+                <v-icon>ri-clipboard-line</v-icon>
               </v-btn>
             </template>
             <span class="text-caption">Copy to clipboard</span>
@@ -48,17 +48,17 @@
       <v-list-item>
         <template #prepend>
           <v-icon v-if="updateKind.semverDiff === 'patch'" color="success"
-            >mdi-information</v-icon
+            >ri-information-line</v-icon
           >
           <v-icon v-else-if="updateKind.semverDiff === 'major'" color="error"
-            >mdi-alert-decagram</v-icon
+            >ri-error-warning-line</v-icon
           >
           <v-icon
             v-else-if="updateKind.semverDiff === 'prerelease'"
             color="prerelease"
-            >mdi-information-outline</v-icon
+            >ri-information-line</v-icon
           >
-          <v-icon v-else color="warning">mdi-alert</v-icon>
+          <v-icon v-else color="warning">ri-alert-line</v-icon>
         </template>
         <v-list-item-title>Update kind</v-list-item-title>
         <v-list-item-subtitle>
@@ -67,7 +67,7 @@
       </v-list-item>
       <v-list-item v-if="result.link">
         <template #prepend>
-          <v-icon color="secondary">mdi-link</v-icon>
+          <v-icon color="secondary">ri-links-line</v-icon>
         </template>
         <v-list-item-title>Link</v-list-item-title>
         <v-list-item-subtitle

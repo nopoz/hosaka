@@ -27,8 +27,12 @@ const db = new Loki(`${configuration.path}/${configuration.file}`, {
 });
 
 function createCollections() {
-    app.createCollections(db);
+    // Containers must be loaded before the app collection: creating the app
+    // collection triggers version migration (store/migrate.js), and the
+    // migrations operate on container rows. Loading app first leaves the
+    // container collection unset, so migrations silently no-op.
     container.createCollections(db);
+    app.createCollections(db);
 }
 
 /**

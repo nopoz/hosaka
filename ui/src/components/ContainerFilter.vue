@@ -4,10 +4,10 @@
          compact row by default; keep Watch now always reachable. -->
     <div v-if="$vuetify.display.smAndDown" class="d-flex align-center mb-2">
       <v-btn variant="tonal" size="small" @click.stop="showFilters = !showFilters">
-        <v-icon start>mdi-filter-variant</v-icon>
+        <v-icon start>ri-filter-3-line</v-icon>
         Filters
         <v-icon end>{{
-          showFilters ? "mdi-chevron-up" : "mdi-chevron-down"
+          showFilters ? "ri-arrow-up-s-line" : "ri-arrow-down-s-line"
         }}</v-icon>
       </v-btn>
       <v-spacer />
@@ -18,7 +18,7 @@
         :loading="isRefreshing"
       >
         Watch now
-        <v-icon end>mdi-refresh</v-icon>
+        <v-icon end>ri-refresh-line</v-icon>
       </v-btn>
     </div>
 
@@ -92,7 +92,7 @@
           :loading="isRefreshing"
         >
           Watch now
-          <v-icon> mdi-refresh</v-icon>
+          <v-icon end class="ms-1">ri-refresh-line</v-icon>
         </v-btn>
       </v-col>
       </v-row>

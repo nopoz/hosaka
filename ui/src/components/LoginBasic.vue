@@ -4,7 +4,7 @@
       <v-text-field
         label="Username"
         v-model="username"
-        append-inner-icon="mdi-account"
+        append-inner-icon="ri-user-line"
         :rules="[rules.required]"
         variant="outlined"
         autofocus
@@ -13,7 +13,7 @@
         label="Password"
         type="password"
         v-model="password"
-        append-inner-icon="mdi-lock"
+        append-inner-icon="ri-lock-2-line"
         :rules="[rules.required]"
         variant="outlined"
       />

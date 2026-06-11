@@ -2,7 +2,7 @@
   <v-list density="compact">
     <v-list-item>
       <template #prepend>
-        <v-icon color="secondary">mdi-identifier</v-icon>
+        <v-icon color="secondary">ri-hashtag</v-icon>
       </template>
       <v-list-item-title>Id</v-list-item-title>
       <v-list-item-subtitle>
@@ -17,7 +17,7 @@
               @click="copyToClipboard('container id', container.id)"
             >
               <v-icon size="small" class="text-medium-emphasis"
-                >mdi-clipboard</v-icon
+                >ri-clipboard-line</v-icon
               >
             </v-btn>
           </template>
@@ -27,21 +27,21 @@
     </v-list-item>
     <v-list-item>
       <template #prepend>
-        <v-icon color="secondary">mdi-pencil</v-icon>
+        <v-icon color="secondary">ri-pencil-line</v-icon>
       </template>
       <v-list-item-title>Name</v-list-item-title>
       <v-list-item-subtitle>{{ container.name }}</v-list-item-subtitle>
     </v-list-item>
     <v-list-item>
       <template #prepend>
-        <v-icon color="secondary">mdi-restart</v-icon>
+        <v-icon color="secondary">ri-restart-line</v-icon>
       </template>
       <v-list-item-title>Status</v-list-item-title>
       <v-list-item-subtitle>{{ container.status }}</v-list-item-subtitle>
     </v-list-item>
     <v-list-item>
       <template #prepend>
-        <v-icon color="secondary">mdi-update</v-icon>
+        <v-icon color="secondary">ri-radar-line</v-icon>
       </template>
       <v-list-item-title>Watcher</v-list-item-title>
       <v-list-item-subtitle>
@@ -52,7 +52,7 @@
     </v-list-item>
     <v-list-item v-if="container.includeTags">
       <template #prepend>
-        <v-icon color="secondary">mdi-tag</v-icon>
+        <v-icon color="secondary">ri-price-tag-3-line</v-icon>
       </template>
       <v-list-item-title>
         Include tags
@@ -66,7 +66,7 @@
               href="https://regex101.com"
               target="_blank"
             >
-              <v-icon>mdi-regex</v-icon>
+              <v-icon>ri-asterisk</v-icon>
             </v-btn>
           </template>
           <span>Test on regex101.com</span>
@@ -76,7 +76,7 @@
     </v-list-item>
     <v-list-item v-if="container.excludeTags">
       <template #prepend>
-        <v-icon color="secondary">mdi-tag-off</v-icon>
+        <v-icon color="secondary">ri-forbid-2-line</v-icon>
       </template>
       <v-list-item-title>
         Exclude tags
@@ -90,7 +90,7 @@
               href="https://regex101.com"
               target="_blank"
             >
-              <v-icon>mdi-regex</v-icon>
+              <v-icon>ri-asterisk</v-icon>
             </v-btn>
           </template>
           <span>Test on regex101.com</span>
@@ -100,7 +100,7 @@
     </v-list-item>
     <v-list-item v-if="container.transformTags">
       <template #prepend>
-        <v-icon color="secondary">mdi-tag-arrow-right</v-icon>
+        <v-icon color="secondary">ri-arrow-right-line</v-icon>
       </template>
       <v-list-item-title>Transform tags</v-list-item-title>
       <v-list-item-subtitle>{{
@@ -109,7 +109,7 @@
     </v-list-item>
     <v-list-item v-if="container.linkTemplate">
       <template #prepend>
-        <v-icon color="secondary">mdi-file-replace</v-icon>
+        <v-icon color="secondary">ri-file-edit-line</v-icon>
       </template>
       <v-list-item-title>Link template</v-list-item-title>
       <v-list-item-subtitle>{{
@@ -118,7 +118,7 @@
     </v-list-item>
     <v-list-item v-if="container.link">
       <template #prepend>
-        <v-icon color="secondary">mdi-link</v-icon>
+        <v-icon color="secondary">ri-links-line</v-icon>
       </template>
       <v-list-item-title>Link</v-list-item-title>
       <v-list-item-subtitle

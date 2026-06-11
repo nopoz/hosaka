@@ -5,7 +5,7 @@
       class="menu-toggle"
       @click.stop="$emit('toggle-drawer')"
     >
-      <v-icon>mdi-menu</v-icon>
+      <v-icon>ri-menu-line</v-icon>
     </v-app-bar-nav-icon>
     <div class="logo-wrap">
       <v-img :src="logo" alt="logo" width="34" height="34" class="logo-mark" />
@@ -28,7 +28,7 @@
         <v-btn v-bind="props" variant="text" size="small" class="text-lowercase">
           {{ user.username }}
           &nbsp;
-          <v-icon size="small">mdi-account</v-icon>
+          <v-icon size="small">ri-user-line</v-icon>
         </v-btn>
       </template>
       <v-list density="compact">

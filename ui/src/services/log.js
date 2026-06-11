@@ -1,5 +1,5 @@
 function getLogIcon() {
-  return "mdi-bug";
+  return "ri-bug-line";
 }
 
 async function getLog() {

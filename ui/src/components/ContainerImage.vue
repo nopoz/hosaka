@@ -2,7 +2,7 @@
   <v-list density="compact">
     <v-list-item>
       <template #prepend>
-        <v-icon color="secondary">mdi-identifier</v-icon>
+        <v-icon color="secondary">ri-hashtag</v-icon>
       </template>
       <v-list-item-title>Id</v-list-item-title>
       <v-list-item-subtitle>
@@ -17,7 +17,7 @@
               @click="copyToClipboard('image id', image.id)"
             >
               <v-icon size="small" class="text-medium-emphasis"
-                >mdi-clipboard</v-icon
+                >ri-clipboard-line</v-icon
               >
             </v-btn>
           </template>
@@ -27,7 +27,7 @@
     </v-list-item>
     <v-list-item>
       <template #prepend>
-        <v-icon color="secondary">mdi-pencil</v-icon>
+        <v-icon color="secondary">ri-pencil-line</v-icon>
       </template>
       <v-list-item-title>Name</v-list-item-title>
       <v-list-item-subtitle>{{ image.name }}</v-list-item-subtitle>
@@ -41,7 +41,7 @@
     </v-list-item>
     <v-list-item>
       <template #prepend>
-        <v-icon color="secondary">mdi-tag</v-icon>
+        <v-icon color="secondary">ri-price-tag-3-line</v-icon>
       </template>
       <v-list-item-title>
         Tag &nbsp;<v-chip
@@ -58,7 +58,7 @@
     </v-list-item>
     <v-list-item v-if="image.digest.value">
       <template #prepend>
-        <v-icon color="secondary">mdi-function-variant</v-icon>
+        <v-icon color="secondary">ri-fingerprint-line</v-icon>
       </template>
       <v-list-item-title>Digest</v-list-item-title>
       <v-list-item-subtitle>
@@ -73,7 +73,7 @@
               @click="copyToClipboard('image digest', image.digest.value)"
             >
               <v-icon size="small" class="text-medium-emphasis"
-                >mdi-clipboard</v-icon
+                >ri-clipboard-line</v-icon
               >
             </v-btn>
           </template>
@@ -92,7 +92,7 @@
     </v-list-item>
     <v-list-item v-if="image.created">
       <template #prepend>
-        <v-icon color="secondary">mdi-calendar</v-icon>
+        <v-icon color="secondary">ri-calendar-line</v-icon>
       </template>
       <v-list-item-title>Created</v-list-item-title>
       <v-list-item-subtitle>{{ date(image.created) }}</v-list-item-subtitle>
@@ -117,17 +117,17 @@ export default {
   },
   computed: {
     registryIcon() {
-      return getRegistryProviderIcon(this.image.registry.name);
+      return getRegistryProviderIcon();
     },
 
     osIcon() {
-      let icon = "mdi-help";
+      let icon = "ri-question-line";
       switch (this.image.os) {
         case "linux":
-          icon = "mdi-linux";
+          icon = "ri-ubuntu-line";
           break;
         case "windows":
-          icon = "mdi-microsoft-windows";
+          icon = "ri-windows-line";
           break;
       }
       return icon;

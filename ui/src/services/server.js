@@ -1,5 +1,5 @@
 function getServerIcon() {
-  return "mdi-connection";
+  return "ri-server-line";
 }
 
 async function getServer() {

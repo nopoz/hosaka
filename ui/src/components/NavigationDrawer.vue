@@ -17,7 +17,7 @@
       class="ma-0 pa-0"
     >
       <v-app-bar-nav-icon class="menu-toggle" @click.stop="onNavIconClick">
-        <v-icon>mdi-menu</v-icon>
+        <v-icon>ri-menu-line</v-icon>
       </v-app-bar-nav-icon>
     </v-toolbar>
     <v-list nav class="pt-0 pb-0">
@@ -52,7 +52,7 @@
         href="https://github.com/nopoz/hosaka"
         target="_blank"
         rel="noopener"
-        prepend-icon="mdi-github"
+        prepend-icon="ri-github-line"
         class="mb-0"
       >
         <v-list-item-title class="nav-title text-uppercase"
@@ -64,7 +64,7 @@
         href="https://nopoz.github.io/hosaka/"
         target="_blank"
         rel="noopener"
-        prepend-icon="mdi-book-open-variant"
+        prepend-icon="ri-book-open-line"
         class="mb-0"
       >
         <v-list-item-title class="nav-title text-uppercase"
@@ -92,7 +92,7 @@
             @update:model-value="toggleDarkMode"
           >
             <template v-slot:label>
-              <v-icon>mdi-weather-night</v-icon>
+              <v-icon>ri-moon-line</v-icon>
             </template>
           </v-switch>
         </v-list-item>

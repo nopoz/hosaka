@@ -1,5 +1,5 @@
 function getContainerIcon() {
-  return "mdi-docker";
+  return "ri-box-3-line";
 }
 
 async function getAllContainers() {
