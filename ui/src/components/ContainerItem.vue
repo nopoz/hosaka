@@ -254,6 +254,7 @@ import ContainerUpdate from "@/components/ContainerUpdate";
 import ContainerError from "@/components/ContainerError";
 import { getRegistryProviderIcon } from "@/services/registry";
 import { date, short } from "@/filters";
+import { copyTextToClipboard } from "@/utils/clipboard";
 import ScriptOutputDialog from './ScriptOutputDialog.vue';
 
 export default {
@@ -429,39 +430,14 @@ export default {
       this.$emit("delete-container");
     },
 
-    copyToClipboard(kind, value) {
-      const ok = () =>
-        this.$bus.emit("notify", { message: `${kind} copied to clipboard` });
-      const fail = () =>
-        this.$bus.emit("notify", {
-          message: `Unable to copy ${kind} to clipboard`,
-          level: "error",
-        });
-      // Prefer the async Clipboard API; it is only available in secure contexts
-      // (https / localhost), so fall back to a hidden-textarea execCommand copy
-      // for plain-http LAN access.
-      if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(value).then(ok, fail);
-        return;
-      }
-      try {
-        const textarea = document.createElement("textarea");
-        textarea.value = value;
-        textarea.style.position = "fixed";
-        textarea.style.opacity = "0";
-        document.body.appendChild(textarea);
-        textarea.focus();
-        textarea.select();
-        const copied = document.execCommand("copy");
-        document.body.removeChild(textarea);
-        if (copied) {
-          ok();
-        } else {
-          fail();
-        }
-      } catch (e) {
-        fail();
-      }
+    async copyToClipboard(kind, value) {
+      const copied = await copyTextToClipboard(value);
+      this.$bus.emit(
+        "notify",
+        copied
+          ? { message: `${kind} copied to clipboard` }
+          : { message: `Unable to copy ${kind} to clipboard`, level: "error" },
+      );
     },
 
     collapseDetail() {

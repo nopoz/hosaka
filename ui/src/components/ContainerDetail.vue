@@ -16,7 +16,9 @@
               v-bind="props"
               @click="copyToClipboard('container id', container.id)"
             >
-              <v-icon size="small">mdi-clipboard</v-icon>
+              <v-icon size="small" class="text-medium-emphasis"
+                >mdi-clipboard</v-icon
+              >
             </v-btn>
           </template>
           <span class="text-caption">Copy to clipboard</span>
@@ -126,6 +128,8 @@
   </v-list>
 </template>
 <script>
+import { copyTextToClipboard } from "@/utils/clipboard";
+
 export default {
   props: {
     container: {
@@ -138,9 +142,14 @@ export default {
   },
 
   methods: {
-    copyToClipboard(kind, value) {
-      navigator.clipboard.writeText(value);
-      this.$bus.emit("notify", { message: `${kind} copied to clipboard` });
+    async copyToClipboard(kind, value) {
+      const copied = await copyTextToClipboard(value);
+      this.$bus.emit(
+        "notify",
+        copied
+          ? { message: `${kind} copied to clipboard` }
+          : { message: `Unable to copy ${kind} to clipboard`, level: "error" },
+      );
     },
   },
 };
