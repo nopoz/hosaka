@@ -43,6 +43,12 @@ function getHaDevice() {
  * @return {*}
  */
 function sanitizeIcon(icon) {
+    // Home Assistant's frontend only renders Material Design Icons (mdi:).
+    // Remix icons (the UI default) have no HA equivalent, so fall back to a
+    // docker glyph rather than emitting an unrenderable ri: icon.
+    if (icon.startsWith('ri:') || icon.startsWith('ri-')) {
+        return 'mdi:docker';
+    }
     return icon
         .replace('mdi-', 'mdi:')
         .replace('fa-', 'fa:')

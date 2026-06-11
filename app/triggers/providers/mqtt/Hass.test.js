@@ -79,6 +79,36 @@ test('addContainerSensor must publish sensor discovery message expected by HA', 
     }), { retain: true });
 });
 
+test('addContainerSensor must map remix icon to mdi:docker for HA', async () => {
+    await hass.addContainerSensor({
+        name: 'container-name',
+        watcher: 'watcher-name',
+        displayIcon: 'ri:box-3-line',
+    });
+    expect(mqttClientMock.publish).toHaveBeenCalledWith('homeassistant/update/topic_watcher-name_container-name/config', JSON.stringify({
+        unique_id: 'topic_watcher-name_container-name',
+        object_id: 'topic_watcher-name_container-name',
+        name: 'topic_watcher-name_container-name',
+        device: {
+            identifiers: [
+                'hosaka',
+            ],
+            manufacturer: 'hosaka',
+            model: 'hosaka',
+            name: 'hosaka',
+            sw_version: 'unknown',
+        },
+        icon: 'mdi:docker',
+        entity_picture: 'https://github.com/nopoz/hosaka/raw/main/docs/wud_logo.png',
+        state_topic: 'topic/watcher-name/container-name',
+        force_update: true,
+        value_template: '{{ value_json.image_tag_value }}',
+        latest_version_topic: 'topic/watcher-name/container-name',
+        latest_version_template: '{% if value_json.update_kind_kind == "digest" %}{{ value_json.result_digest[:15] }}{% else %}{{ value_json.result_tag }}{% endif %}',
+        json_attributes_topic: 'topic/watcher-name/container-name',
+    }), { retain: true });
+});
+
 test('removeContainerSensor must publish sensor discovery message expected by HA', async () => {
     await hass.removeContainerSensor({
         name: 'container-name',
