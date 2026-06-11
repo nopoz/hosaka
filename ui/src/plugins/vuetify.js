@@ -9,6 +9,9 @@ import "@fontsource/jetbrains-mono/600.css";
 // Material design icons
 import "@mdi/font/css/materialdesignicons.css";
 
+// Remix icon (app-chrome icon set)
+import "remixicon/fonts/remixicon.css";
+
 // Font-awesome
 import "@fortawesome/fontawesome-free/css/all.css";
 
