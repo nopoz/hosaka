@@ -17,7 +17,7 @@
             @click="close"
             v-if="!isComplete && !error"
           >
-            <v-icon>mdi-close</v-icon>
+            <v-icon>ri-close-line</v-icon>
           </v-btn>
         </div>
 

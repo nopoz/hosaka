@@ -6,7 +6,7 @@
       }}</v-toolbar-title>
       <v-spacer />
       <v-icon>{{ item.icon }}</v-icon>
-      <v-icon>{{ showDetail ? "mdi-chevron-up" : "mdi-chevron-down" }}</v-icon>
+      <v-icon>{{ showDetail ? "ri-arrow-up-s-line" : "ri-arrow-down-s-line" }}</v-icon>
     </v-toolbar>
     <v-expand-transition>
       <v-card-text v-show="showDetail">
