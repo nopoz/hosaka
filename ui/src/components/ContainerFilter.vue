@@ -92,7 +92,7 @@
           :loading="isRefreshing"
         >
           Watch now
-          <v-icon> ri-refresh-line</v-icon>
+          <v-icon end class="ms-1">ri-refresh-line</v-icon>
         </v-btn>
       </v-col>
       </v-row>
