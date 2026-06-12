@@ -1,0 +1,177 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 620" font-family="'Rajdhani','Segoe UI',sans-serif">
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#5a5a78"/>
+    </marker>
+    <marker id="arc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#19E3E3"/>
+    </marker>
+    <marker id="arg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#5CFF3D"/>
+    </marker>
+    <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="3.2" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glowg" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="4.5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <style>
+      .lbl{font-size:13px;font-weight:600;fill:#E4E4F0}
+      .sub{font-size:11px;fill:#9A9AB5;font-family:'JetBrains Mono',monospace}
+      .edge{font-size:11px;fill:#8a8aa6;font-family:'JetBrains Mono',monospace}
+      .name{font-size:16px;font-weight:700;fill:#19E3E3}
+      .node{rx:8}
+      .core{fill:#16161F;stroke:#19E3E3;stroke-width:1.5}
+      .watcher{fill:#0c2f37;stroke:#19E3E3;stroke-width:1.3}
+      .registry{fill:#2e0f3a;stroke:#D633FF;stroke-width:1.3}
+      .trigger{fill:#0e3326;stroke:#3DF5B0;stroke-width:1.3}
+      .script{fill:#13380f;stroke:#5CFF3D;stroke-width:2}
+      .ext{fill:#101019;stroke:#2A2A3A;stroke-width:1.2}
+      .conn{stroke:#5a5a78;stroke-width:1.4;fill:none}
+      .connc{stroke:#19E3E3;stroke-width:1.4;fill:none;stroke-dasharray:5 4;opacity:.85}
+      .conng{stroke:#5CFF3D;stroke-width:2.2;fill:none}
+      .cyan{fill:#7df0f0}.viol{fill:#e3a6ff}.grn{fill:#9af5d0}.upd{fill:#bfffae}
+    </style>
+  </defs>
+
+  <!-- ===== layer 0: background ===== -->
+  <rect x="0" y="0" width="1040" height="620" fill="#0A0A0F"/>
+  <rect x="270" y="52" width="500" height="470" rx="14" fill="#0d0d16" stroke="#23233a" stroke-width="1.2"/>
+
+  <!-- ===== layer 1: links (start/stop on the hex perimeter, never inside) ===== -->
+  <g>
+    <!-- hosts -> watchers (dashed cyan) -->
+    <path class="connc" d="M186 196 H280" marker-end="url(#arc)"/>
+    <path class="connc" d="M186 268 H280" marker-end="url(#arc)"/>
+    <path class="connc" d="M186 340 H280" marker-end="url(#arc)"/>
+    <!-- watchers -> core (land on left edge of hex) -->
+    <path class="conn" d="M400 196 C436 198 452 210 478 221" marker-end="url(#ar)"/>
+    <path class="conn" d="M400 268 H463" marker-end="url(#ar)"/>
+    <path class="conn" d="M400 340 C436 338 452 304 478 293" marker-end="url(#ar)"/>
+    <!-- ui/api expose -> core (land on top edges of hex) -->
+    <path class="conn" d="M430 128 C448 158 484 188 506 205" marker-end="url(#ar)"/>
+    <path class="conn" d="M610 128 C592 158 556 188 534 205" marker-end="url(#ar)"/>
+    <!-- core -> triggers (leave from right edge of hex) -->
+    <path class="conng" d="M545 214 C575 200 596 196 632 192" marker-end="url(#arg)"/>
+    <path class="conn"  d="M573 258 H632" marker-end="url(#ar)"/>
+    <path class="conn"  d="M573 282 C600 296 612 308 632 322" marker-end="url(#ar)"/>
+    <path class="conn"  d="M540 301 C572 348 600 362 632 374" marker-end="url(#ar)"/>
+    <!-- triggers -> external destinations -->
+    <path class="conng" d="M764 192 H816" marker-end="url(#arg)"/>
+    <path class="conn"  d="M764 264 H816" marker-end="url(#ar)"/>
+    <path class="conn"  d="M764 322 H816" marker-end="url(#ar)"/>
+    <path class="conn"  d="M764 374 H816" marker-end="url(#ar)"/>
+    <!-- core -> registries (leave from bottom edge of hex) -->
+    <path class="conn" d="M503 303 C476 350 430 392 390 430" marker-end="url(#ar)"/>
+    <path class="conn" d="M520 311 V430" marker-end="url(#ar)"/>
+    <path class="conn" d="M537 303 C564 350 610 392 650 430" marker-end="url(#ar)"/>
+    <!-- registries -> providers -->
+    <path class="conn" d="M384 480 V540" marker-end="url(#ar)"/>
+    <path class="conn" d="M520 480 V540" marker-end="url(#ar)"/>
+    <path class="conn" d="M656 480 V540" marker-end="url(#ar)"/>
+  </g>
+
+  <!-- ===== layer 2: nodes ===== -->
+  <g>
+    <!-- ui / api -->
+    <rect class="node core" x="385" y="86" width="90" height="42"/>
+    <rect class="node core" x="565" y="86" width="90" height="42"/>
+
+    <!-- Hosaka core mark (hex spans x 467..573, y 202..311) -->
+    <g filter="url(#glowg)" transform="translate(520 256) scale(1.2) translate(-50 -50)">
+      <g transform="translate(50 50) scale(0.96) translate(-50 -50)">
+        <polygon points="50,3.39 96.07,25.43 96.07,75.32 50,97.36 3.93,75.32 3.93,25.43" fill="none" stroke="#19E3E3" stroke-width="3.34"/>
+        <polygon fill="#19E3E3" points="50.00,12.93 43.10,12.93 43.00,28.88 14.22,29.31 23.71,38.69 42.13,38.69 42.24,39.55 12.50,68.97 14.55,69.72 27.91,68.43 43.00,53.77 43.10,85.67 50.00,85.67 50.00,85.67 56.90,85.67 57.00,53.77 72.09,68.43 85.45,69.72 87.50,68.97 57.76,39.55 57.87,38.69 76.29,38.69 85.78,29.31 57.00,28.88 56.90,12.93 50.00,12.93"/>
+      </g>
+    </g>
+
+    <!-- watchers (pushed left to open a gap from the core) -->
+    <rect class="node watcher" x="280" y="174" width="120" height="44"/>
+    <rect class="node watcher" x="280" y="246" width="120" height="44"/>
+    <rect class="node watcher" x="280" y="318" width="120" height="44"/>
+
+    <!-- triggers (pushed right to open a gap from the core) -->
+    <rect class="node script"  x="632" y="166" width="132" height="52" filter="url(#glow)"/>
+    <rect class="node trigger" x="632" y="244" width="132" height="40"/>
+    <rect class="node trigger" x="632" y="302" width="132" height="40"/>
+    <rect class="node trigger" x="632" y="354" width="132" height="40"/>
+
+    <!-- registries -->
+    <rect class="node registry" x="342" y="434" width="84" height="46"/>
+    <rect class="node registry" x="478" y="434" width="84" height="46"/>
+    <rect class="node registry" x="614" y="434" width="84" height="46"/>
+
+    <!-- external: hosts -->
+    <rect class="node ext" x="26" y="166" width="160" height="58"/>
+    <rect class="node ext" x="26" y="248" width="160" height="40"/>
+    <rect class="node ext" x="26" y="320" width="160" height="40"/>
+
+    <!-- external: destinations -->
+    <rect class="node ext" x="816" y="166" width="166" height="52" stroke="#5CFF3D"/>
+    <rect class="node ext" x="816" y="244" width="166" height="40"/>
+    <rect class="node ext" x="816" y="302" width="166" height="40"/>
+    <rect class="node ext" x="816" y="354" width="166" height="40"/>
+
+    <!-- external: registry providers -->
+    <rect class="node ext" x="342" y="540" width="84" height="42"/>
+    <rect class="node ext" x="478" y="540" width="84" height="42"/>
+    <rect class="node ext" x="614" y="540" width="84" height="42"/>
+  </g>
+
+  <!-- ===== layer 3: labels (always on top) ===== -->
+  <g>
+    <text class="lbl" x="430" y="112" text-anchor="middle">UI</text>
+    <text class="lbl" x="610" y="112" text-anchor="middle">API</text>
+    <text class="edge" x="520" y="150" text-anchor="middle">expose</text>
+    <text class="name" x="520" y="360" text-anchor="middle">Hosaka</text>
+
+    <!-- watchers -->
+    <text class="lbl cyan" x="340" y="192" text-anchor="middle">LOCAL</text>
+    <text class="sub" x="340" y="208" text-anchor="middle">Watcher</text>
+    <text class="lbl cyan" x="340" y="264" text-anchor="middle">REMOTE</text>
+    <text class="sub" x="340" y="280" text-anchor="middle">Watcher</text>
+    <text class="lbl cyan" x="340" y="336" text-anchor="middle">REMOTE</text>
+    <text class="sub" x="340" y="352" text-anchor="middle">Watcher</text>
+    <text class="edge" x="340" y="162" text-anchor="middle">watch containers</text>
+
+    <!-- triggers -->
+    <text class="lbl upd" x="698" y="188" text-anchor="middle" font-size="14">SCRIPT</text>
+    <text class="sub" x="698" y="205" text-anchor="middle" fill="#bfffae">one-click update</text>
+    <text class="lbl grn" x="698" y="269" text-anchor="middle">HTTP Trigger</text>
+    <text class="lbl grn" x="698" y="327" text-anchor="middle">SMTP Trigger</text>
+    <text class="lbl grn" x="698" y="379" text-anchor="middle">MQTT Trigger</text>
+    <text class="edge" x="698" y="158" text-anchor="middle">trigger actions</text>
+
+    <!-- registries -->
+    <text class="lbl viol" x="384" y="455" text-anchor="middle">HUB</text>
+    <text class="sub" x="384" y="471" text-anchor="middle">Registry</text>
+    <text class="lbl viol" x="520" y="455" text-anchor="middle">ECR</text>
+    <text class="sub" x="520" y="471" text-anchor="middle">Registry</text>
+    <text class="lbl viol" x="656" y="455" text-anchor="middle">GHCR</text>
+    <text class="sub" x="656" y="471" text-anchor="middle">Registry</text>
+    <text class="edge" x="520" y="408" text-anchor="middle">query for updates</text>
+
+    <!-- external hosts -->
+    <text class="lbl" x="38" y="190">Local Host</text>
+    <text class="sub" x="38" y="208" fill="#7df0f0">nginx · mariadb</text>
+    <text class="lbl" x="38" y="273">Remote Host X</text>
+    <text class="lbl" x="38" y="345">Remote Host Y</text>
+    <text class="edge" x="233" y="190" text-anchor="middle">docker.sock</text>
+    <text class="edge" x="233" y="262" text-anchor="middle">tcp://x:2376</text>
+    <text class="edge" x="233" y="334" text-anchor="middle">tcp://y:2376</text>
+
+    <!-- external destinations -->
+    <text class="lbl" x="899" y="186" text-anchor="middle" fill="#bfffae">Portainer stack</text>
+    <text class="sub" x="899" y="203" text-anchor="middle" fill="#bfffae">image:current → target</text>
+    <text class="lbl" x="899" y="269" text-anchor="middle">Webhook</text>
+    <text class="lbl" x="899" y="327" text-anchor="middle">Mailbox</text>
+    <text class="lbl" x="899" y="379" text-anchor="middle">MQTT broker</text>
+
+    <!-- external providers -->
+    <text class="lbl" x="384" y="566" text-anchor="middle" font-size="11">Docker Hub</text>
+    <text class="lbl" x="520" y="566" text-anchor="middle" font-size="11">AWS ECR</text>
+    <text class="lbl" x="656" y="566" text-anchor="middle" font-size="11">GitHub</text>
+  </g>
+</svg>
