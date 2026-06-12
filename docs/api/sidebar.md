@@ -1,4 +1,4 @@
-- [Introduction](introduction/)
+- [Introduction](/)
 - [Quick start](quickstart/)
 - [Configuration](configuration/)
 - [UI](ui/)
