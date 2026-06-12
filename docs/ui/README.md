@@ -4,8 +4,6 @@ In addition to the REST API, Hosaka exposes a web UI on the same port.
 
 > [**http://localhost:3000**](http://localhost:3000)
 
-![image](ui.png)
-
 ## One-click container updates
 
 Each container row with an available update shows an **Update** button. Clicking
@@ -48,19 +46,20 @@ The selected sort key is remembered for the browser session.
 
 ## Semver color ladder
 
-The update icon in each row is colored to reflect the severity of the available
-change:
+The update icon in each row is tinted to reflect the severity of the available
+change. Each rung maps to a Vuetify theme token rather than a fixed color, so the
+exact hue follows whichever theme is active:
 
-| Semver diff  | Color                    |
-|--------------|--------------------------|
-| `major`      | Red (error)              |
-| `minor`      | Orange (warning)         |
-| `patch`      | Green (success)          |
-| `prerelease` | Cyan (`#00BCD4`)         |
+| Semver diff  | Theme token  | Meaning                   |
+|--------------|--------------|---------------------------|
+| `major`      | `error`      | highest-severity update   |
+| `minor`      | `warning`    | mid-severity update       |
+| `patch`      | `success`    | low-severity update       |
+| `prerelease` | `prerelease` | distinct pre-release rung  |
 
-The prerelease color is a custom Vuetify theme token that keeps pre-release
-candidates visually distinct from stable releases without implying a higher or
-lower urgency than patch.
+`prerelease` is a dedicated theme token (not reused from `error`/`warning`/
+`success`) so pre-release candidates stay visually distinct from stable releases
+without implying more or less urgency than a patch.
 
 ## Update-lifecycle reliability
 

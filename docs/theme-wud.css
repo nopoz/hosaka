@@ -1,5 +1,174 @@
+/* Hosaka docs theme — "Neon Noir" dark, matched to the app UI.
+   Near-black base, cyan primary, electric-violet accents. Variable names are
+   docsify-themeable's; see https://jhildenbiddle.github.io/docsify-themeable */
+
 :root {
-    --base-font-size: 14px;
-    --theme-color   : #0E7490;
-    --content-max-width: 150em;
+  --base-font-size: 14px;
+  --content-max-width: 150em;
+
+  /* Palette (mirrors ui/src/plugins/vuetify.js) */
+  --theme-color: #19E3E3;        /* primary cyan */
+  --bg: #0A0A0F;                 /* background */
+  --surface: #101019;            /* sidebar / panels */
+  --surface-light: #16161F;      /* code / hover */
+  --border: #2A2A3A;
+  --text: #E4E4F0;
+  --text-muted: #9A9AB5;
+  --accent: #D633FF;             /* electric violet */
+
+  /* Page */
+  --base-background-color: var(--bg);
+  --base-color: var(--text);
+  --mono-font: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+
+  /* Links */
+  --link-color: var(--theme-color);
+  --link-color--hover: #5CFFFF;
+
+  /* Headings */
+  --heading-color: #FFFFFF;
+  --heading-h1-color: #FFFFFF;
+  --heading-h2-border-color: var(--border);
+
+  /* Sidebar */
+  --sidebar-background: var(--surface);
+  --sidebar-border-color: var(--border);
+  --sidebar-nav-link-color: var(--text-muted);
+  --sidebar-nav-link-color--active: var(--theme-color);
+  --sidebar-nav-link-border-color--active: var(--theme-color);
+  --sidebar-nav-link-color--hover: var(--text);
+  --sidebar-name-color: #FFFFFF;
+
+  /* Code */
+  --code-font-family: var(--mono-font);
+  --code-inline-background: var(--surface-light);
+  --code-inline-color: #5CFFFF;
+  --code-theme-background: var(--surface-light);
+  --pre-background: var(--surface-light);
+
+  /* Blockquote / notices */
+  --blockquote-background: var(--surface-light);
+  --blockquote-border-color: var(--accent);
+  --blockquote-color: var(--text-muted);
+
+  /* Tables */
+  --table-cell-border-color: var(--border);
+  --table-row-odd-background-color: var(--surface);
+  --table-row-even-background-color: var(--bg);
+
+  /* Search */
+  --search-input-background-color: var(--surface-light);
+  --search-input-border-color: var(--border);
+  --search-result-heading-color: var(--theme-color);
+
+  /* Copy-code button */
+  --docsifycopycode-background: var(--theme-color);
+  --docsifycopycode-color: var(--bg);
+}
+
+/* Brand mark in the sidebar: same soft cyan glow as the app AppBar logo. */
+.sidebar .app-name-link img,
+.sidebar img.logo,
+.app-name-link img {
+  filter: drop-shadow(0 0 4px rgba(34, 211, 238, 0.55))
+    drop-shadow(0 0 10px rgba(34, 211, 238, 0.3));
+}
+
+/* Docsify callouts (?> tip / !> warn) ship hardcoded near-white backgrounds
+   that vanish under the light text. Re-skin them onto the dark surface. */
+.markdown-section p.tip,
+.markdown-section p.warn {
+  background: var(--surface-light) !important;
+  color: var(--text) !important;
+  border-radius: 4px;
+}
+.markdown-section p.tip {
+  border-left: 4px solid var(--theme-color) !important;
+}
+.markdown-section p.warn {
+  border-left: 4px solid var(--warning, #FF7B29) !important;
+}
+.markdown-section p.tip strong,
+.markdown-section p.warn strong {
+  color: var(--text) !important;
+}
+.markdown-section p.tip code,
+.markdown-section p.warn code {
+  background: rgba(255, 255, 255, 0.08);
+  color: #5CFFFF;
+}
+
+/* Zebra striping ships a hardcoded near-white colour for odd rows. */
+.markdown-section table tbody tr:nth-child(odd) {
+  background-color: var(--surface-light) !important;
+}
+.markdown-section table tbody tr:nth-child(even) {
+  background-color: var(--surface) !important;
+}
+.markdown-section table td,
+.markdown-section table th {
+  border-color: var(--border) !important;
+}
+
+/* Fenced code blocks: the base (non-token) text inherits a near-black #333,
+   which is invisible on the dark surface. Token colours from prism-tomorrow
+   are fine and override this. */
+.markdown-section pre[data-lang],
+.markdown-section pre[data-lang] code {
+  color: #d6d6e6 !important;
+}
+
+/* docsify-tabs: inactive tab ships a hardcoded near-white background, and the
+   borders/panels are light grey. Re-skin onto the dark base. */
+.docsify-tabs__tab {
+  background: transparent !important;
+  color: var(--text-muted) !important;
+  border-color: var(--border) !important;
+}
+.docsify-tabs__tab--active {
+  background: var(--surface) !important;
+  color: var(--theme-color) !important;
+  border-color: var(--theme-color) !important;
+}
+.docsify-tabs__content {
+  border-color: var(--border) !important;
+  background: var(--surface);
+}
+
+/* Sidebar search: theme-simple bakes a dark magnifier icon into the input
+   background and uses a near-black placeholder + clear button, all invisible on
+   the dark sidebar. Swap in a light magnifier and lighten the text/icon. */
+.sidebar .search .input-wrap input::placeholder,
+.sidebar .search input::placeholder {
+  color: var(--text-muted) !important;
+  opacity: 1 !important;
+}
+.sidebar .search input {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%239A9AB5' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") !important;
+}
+.sidebar .search .clear-button svg {
+  fill: var(--text-muted);
+}
+
+/* Architecture diagram: the SVG is a wide landscape. Cap it on large/4K
+   screens (it otherwise blows up to the 150em content width), and let it
+   scroll horizontally on phones at a readable min-width instead of shrinking
+   to an illegible thumbnail. */
+.arch-wrap {
+  overflow-x: auto;
+  margin: 1.5em 0;
+}
+.arch-wrap img {
+  display: block;
+  /* Scale fluidly with the viewport instead of a fixed width: a 600px floor
+     keeps it legible (and forces the wrapper to scroll on phones), 70vw tracks
+     the screen in between, and a 1200px ceiling stops it dominating on 4K. */
+  width: clamp(600px, 70vw, 1200px);
+  max-width: none !important;
+  margin: 0 auto;
+}
+
+/* Keep selection legible on the near-black base. */
+::selection {
+  background: rgba(214, 51, 255, 0.35);
 }

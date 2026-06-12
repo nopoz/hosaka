@@ -22,7 +22,11 @@ Hosaka is a pipeline built from three kinds of components:
 
 > `TRIGGERS` perform actions when an update is available (notify, or update).
 
-![image](wud_arch.png)
+<div class="arch-wrap">
+
+![Hosaka architecture](hosaka_arch.svg)
+
+</div>
 
 See [How it works](how-it-works/) for the full watch-and-update cycle.
 
