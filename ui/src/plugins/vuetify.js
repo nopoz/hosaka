@@ -66,6 +66,9 @@ const themes = {
       prerelease: "#8A6A14", update: "#FFB000",
       background: "#0A0A06", surface: "#14110A",
       "surface-light": "#171206", "surface-bright": "#3A2F12",
+      // Monochrome CRT: default text + icons render amber, not white, so the
+      // whole chrome (chrome bar, filters, nav, row text) reads as one phosphor.
+      "on-background": "#FFB000", "on-surface": "#FFB000",
     },
   },
   corpo: {
