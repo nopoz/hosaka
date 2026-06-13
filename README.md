@@ -21,7 +21,7 @@ rebuilt around a faster, mobile-friendly UI and one-click updates.
 </p>
 
 <details>
-<summary>Contents</summary>
+<summary><h2>Table of Contents</h2></summary>
 
 - [Why Hosaka](#why-hosaka)
 - [What's different from WUD](#whats-different-from-wud)
