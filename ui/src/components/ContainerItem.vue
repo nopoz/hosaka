@@ -10,7 +10,7 @@
     >
       <v-toolbar-title class="text-body-3">
         <v-chip label color="info" variant="outlined" disabled
-          ><v-icon start>ri-arrow-up-circle-line</v-icon
+          ><v-icon start>ri-server-line</v-icon
           >{{ container.watcher }}
         </v-chip>
         /
@@ -49,6 +49,7 @@
         @click.stop="installContainer"
         class="mr-1"
       >
+        <v-icon start>ri-arrow-up-circle-line</v-icon>
         Update
       </v-chip>
       <v-tooltip location="bottom">
@@ -118,6 +119,7 @@
           class="ml-2 flex-shrink-0"
           @click.stop="installContainer"
         >
+          <v-icon start>ri-arrow-up-circle-line</v-icon>
           Update
         </v-btn>
       </div>

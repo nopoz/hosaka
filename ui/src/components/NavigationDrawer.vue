@@ -291,5 +291,8 @@ export default {
   height: 16px;
   border-radius: 2px;
   display: inline-block;
+  /* Neutral hairline so near-black swatches (e.g. Corpo) stay visible on a dark
+     menu and near-white ones stay visible on a light menu. */
+  box-shadow: inset 0 0 0 1px rgba(128, 128, 128, 0.5);
 }
 </style>

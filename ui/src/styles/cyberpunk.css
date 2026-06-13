@@ -63,10 +63,11 @@ pre,
 /* The semver rungs share an amber hue, so separate them by a leading glyph,
    border weight, and border style. `major` is the single filled anchor.
    (Chips already inherit JetBrains Mono globally, see above.) */
-.v-theme--sprawl-terminal .v-chip.sev-major::before { content: "\25B2 "; }   /* ▲ */
-.v-theme--sprawl-terminal .v-chip.sev-minor::before { content: "\25CF "; }   /* ● */
-.v-theme--sprawl-terminal .v-chip.sev-patch::before { content: "\25CB "; }   /* ○ */
-.v-theme--sprawl-terminal .v-chip.sev-prerelease::before { content: "\00B7 "; } /* · */
+.v-theme--sprawl-terminal .v-chip[class*="sev-"]::before { margin-right: 0.45em; }
+.v-theme--sprawl-terminal .v-chip.sev-major::before { content: "\25B2"; }   /* ▲ */
+.v-theme--sprawl-terminal .v-chip.sev-minor::before { content: "\25CF"; }   /* ● */
+.v-theme--sprawl-terminal .v-chip.sev-patch::before { content: "\25CB"; }   /* ○ */
+.v-theme--sprawl-terminal .v-chip.sev-prerelease::before { content: "\00B7"; } /* · */
 
 /* major: filled amber anchor (override the outlined transparency). */
 .v-theme--sprawl-terminal .v-chip.sev-major {
@@ -91,4 +92,28 @@ pre,
    on the white app bar. Use a dark hairline so the bar/content edge still reads. */
 .v-theme--corpo .v-app-bar.v-toolbar {
   border-bottom-color: rgba(0, 0, 0, 0.12);
+}
+
+/* Corpo (light): strip the leading/trailing icon accents inside chips for a
+   flatter, blander corporate look. Icons elsewhere (detail tabs, the theme
+   picker menu) are untouched. */
+.v-theme--corpo .v-chip .v-icon,
+.v-theme--corpo .v-chip img {
+  display: none;
+}
+
+/* Per-theme brand-mark glow: recolour the logo's neon halo to match each theme's
+   accent (the mark SVG itself is swapped per theme in AppBar.vue). Neon Noir's
+   cyan glow stays in AppBar's scoped style; Corpo is flat (above). */
+.v-theme--acid-matrix .logo-mark {
+  filter: drop-shadow(0 0 4px rgba(92, 255, 61, 0.55))
+    drop-shadow(0 0 10px rgba(92, 255, 61, 0.3));
+}
+.v-theme--synthwave .logo-mark {
+  filter: drop-shadow(0 0 4px rgba(255, 46, 151, 0.55))
+    drop-shadow(0 0 10px rgba(255, 46, 151, 0.3));
+}
+.v-theme--sprawl-terminal .logo-mark {
+  filter: drop-shadow(0 0 4px rgba(255, 176, 0, 0.55))
+    drop-shadow(0 0 10px rgba(255, 176, 0, 0.3));
 }

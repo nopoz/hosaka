@@ -8,7 +8,7 @@
       <v-icon>ri-menu-line</v-icon>
     </v-app-bar-nav-icon>
     <div class="logo-wrap">
-      <v-img :src="logo" alt="logo" width="34" height="34" class="logo-mark" />
+      <v-img :src="logoSrc" alt="logo" width="34" height="34" class="logo-mark" />
     </div>
 
     <v-toolbar-title
@@ -39,7 +39,16 @@
 </template>
 <script>
 import { logout } from "@/services/auth";
-import logo from "@/assets/hosaka-logo-dark.svg";
+import logoNeon from "@/assets/hosaka-logo-dark.svg";
+import logoAcid from "@/assets/hosaka-logo-acid.svg";
+import logoSynthwave from "@/assets/hosaka-logo-synthwave.svg";
+import logoSprawl from "@/assets/hosaka-logo-sprawl.svg";
+
+const THEME_LOGOS = {
+  "acid-matrix": logoAcid,
+  synthwave: logoSynthwave,
+  "sprawl-terminal": logoSprawl,
+};
 
 export default {
   props: {
@@ -49,14 +58,14 @@ export default {
     },
   },
   emits: ["toggle-drawer"],
-  data() {
-    return {
-      logo,
-    };
-  },
   computed: {
     viewName() {
       return this.$route.name;
+    },
+    // Per-theme brand mark. Neon Noir + Corpo use the base (cyan) SVG — Corpo
+    // flattens it to black via CSS; the others get a recoloured variant.
+    logoSrc() {
+      return THEME_LOGOS[this.$vuetify.theme.global.name] || logoNeon;
     },
   },
 
