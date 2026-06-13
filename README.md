@@ -20,6 +20,18 @@ rebuilt around a faster, mobile-friendly UI and one-click updates.
   <img src="docs/demo.gif" alt="Clicking Update streams the install live, line by line, until the container is healthy" width="820">
 </p>
 
+## Table of Contents
+
+- [Why Hosaka](#why-hosaka)
+- [What's different from WUD](#whats-different-from-wud)
+- [How it works](#how-it-works)
+- [Features](#features)
+- [Get started](#get-started)
+- [Documentation](#documentation)
+- [Works with](#works-with)
+- [Security](#security)
+- [More of my projects](#more-of-my-projects)
+
 ## Why Hosaka
 
 Keeping self-hosted containers up to date is a chore with bad default options.
@@ -205,40 +217,24 @@ Full docs are published at **[nopoz.github.io/hosaka](https://nopoz.github.io/ho
 - [REST API](https://nopoz.github.io/hosaka/#/api/)
 - [Monitoring](https://nopoz.github.io/hosaka/#/monitoring/)
 
-## Triggers
-- Send notifications using [**SMTP**](https://en.wikipedia.org/wiki/Simple_Mail_Transfer_Protocol), [**Apprise**](https://github.com/caronc/apprise-api), [**IFTTT**](https://ifttt.com), [**Pushover**](https://pushover.net), [**Slack**](https://slack.com), [**Telegram**](https://telegram.org/), and [**Discord**](https://discord.com/)
-- Update your [**docker**](https://www.docker.com) containers or your [**docker-compose**](https://docs.docker.com/compose) stack, automatically or with a single click in the UI
-- Update Portainer-managed stacks with the built-in one-click script, or run your own update script and watch its output live
-- Integrate with third-party systems using [**Kafka**](https://kafka.apache.org), [**MQTT**](https://mqtt.org), and **HTTP webhooks**
-- Set up your own update strategies (e.g. auto-update on minor and patch versions, notify by email on major versions)
+## Works with
 
-## Registries
+Quick reference for what Hosaka plugs into. Full setup lives in the
+[documentation](https://nopoz.github.io/hosaka/).
 
-- [**AWS Elastic Container Registry**](https://aws.amazon.com/ecr)
-- [**Azure Container Registry**](https://azure.microsoft.com/services/container-registry)
-- [**Docker Hub**](http://hub.docker.com)
-- [**Forgejo Container Registry**](https://forgejo.org/)
-- [**Gitea Container Registry**](https://gitea.com/)
-- [**GitHub Container Registry**](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-docker-registry)
-- [**GitLab Container Registry**](https://docs.gitlab.com/ee/user/packages/container_registry/)
-- [**Google Container Registry**](https://cloud.google.com/container-registry)
-- [**LinuxServer Container Registry (lscr.io)**](https://fleet.linuxserver.io/)
-- [**Red Hat Quay**](https://quay.io/)
-- [**Self-hosted Docker Registry**](https://docs.docker.com/registry/)
+**Registries:** Docker Hub, GitHub (GHCR), GitLab, Gitea, Forgejo, AWS ECR,
+Azure ACR, Google GCR, LinuxServer (lscr.io), Red Hat Quay, and any self-hosted
+Docker registry.
 
-## Authentication
-- [Openid Connect](https://openid.net/connect/)
-- [Basic authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication)
+**Notifications:** SMTP, Slack, Discord, Telegram, Apprise, IFTTT, Pushover,
+Kafka, MQTT, and HTTP webhooks.
 
-## Integrations
+**Auth / SSO:** Basic auth, or OpenID Connect (Authelia, Authentik, Auth0,
+Keycloak, and other OIDC providers).
 
-- [**Authelia**](https://www.authelia.com/)
-- [**Authentik**](https://goauthentik.io/)
-- [**Auth0**](https://auth0.com/)
-- [**Grafana**](https://grafana.com/)
-- [**Home-Assistant**](https://www.home-assistant.io/)
-- [**Keycloak**](https://www.keycloak.org/)
-- [**Prometheus**](https://prometheus.io/)
+**Monitoring:** Prometheus metrics and a `/health` endpoint, ready for Grafana.
+
+**Home:** Home-Assistant.
 
 ## Security
 
