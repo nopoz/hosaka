@@ -40,7 +40,6 @@
           {{ container.image.tag.value }}
         </v-chip>
       </v-toolbar-title>
-      <v-spacer />
       <v-chip
         v-if="(container.install === true || container.install === 'multiple') && container.updateAvailable"
         label
@@ -554,7 +553,15 @@ export default {
 .v-toolbar :deep(.v-toolbar__content) {
   padding-inline: 8px;
 }
+/* Let the title reserve its content width and grow into the leftover space so it
+   pushes the right-hand chips to the edge on its own. Without a v-spacer (which
+   would otherwise grow alongside a basis-0 title and split the row 50/50,
+   truncating the left chips while a gap sits unused), the title only clips when
+   the chips would genuinely collide with the right-hand cluster. */
 .v-toolbar :deep(.v-toolbar-title) {
   margin-inline-start: 4px;
+  flex: 1 1 auto !important;
+  min-width: 0;
+  overflow: hidden;
 }
 </style>
