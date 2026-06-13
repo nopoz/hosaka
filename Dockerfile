@@ -1,7 +1,7 @@
 # Common Stage
 FROM node:18-alpine as base
 
-LABEL maintainer="fmartinou"
+LABEL maintainer="nopoz"
 EXPOSE 3000
 
 ARG HOSAKA_VERSION=unknown
