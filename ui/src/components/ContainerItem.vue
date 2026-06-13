@@ -56,8 +56,9 @@
           <v-chip
             v-if="container.updateAvailable"
             label
-            variant="outlined"
+            :variant="semverChipVariant"
             :color="newVersionClass"
+            :class="severityClass"
             v-bind="props"
             @click.stop="copyToClipboard('container new version', newVersion)"
           >
@@ -382,6 +383,19 @@ export default {
         }
       }
       return color;
+    },
+
+    // Corpo (light) uses filled chips — thin grey outlines vanish on white.
+    // Every other theme keeps the app's outlined chip convention.
+    semverChipVariant() {
+      return this.$vuetify.theme.global.name === "corpo" ? "flat" : "outlined";
+    },
+    // Stable hook for theme-scoped CSS (Sprawl Terminal glyph/border treatment).
+    severityClass() {
+      const diff =
+        (this.container.updateKind && this.container.updateKind.semverDiff) ||
+        "unknown";
+      return `sev-${diff}`;
     },
   },
 
