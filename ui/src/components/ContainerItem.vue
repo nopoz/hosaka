@@ -385,10 +385,12 @@ export default {
       return color;
     },
 
-    // Corpo (light) uses filled chips — thin grey outlines vanish on white.
-    // Every other theme keeps the app's outlined chip convention.
+    // Light themes (Corpo) use filled chips — thin coloured outlines vanish on a
+    // light surface. Dark themes keep the app's outlined chip convention. Keyed
+    // on the theme's `dark` flag rather than a specific name so any future light
+    // theme behaves correctly.
     semverChipVariant() {
-      return this.$vuetify.theme.global.name === "corpo" ? "flat" : "outlined";
+      return this.$vuetify.theme.current.value.dark ? "outlined" : "flat";
     },
     // Stable hook for theme-scoped CSS (Sprawl Terminal glyph/border treatment).
     severityClass() {

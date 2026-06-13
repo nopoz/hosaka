@@ -121,8 +121,8 @@
               <v-list-item-title class="text-body-2">{{
                 t.label
               }}</v-list-item-title>
-              <template v-slot:append v-if="t.id === theme">
-                <v-icon size="small">ri-check-line</v-icon>
+              <template v-slot:append>
+                <v-icon v-if="t.id === theme" size="small">ri-check-line</v-icon>
               </template>
             </v-list-item>
           </v-list>

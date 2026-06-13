@@ -61,13 +61,8 @@ pre,
 
 /* ---- Sprawl Terminal: monochrome amber needs non-color differentiation ---- */
 /* The semver rungs share an amber hue, so separate them by a leading glyph,
-   border weight, and border style. `major` is the single filled anchor. */
-.v-theme--sprawl-terminal .v-chip.sev-major,
-.v-theme--sprawl-terminal .v-chip.sev-minor,
-.v-theme--sprawl-terminal .v-chip.sev-patch,
-.v-theme--sprawl-terminal .v-chip.sev-prerelease {
-  font-family: "JetBrains Mono", monospace;
-}
+   border weight, and border style. `major` is the single filled anchor.
+   (Chips already inherit JetBrains Mono globally, see above.) */
 .v-theme--sprawl-terminal .v-chip.sev-major::before { content: "\25B2 "; }   /* ▲ */
 .v-theme--sprawl-terminal .v-chip.sev-minor::before { content: "\25CF "; }   /* ● */
 .v-theme--sprawl-terminal .v-chip.sev-patch::before { content: "\25CB "; }   /* ○ */
@@ -90,4 +85,10 @@ pre,
    app-bar root), so force the flat near-black treatment globally here. */
 .v-theme--corpo .logo-mark {
   filter: brightness(0) saturate(0) !important;
+}
+
+/* Corpo (light): the app-shell hairline is a translucent-white border, invisible
+   on the white app bar. Use a dark hairline so the bar/content edge still reads. */
+.v-theme--corpo .v-app-bar.v-toolbar {
+  border-bottom-color: rgba(0, 0, 0, 0.12);
 }
