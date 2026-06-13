@@ -59,6 +59,7 @@ one makes the UI throw an error.
 |---------------------------|:--------------:|---------------------------------------------------------------------------------------|---------|
 | `PORTAINER_API_ENDPOINT`  |  :red_circle:  | Portainer API base URL, including the `/api` suffix (e.g. `https://host:9443/api`).    |         |
 | `PORTAINER_API_KEY`       |  :red_circle:  | A Portainer API access token. Prefer a Docker secret over an inline value.             |         |
+| `PORTAINER_INSECURE`      | :white_circle: | Set `true` to skip TLS certificate verification (self-signed cert / connect by IP).    | `false` |
 | `UPDATE_TIMEOUT`          | :white_circle: | Seconds to wait for the container to reach the target image.                           | `300`   |
 | `POLL_INTERVAL`           | :white_circle: | Seconds between container-state polls.                                                 | `5`     |
 
@@ -67,6 +68,13 @@ one makes the UI throw an error.
 > Docker-secret convention. To keep the key out of your compose file, use the
 > compose `secrets` mechanism and export it into the env in your own entrypoint,
 > or supply it via your secret manager.
+
+> **HTTPS with a self-signed certificate.** By default the script verifies the
+> Portainer endpoint's TLS certificate, so an `https://` endpoint with a
+> self-signed certificate (or one reached by IP, where the certificate's name
+> won't match) fails the connectivity preflight with a certificate error. If you
+> trust the endpoint, set `PORTAINER_INSECURE=true` to skip verification.
+> Accepted values are `true`, `1`, or `yes`.
 
 ## Example
 

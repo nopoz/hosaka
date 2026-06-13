@@ -49,6 +49,7 @@ services:
       - HOSAKA_TRIGGER_SCRIPT_PORTAINER_INSTALL=true
       # - PORTAINER_API_ENDPOINT=https://portainer.example.com:9443/api   # must include /api
       # - PORTAINER_API_KEY=ptr_xxxxxxxxxxxxxxxx                          # Portainer access token
+      # - PORTAINER_INSECURE=true                                         # skip TLS verify (self-signed cert / IP)
       # - UPDATE_TIMEOUT=300                                              # script: wait for healthy (s)
       # - POLL_INTERVAL=5                                                 # script: health poll interval (s)
       # - HOSAKA_TRIGGER_SCRIPT_PORTAINER_TIMEOUT=300000                  # hard kill the script after (ms)
