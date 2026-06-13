@@ -2,8 +2,11 @@
    Palette tokens live in src/plugins/vuetify.js; this file owns the
    font-family switch and the mono mapping. */
 
-/* UI font: Rajdhani. Override Vuetify's compiled default (Roboto). */
-.v-application {
+/* UI font: Rajdhani. Override Vuetify's compiled default (Roboto). The overlay
+   container is teleported outside .v-application, so menus/dropdowns/dialogs
+   would otherwise fall back to Roboto — include it so their text matches. */
+.v-application,
+.v-overlay-container {
   font-family: "Rajdhani", "Segoe UI", sans-serif;
 }
 
@@ -37,6 +40,15 @@ pre,
 .font-mono,
 .v-application .v-chip {
   font-family: "JetBrains Mono", monospace;
+}
+
+/* Container-row toolbars: Vuetify pins the toolbar text/icon colour to white
+   regardless of the theme's on-surface token, so the bare chip separators ("/",
+   ":") and the row expand chevron stay white on themes whose on-surface isn't
+   white (e.g. Sprawl's amber). Re-point row-toolbar content at on-surface so
+   they follow the theme. */
+.v-card .v-toolbar__content {
+  color: rgb(var(--v-theme-on-surface));
 }
 
 /* Hairline that frames the app shell: the nav drawer already draws a 1px
