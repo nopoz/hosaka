@@ -58,3 +58,28 @@ pre,
 .v-icon[class*="si-"]::before {
   font-family: "Simple Icons" !important;
 }
+
+/* ---- Sprawl Terminal: monochrome amber needs non-color differentiation ---- */
+/* The semver rungs share an amber hue, so separate them by a leading glyph,
+   border weight, and border style. `major` is the single filled anchor. */
+.v-theme--sprawl-terminal .v-chip.sev-major,
+.v-theme--sprawl-terminal .v-chip.sev-minor,
+.v-theme--sprawl-terminal .v-chip.sev-patch,
+.v-theme--sprawl-terminal .v-chip.sev-prerelease {
+  font-family: "JetBrains Mono", monospace;
+}
+.v-theme--sprawl-terminal .v-chip.sev-major::before { content: "\25B2 "; }   /* ▲ */
+.v-theme--sprawl-terminal .v-chip.sev-minor::before { content: "\25CF "; }   /* ● */
+.v-theme--sprawl-terminal .v-chip.sev-patch::before { content: "\25CB "; }   /* ○ */
+.v-theme--sprawl-terminal .v-chip.sev-prerelease::before { content: "\00B7 "; } /* · */
+
+/* major: filled amber anchor (override the outlined transparency). */
+.v-theme--sprawl-terminal .v-chip.sev-major {
+  background-color: #ffb000 !important;
+  color: #000 !important;
+  border-color: #ffb000 !important;
+}
+/* minor: heavier solid border. patch: dashed. prerelease: dotted + dim. */
+.v-theme--sprawl-terminal .v-chip.sev-minor { border-width: 2px; border-style: solid; }
+.v-theme--sprawl-terminal .v-chip.sev-patch { border-style: dashed; }
+.v-theme--sprawl-terminal .v-chip.sev-prerelease { border-style: dotted; }
