@@ -83,3 +83,11 @@ pre,
 .v-theme--sprawl-terminal .v-chip.sev-minor { border-width: 2px; border-style: solid; }
 .v-theme--sprawl-terminal .v-chip.sev-patch { border-style: dashed; }
 .v-theme--sprawl-terminal .v-chip.sev-prerelease { border-style: dotted; }
+
+/* Corpo (light): the app-bar logo is a fixed cyan glyph with a cyan glow, which
+   is off-brand and low-contrast on a white bar. The per-component scoped override
+   in AppBar.vue cannot reach the theme class (it sits on an ancestor of the
+   app-bar root), so force the flat near-black treatment globally here. */
+.v-theme--corpo .logo-mark {
+  filter: brightness(0) saturate(0) !important;
+}

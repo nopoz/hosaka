@@ -108,9 +108,6 @@ export default {
   filter: drop-shadow(0 0 4px rgba(34, 211, 238, 0.55))
     drop-shadow(0 0 10px rgba(34, 211, 238, 0.3));
 }
-/* Corpo (light) theme: the cyan mark + glow disappear on a white bar, so render
-   the glyph as flat near-black and remove the neon glow. */
-:deep(.v-theme--corpo) .logo-mark {
-  filter: brightness(0) saturate(0);
-}
+/* Corpo (light) logo treatment lives in styles/cyberpunk.css: the theme class is
+   an ancestor of this component root, so a scoped :deep() selector can't reach it. */
 </style>
