@@ -15,6 +15,18 @@ compose_project="$6"
 update_timeout="${UPDATE_TIMEOUT:-300}"  # Overall timeout for update operations (default 300s)
 poll_interval="${POLL_INTERVAL:-5}"      # Interval for polling container state (default 5s)
 
+# Opt-in TLS skip-verify for Portainer endpoints with a self-signed certificate
+# (or accessed by IP, where the cert won't match). Off by default so verification
+# stays on; set PORTAINER_INSECURE=true/1 to accept an untrusted cert. Every
+# Portainer API call goes through pcurl so the flag applies uniformly.
+insecure_opt=()
+case "${PORTAINER_INSECURE,,}" in
+	true|1|yes) insecure_opt=(--insecure) ;;
+esac
+pcurl() {
+	curl "${insecure_opt[@]}" "$@"
+}
+
 # Inspect the container once; echo its state vs the target:
 # ready | unhealthy | sameimage (target tag but image ID unchanged) | waiting | absent
 check_container_state() {
@@ -24,7 +36,7 @@ check_container_state() {
 	local initial_img_id="$4"
 
 	local containers_json container_id container_info
-	containers_json=$(curl -s --location --request GET "$portainer_url/endpoints/$endpoint_id/docker/containers/json?all=true" \
+	containers_json=$(pcurl -s --location --request GET "$portainer_url/endpoints/$endpoint_id/docker/containers/json?all=true" \
 		--header 'Accept: application/json' \
 		--header "X-API-Key: $api_key")
 	container_id=$(echo "$containers_json" | jq -r --arg container_name "$container_name" \
@@ -35,7 +47,7 @@ check_container_state() {
 		return
 	fi
 
-	container_info=$(curl -s --location --request GET "$portainer_url/endpoints/$endpoint_id/docker/containers/$container_id/json" \
+	container_info=$(pcurl -s --location --request GET "$portainer_url/endpoints/$endpoint_id/docker/containers/$container_id/json" \
 		--header 'Accept: application/json' \
 		--header "X-API-Key: $api_key")
 
@@ -159,7 +171,7 @@ wait_for_container_update() {
 			verify_and_finish; local rc=$?
 			[[ $rc -ne 2 ]] && return $rc
 		fi
-	done < <(curl -sN --max-time "$timeout" --location --request GET \
+	done < <(pcurl -sN --max-time "$timeout" --location --request GET \
 		"$portainer_url/endpoints/$endpoint_id/docker/events?since=$since&filters=$filters" \
 		--header 'Accept: application/json' \
 		--header "X-API-Key: $api_key" 2>/dev/null)
@@ -190,7 +202,7 @@ fetch_container_logs() {
 
 	echo -e "\nFetching last $lines lines of logs for container \"$container_name\"..."
 
-	local containers_json=$(curl -s --location --request GET "$portainer_url/endpoints/$endpoint_id/docker/containers/json?all=true" \
+	local containers_json=$(pcurl -s --location --request GET "$portainer_url/endpoints/$endpoint_id/docker/containers/json?all=true" \
 		--header 'Accept: application/json' \
 		--header "X-API-Key: $api_key")
 
@@ -204,7 +216,7 @@ fetch_container_logs() {
 
 	# Fetch logs via Docker API proxy, demuxing the stream so binary frame
 	# headers don't end up in the console. Pipe directly (NULs survive).
-	local logs=$(curl -s --location --request GET "$portainer_url/endpoints/$endpoint_id/docker/containers/$container_id/logs?stdout=true&stderr=true&tail=$lines" \
+	local logs=$(pcurl -s --location --request GET "$portainer_url/endpoints/$endpoint_id/docker/containers/$container_id/logs?stdout=true&stderr=true&tail=$lines" \
 		--header "X-API-Key: $api_key" 2>/dev/null | demux_docker_stream | tail -n "$lines")
 
 	if [[ -n "$logs" ]]; then
@@ -243,11 +255,18 @@ fi
 
 # Verify connectivity and auth up front so any failure is attributable to the
 # right cause (unreachable endpoint vs bad key vs missing /api suffix).
-preflight_code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 --location \
+preflight_code=$(pcurl -s -o /dev/null -w '%{http_code}' --max-time 15 --location \
 	--request GET "$portainer_url/endpoints" \
 	--header 'Accept: application/json' \
 	--header "X-API-Key: $api_key")
 preflight_rc=$?
+if [[ $preflight_rc -eq 60 ]]; then
+	echo "ERROR: TLS certificate verification failed for \"$portainer_url\" (curl exit 60)."
+	echo "Portainer is reachable but presented a certificate that could not be verified - expected"
+	echo "if it uses a self-signed certificate or you connect to it by IP address. If you trust this"
+	echo "endpoint, set PORTAINER_INSECURE=true on the Hosaka container to skip certificate verification."
+	exit 1
+fi
 if [[ $preflight_rc -ne 0 ]]; then
 	echo "ERROR: could not reach Portainer at \"$portainer_url\" (curl exit $preflight_rc)."
 	echo "Check PORTAINER_API_ENDPOINT (scheme, host, port) and that the Hosaka container can"
@@ -282,7 +301,7 @@ echo -e "\nretrieving portainer info for container \"$container_name\" in stack 
 if [[ $watcher_name == "local" ]]; then
 	endpoint_id=1
 else
-	endpoints_json=$(curl -s --location --request GET "$portainer_url/endpoints?name=$watcher_name" \
+	endpoints_json=$(pcurl -s --location --request GET "$portainer_url/endpoints?name=$watcher_name" \
 		--header 'Accept: application/json' \
 		--header "X-API-KEY: $api_key")
 
@@ -291,7 +310,7 @@ else
 	candidate_ids=$(echo "$endpoints_json" | jq -r 'if type == "array" then .[] else . end | .Id')
 	endpoint_id=""
 	for candidate_id in $candidate_ids; do
-		proxy_containers=$(curl -s --location --request GET "$portainer_url/endpoints/$candidate_id/docker/containers/json?all=true" \
+		proxy_containers=$(pcurl -s --location --request GET "$portainer_url/endpoints/$candidate_id/docker/containers/json?all=true" \
 			--header 'Accept: application/json' \
 			--header "X-API-Key: $api_key")
 		match=$(echo "$proxy_containers" | jq -r --arg container_name "$container_name" --arg compose_project "$compose_project" \
@@ -313,7 +332,7 @@ echo "container endpoint id: $endpoint_id"
 
 # get image id from endpoints output
 filter_encoded=$(printf '{"name":["/%s"]}' "$container_name" | jq -sRr @uri)
-endpoint_inspect=$(curl -s --location -g \
+endpoint_inspect=$(pcurl -s --location -g \
 	--request GET "$portainer_url/endpoints/$endpoint_id/docker/containers/json?all=true&filters=$filter_encoded" \
 	--header 'Accept: application/json' \
 	--header "X-API-Key: $api_key")
@@ -329,7 +348,7 @@ echo "container image id: $image_id"
 
 # get stack id
 filter_encoded=$(printf '{"EndpointID":%s}' "$endpoint_id" | jq -sRr @uri)
-endpoint_stacks=$(curl -s --location -g \
+endpoint_stacks=$(pcurl -s --location -g \
 	--request GET "$portainer_url/stacks?filters=${filter_encoded}" \
 	--header 'Accept: application/json' \
 	--header "X-API-Key: $api_key")
@@ -346,7 +365,7 @@ echo "container stack id: $stack_id"
 env_data=$(echo "$endpoint_stacks" | jq --arg id "$stack_id" '.[] | select(.Id == ($id | tonumber)) | .Env')
 
 # get stack file contents:
-stack_contents=$(curl -s --location --request GET "$portainer_url/stacks/$stack_id/file" \
+stack_contents=$(pcurl -s --location --request GET "$portainer_url/stacks/$stack_id/file" \
 	--header 'Accept: application/json' \
 	--header "X-API-KEY: $api_key")
 if [[ -n $stack_contents ]]; then
@@ -412,7 +431,7 @@ fi
 
 # Capture initial container state before update
 echo -e "\ncapturing initial container state..."
-initial_containers_json=$(curl -s --location --request GET "$portainer_url/endpoints/$endpoint_id/docker/containers/json?all=true" \
+initial_containers_json=$(pcurl -s --location --request GET "$portainer_url/endpoints/$endpoint_id/docker/containers/json?all=true" \
 	--header 'Accept: application/json' \
 	--header "X-API-Key: $api_key")
 
@@ -441,7 +460,7 @@ payload=$(jq -n \
 
 # push stack update to portainer API
 echo -e "\npushing $compose_project stack file update to portainer..."
-response=$(curl -s --max-time 300 -i --location \
+response=$(pcurl -s --max-time 300 -i --location \
 	--request PUT "$portainer_url/stacks/$stack_id?endpointId=$endpoint_id" \
 	--header 'Content-Type: application/json' \
 	--header 'Accept: application/json' \
@@ -471,7 +490,7 @@ fi
 
 # Echo how many containers are still running the old image.
 check_old_container_present() {
-	containers_json=$(curl -s --location --request GET "$portainer_url/endpoints/$endpoint_id/docker/containers/json?all=true" \
+	containers_json=$(pcurl -s --location --request GET "$portainer_url/endpoints/$endpoint_id/docker/containers/json?all=true" \
 		--header 'Accept: application/json' \
 		--header "X-API-Key: $api_key")
 	echo "$containers_json" | jq --arg old_image "$old_image" \

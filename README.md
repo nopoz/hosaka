@@ -147,7 +147,8 @@ marked done until the new container comes back healthy.
   `latest`, and step from one known version to the next when you choose, so you
   always know what is running and can roll back by redeploying the old tag
 - Nothing to write or mount; point it at your Portainer URL and API key and the
-  Update button does the rest
+  Update button does the rest. Connecting over HTTPS to a self-signed certificate
+  (or by IP) works too, by opting in with `PORTAINER_INSECURE=true`
 - Health-aware progress: the run streams to the UI line by line and waits for the
   container to come back healthy on the new image before reporting success
 - Reference stack in [`docker-compose.example.yml`](docker-compose.example.yml);
