@@ -48,6 +48,8 @@ function init() {
             'include_tags',
             'exclude_tags',
             'transform_tags',
+            'trigger_include',
+            'trigger_exclude',
             'link_template',
             'link',
             'image_id',
