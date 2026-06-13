@@ -6,6 +6,7 @@
 
 [![CI](https://github.com/nopoz/hosaka/actions/workflows/ci.yml/badge.svg)](https://github.com/nopoz/hosaka/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/nopoz/hosaka?sort=semver)](https://github.com/nopoz/hosaka/releases)
+[![GHCR](https://img.shields.io/badge/ghcr.io-nopoz%2Fhosaka-2496ED?logo=docker&logoColor=white)](https://github.com/nopoz/hosaka/pkgs/container/hosaka)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 Hosaka watches your Docker hosts for new container image versions, then lets you
