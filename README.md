@@ -20,8 +20,7 @@ rebuilt around a faster, mobile-friendly UI and one-click updates.
   <img src="docs/demo.gif" alt="Clicking Update streams the install live, line by line, until the container is healthy" width="820">
 </p>
 
-<details>
-<summary><h2>Table of Contents</h2></summary>
+## Table of Contents
 
 - [Why Hosaka](#why-hosaka)
 - [What's different from WUD](#whats-different-from-wud)
@@ -32,8 +31,6 @@ rebuilt around a faster, mobile-friendly UI and one-click updates.
 - [Works with](#works-with)
 - [Security](#security)
 - [More of my projects](#more-of-my-projects)
-
-</details>
 
 ## Why Hosaka
 
