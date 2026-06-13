@@ -2,8 +2,11 @@
    Palette tokens live in src/plugins/vuetify.js; this file owns the
    font-family switch and the mono mapping. */
 
-/* UI font: Rajdhani. Override Vuetify's compiled default (Roboto). */
-.v-application {
+/* UI font: Rajdhani. Override Vuetify's compiled default (Roboto). The overlay
+   container is teleported outside .v-application, so menus/dropdowns/dialogs
+   would otherwise fall back to Roboto — include it so their text matches. */
+.v-application,
+.v-overlay-container {
   font-family: "Rajdhani", "Segoe UI", sans-serif;
 }
 
@@ -39,6 +42,15 @@ pre,
   font-family: "JetBrains Mono", monospace;
 }
 
+/* Container-row toolbars: Vuetify pins the toolbar text/icon colour to white
+   regardless of the theme's on-surface token, so the bare chip separators ("/",
+   ":") and the row expand chevron stay white on themes whose on-surface isn't
+   white (e.g. Sprawl's amber). Re-point row-toolbar content at on-surface so
+   they follow the theme. */
+.v-card .v-toolbar__content {
+  color: rgb(var(--v-theme-on-surface));
+}
+
 /* Hairline that frames the app shell: the nav drawer already draws a 1px
    right border; give the app bar a matching bottom border so the two meet at
    the corner and read as one continuous edge around the chrome. */
@@ -57,4 +69,63 @@ pre,
 }
 .v-icon[class*="si-"]::before {
   font-family: "Simple Icons" !important;
+}
+
+/* ---- Sprawl Terminal: monochrome amber needs non-color differentiation ---- */
+/* The semver rungs share an amber hue, so separate them by a leading glyph,
+   border weight, and border style. `major` is the single filled anchor.
+   (Chips already inherit JetBrains Mono globally, see above.) */
+.v-theme--sprawl-terminal .v-chip[class*="sev-"]::before { margin-right: 0.45em; }
+.v-theme--sprawl-terminal .v-chip.sev-major::before { content: "\25B2"; }   /* ▲ */
+.v-theme--sprawl-terminal .v-chip.sev-minor::before { content: "\25CF"; }   /* ● */
+.v-theme--sprawl-terminal .v-chip.sev-patch::before { content: "\25CB"; }   /* ○ */
+.v-theme--sprawl-terminal .v-chip.sev-prerelease::before { content: "\00B7"; } /* · */
+
+/* major: filled amber anchor (override the outlined transparency). */
+.v-theme--sprawl-terminal .v-chip.sev-major {
+  background-color: #ffb000 !important;
+  color: #000 !important;
+  border-color: #ffb000 !important;
+}
+/* minor: heavier solid border. patch: dashed. prerelease: dotted + dim. */
+.v-theme--sprawl-terminal .v-chip.sev-minor { border-width: 2px; border-style: solid; }
+.v-theme--sprawl-terminal .v-chip.sev-patch { border-style: dashed; }
+.v-theme--sprawl-terminal .v-chip.sev-prerelease { border-style: dotted; }
+
+/* Corpo (light): the app-bar logo is a fixed cyan glyph with a cyan glow, which
+   is off-brand and low-contrast on a white bar. The per-component scoped override
+   in AppBar.vue cannot reach the theme class (it sits on an ancestor of the
+   app-bar root), so force the flat near-black treatment globally here. */
+.v-theme--corpo .logo-mark {
+  filter: brightness(0) saturate(0) !important;
+}
+
+/* Corpo (light): the app-shell hairline is a translucent-white border, invisible
+   on the white app bar. Use a dark hairline so the bar/content edge still reads. */
+.v-theme--corpo .v-app-bar.v-toolbar {
+  border-bottom-color: rgba(0, 0, 0, 0.12);
+}
+
+/* Corpo (light): strip the leading/trailing icon accents inside chips for a
+   flatter, blander corporate look. Icons elsewhere (detail tabs, the theme
+   picker menu) are untouched. */
+.v-theme--corpo .v-chip .v-icon,
+.v-theme--corpo .v-chip img {
+  display: none;
+}
+
+/* Per-theme brand-mark glow: recolour the logo's neon halo to match each theme's
+   accent (the mark SVG itself is swapped per theme in AppBar.vue). Neon Noir's
+   cyan glow stays in AppBar's scoped style; Corpo is flat (above). */
+.v-theme--acid-matrix .logo-mark {
+  filter: drop-shadow(0 0 4px rgba(92, 255, 61, 0.55))
+    drop-shadow(0 0 10px rgba(92, 255, 61, 0.3));
+}
+.v-theme--synthwave .logo-mark {
+  filter: drop-shadow(0 0 4px rgba(255, 46, 151, 0.55))
+    drop-shadow(0 0 10px rgba(255, 46, 151, 0.3));
+}
+.v-theme--sprawl-terminal .logo-mark {
+  filter: drop-shadow(0 0 4px rgba(255, 176, 0, 0.55))
+    drop-shadow(0 0 10px rgba(255, 176, 0, 0.3));
 }

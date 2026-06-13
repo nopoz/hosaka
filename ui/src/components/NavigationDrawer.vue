@@ -4,8 +4,7 @@
     :permanent="$vuetify.display.mdAndUp"
     :temporary="$vuetify.display.smAndDown"
     :rail="isRail"
-    theme="dark"
-    color="#0D0D14"
+    color="surface"
   >
     <!-- Desktop only: the rail toggle. On mobile the drawer is a temporary
          overlay opened/closed by the AppBar hamburger, so an in-drawer toggle
@@ -73,29 +72,61 @@
       </v-list-item>
     </v-list>
 
-    <template v-slot:append v-if="!isRail">
-      <v-list>
-        <v-list-item class="px-4 py-1">
+    <template v-slot:append>
+      <v-list class="pb-2">
+        <v-list-item v-if="!isRail" class="px-4 py-1">
           <span class="text-caption text-medium-emphasis font-mono"
             >Hosaka<template v-if="version && version !== 'unknown'">
               v{{ version }}</template
             ></span
           >
         </v-list-item>
-        <v-list-item class="ml-2 mb-2">
-          <v-switch
-            hide-details
-            inset
-            color="secondary"
-            label="Dark mode"
-            v-model="darkMode"
-            @update:model-value="toggleDarkMode"
-          >
-            <template v-slot:label>
-              <v-icon>ri-moon-line</v-icon>
-            </template>
-          </v-switch>
-        </v-list-item>
+
+        <v-menu location="top" :close-on-content-click="true">
+          <template v-slot:activator="{ props }">
+            <v-list-item
+              v-bind="props"
+              :prepend-icon="isRail ? 'ri-palette-line' : undefined"
+              class="theme-trigger"
+            >
+              <template v-if="!isRail">
+                <div class="d-flex align-center">
+                  <span class="theme-swatch mr-2">
+                    <i :style="{ background: activeTheme.swatch[0] }"></i>
+                    <i :style="{ background: activeTheme.swatch[1] }"></i>
+                  </span>
+                  <span class="nav-title text-uppercase text-caption">{{
+                    activeTheme.label
+                  }}</span>
+                  <v-spacer />
+                  <v-icon size="small">ri-arrow-up-s-line</v-icon>
+                </div>
+              </template>
+            </v-list-item>
+          </template>
+
+          <v-list density="compact" nav>
+            <v-list-item
+              v-for="t in themes"
+              :key="t.id"
+              :active="t.id === theme"
+              @click="selectTheme(t.id)"
+            >
+              <template v-slot:prepend>
+                <span class="theme-swatch mr-2">
+                  <i :style="{ background: t.swatch[0] }"></i>
+                  <i :style="{ background: t.swatch[1] }"></i>
+                </span>
+              </template>
+              <v-list-item-title class="text-body-2">{{
+                t.label
+              }}</v-list-item-title>
+              <template v-slot:append>
+                <v-icon v-if="t.id === theme" size="small">ri-check-line</v-icon>
+              </template>
+            </v-list-item>
+          </v-list>
+        </v-menu>
       </v-list>
     </template>
   </v-navigation-drawer>
@@ -120,7 +151,14 @@ export default {
   emits: ["update:modelValue"],
   data: () => ({
     mini: true,
-    darkMode: localStorage.darkMode !== "false",
+    theme: "neon-noir",
+    themes: [
+      { id: "neon-noir", label: "Neon Noir", swatch: ["#19E3E3", "#D633FF"] },
+      { id: "acid-matrix", label: "Acid Matrix", swatch: ["#5CFF3D", "#FF1F4B"] },
+      { id: "synthwave", label: "Synthwave", swatch: ["#FF2E97", "#19E3E3"] },
+      { id: "sprawl-terminal", label: "Sprawl Terminal", swatch: ["#FFB000", "#C98A00"] },
+      { id: "corpo", label: "Corpo", swatch: ["#0D0D0D", "#767676"] },
+    ],
     version: "unknown",
     containerIcon: getContainerIcon(),
     configurationItems: [
@@ -153,6 +191,9 @@ export default {
   }),
 
   computed: {
+    activeTheme() {
+      return this.themes.find((t) => t.id === this.theme) || this.themes[0];
+    },
     configurationItemsSorted() {
       return [...this.configurationItems].sort((item1, item2) =>
         item1.name.localeCompare(item2.name),
@@ -194,17 +235,24 @@ export default {
         this.mini = !this.mini;
       }
     },
-    toggleDarkMode: function () {
-      localStorage.darkMode = this.darkMode;
-      this.setDarkMode(this.darkMode);
-    },
-    setDarkMode(darkMode) {
-      this.$vuetify.theme.global.name = darkMode ? "dark" : "light";
+    selectTheme(id) {
+      this.theme = id;
+      localStorage.theme = id;
+      this.$vuetify.theme.global.name = id;
     },
   },
 
   async beforeMount() {
-    this.setDarkMode(this.darkMode);
+    const valid = this.themes.map((t) => t.id);
+    let name = localStorage.theme;
+    if (!valid.includes(name)) {
+      // Migrate the old boolean dark-mode pref: an explicit light choice maps to
+      // the only light theme (Corpo); everything else defaults to Neon Noir.
+      name = localStorage.darkMode === "false" ? "corpo" : "neon-noir";
+      localStorage.theme = name;
+    }
+    this.theme = name;
+    this.$vuetify.theme.global.name = name;
     try {
       const appInfos = await getAppInfos();
       this.version = appInfos.version || "unknown";
@@ -230,5 +278,21 @@ export default {
 .nav-title {
   letter-spacing: 0.1em;
   font-weight: 600;
+}
+
+/* Two-color theme swatch used in the picker trigger + menu rows. */
+.theme-swatch {
+  display: inline-flex;
+  gap: 2px;
+  vertical-align: middle;
+}
+.theme-swatch i {
+  width: 8px;
+  height: 16px;
+  border-radius: 2px;
+  display: inline-block;
+  /* Neutral hairline so near-black swatches (e.g. Corpo) stay visible on a dark
+     menu and near-white ones stay visible on a light menu. */
+  box-shadow: inset 0 0 0 1px rgba(128, 128, 128, 0.5);
 }
 </style>

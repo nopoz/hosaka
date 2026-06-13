@@ -7,9 +7,9 @@
     @click:outside="close"
     persistent
   >
-    <v-card theme="dark">
-      <div style="background-color: #1E1E1E;">
-        <div class="d-flex justify-end pa-2" style="background-color: #2D2D2D;">
+    <v-card>
+      <div class="console-window">
+        <div class="d-flex justify-end pa-2 console-bar">
           <v-btn
             icon
             size="x-small"
@@ -33,7 +33,7 @@
           </div>
         </v-card-text>
 
-        <v-card-actions v-if="isComplete || error || scriptExitCode !== null" class="pa-4" style="background-color: #2D2D2D;">
+        <v-card-actions v-if="isComplete || error || scriptExitCode !== null" class="pa-4 console-bar">
           <v-spacer></v-spacer>
           <v-btn
             variant="flat"
@@ -365,14 +365,24 @@ export default {
 </script>
 
 <style scoped>
+/* The console follows the active theme: window/bars use the surface tokens,
+   text uses on-surface, and the log severities map to the semantic tokens so a
+   monochrome theme (Sprawl) reads as one phosphor and a neon one stays colourful. */
+.console-window {
+  background-color: rgb(var(--v-theme-surface));
+}
+.console-bar {
+  background-color: rgb(var(--v-theme-surface-light));
+}
+
 .log-output {
-  background-color: #1E1E1E;
-  color: #FFFFFF;
+  background-color: rgb(var(--v-theme-surface));
+  color: rgb(var(--v-theme-on-surface));
   font-family: "JetBrains Mono", monospace;
   white-space: pre;
   height: 400px;
   overflow-y: auto;
-  border: 1px solid #333333;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.18);
   border-radius: 4px;
   padding: 12px;
   margin: 0;
@@ -388,14 +398,14 @@ export default {
 /* Render the ASCII banner as a CSS hairline + heading. */
 .log-rule {
   border: none;
-  border-top: 1px solid #555555;
+  border-top: 1px solid rgba(var(--v-theme-on-surface), 0.35);
   margin: 6px 8px;
 }
 
 .log-title {
   text-align: center;
   font-weight: bold;
-  color: #F5F5F5;
+  color: rgb(var(--v-theme-on-surface));
   padding: 2px 0;
 }
 
@@ -404,29 +414,29 @@ export default {
   color: inherit !important;
 }
 
-/* More vibrant ANSI-style colors */
+/* Log severities map to the theme's semantic tokens. */
 .log-output .header-text {
-  color: #F5F5F5 !important;  /* Much lighter grey for headers */
+  color: rgb(var(--v-theme-on-surface)) !important;
 }
 
 .log-output .command-text {
-  color: #00FFFF !important;  /* Bright cyan for commands */
+  color: rgb(var(--v-theme-info)) !important;
 }
 
 .log-output .success-text {
-  color: #00FF00 !important;  /* Bright green for success */
+  color: rgb(var(--v-theme-success)) !important;
 }
 
 .log-output .warning-text {
-  color: #FFD700 !important;  /* Bright gold for warnings */
+  color: rgb(var(--v-theme-warning)) !important;
 }
 
 .log-output .error-text {
-  color: #FF4444 !important;  /* Bright red for errors */
+  color: rgb(var(--v-theme-error)) !important;
 }
 
 .log-output .divider-text {
-  color: #BDBDBD !important;  /* Lighter grey for dividers */
+  color: rgba(var(--v-theme-on-surface), 0.6) !important;
 }
 
 
@@ -436,21 +446,21 @@ export default {
 }
 
 .log-output::-webkit-scrollbar-track {
-  background: #2D2D2D;
+  background: rgb(var(--v-theme-surface-light));
 }
 
 .log-output::-webkit-scrollbar-thumb {
-  background: #555;
+  background: rgba(var(--v-theme-on-surface), 0.35);
   border-radius: 4px;
 }
 
 .log-output::-webkit-scrollbar-thumb:hover {
-  background: #666;
+  background: rgba(var(--v-theme-on-surface), 0.5);
 }
 
-/* Override Vuetify's default card background */
+/* Override Vuetify's default card background to the theme surface. */
 :deep(.v-card) {
-  background-color: #1E1E1E !important;
+  background-color: rgb(var(--v-theme-surface)) !important;
 }
 
 :deep(.v-card > .v-card-text) {

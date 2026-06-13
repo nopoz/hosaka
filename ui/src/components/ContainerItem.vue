@@ -10,7 +10,7 @@
     >
       <v-toolbar-title class="text-body-3">
         <v-chip label color="info" variant="outlined" disabled
-          ><v-icon start>ri-arrow-up-circle-line</v-icon
+          ><v-icon start>ri-server-line</v-icon
           >{{ container.watcher }}
         </v-chip>
         /
@@ -49,6 +49,7 @@
         @click.stop="installContainer"
         class="mr-1"
       >
+        <v-icon start>ri-arrow-up-circle-line</v-icon>
         Update
       </v-chip>
       <v-tooltip location="bottom">
@@ -56,8 +57,9 @@
           <v-chip
             v-if="container.updateAvailable"
             label
-            variant="outlined"
+            :variant="semverChipVariant"
             :color="newVersionClass"
+            :class="severityClass"
             v-bind="props"
             @click.stop="copyToClipboard('container new version', newVersion)"
           >
@@ -117,6 +119,7 @@
           class="ml-2 flex-shrink-0"
           @click.stop="installContainer"
         >
+          <v-icon start>ri-arrow-up-circle-line</v-icon>
           Update
         </v-btn>
       </div>
@@ -382,6 +385,22 @@ export default {
         }
       }
       return color;
+    },
+
+    // Corpo (the only light theme) uses filled chips — thin coloured outlines
+    // vanish on a light surface. Dark themes keep the outlined convention. Keyed
+    // on the theme name: the Options-API `$vuetify.theme` adapter does not expose
+    // the current theme's `dark` flag reliably, so a future light theme must be
+    // added here too.
+    semverChipVariant() {
+      return this.$vuetify.theme.global.name === "corpo" ? "flat" : "outlined";
+    },
+    // Stable hook for theme-scoped CSS (Sprawl Terminal glyph/border treatment).
+    severityClass() {
+      const diff =
+        (this.container.updateKind && this.container.updateKind.semverDiff) ||
+        "unknown";
+      return `sev-${diff}`;
     },
   },
 
