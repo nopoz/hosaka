@@ -16,6 +16,10 @@ update run live.
 Hosaka is a fork of [What's Up Docker (WUD)](https://github.com/getwud/wud),
 rebuilt around a faster, mobile-friendly UI and one-click updates.
 
+<p align="center">
+  <img src="docs/demo.gif" alt="Clicking Update streams the install live, line by line, until the container is healthy" width="820">
+</p>
+
 ## Why Hosaka
 
 Keeping self-hosted containers up to date is a chore with bad default options.
