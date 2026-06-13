@@ -1,5 +1,5 @@
 <template>
-  <v-app-bar flat tile density="compact" theme="dark" color="#0D0D14">
+  <v-app-bar flat tile density="compact" color="surface">
     <v-app-bar-nav-icon
       v-if="$vuetify.display.smAndDown"
       class="menu-toggle"
@@ -107,5 +107,10 @@ export default {
 .logo-mark {
   filter: drop-shadow(0 0 4px rgba(34, 211, 238, 0.55))
     drop-shadow(0 0 10px rgba(34, 211, 238, 0.3));
+}
+/* Corpo (light) theme: the cyan mark + glow disappear on a white bar, so render
+   the glyph as flat near-black and remove the neon glow. */
+:deep(.v-theme--corpo) .logo-mark {
+  filter: brightness(0) saturate(0);
 }
 </style>

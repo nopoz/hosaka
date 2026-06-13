@@ -4,8 +4,7 @@
     :permanent="$vuetify.display.mdAndUp"
     :temporary="$vuetify.display.smAndDown"
     :rail="isRail"
-    theme="dark"
-    color="#0D0D14"
+    color="surface"
   >
     <!-- Desktop only: the rail toggle. On mobile the drawer is a temporary
          overlay opened/closed by the AppBar hamburger, so an in-drawer toggle
