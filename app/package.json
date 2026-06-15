@@ -1,7 +1,7 @@
 {
   "name": "hosaka-app",
-  "version": "1.2.0",
-  "description": "What'up Docker? the app",
+  "version": "1.2.1",
+  "description": "Hosaka - app",
   "main": "index.js",
   "scripts": {
     "start": "nodemon index.js | bunyan -L -o short",
