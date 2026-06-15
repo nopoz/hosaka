@@ -17,6 +17,7 @@ function populateGauge() {
       // Exclude notification fields from labels
       delete labels.notification_message;
       delete labels.notification_level;
+      delete labels.notification_timestamp;
 
       gaugeContainer.set(labels, 1);
     } catch (e) {
