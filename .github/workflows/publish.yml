@@ -63,6 +63,10 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
+          # Persist layer cache across releases so the emulated arm64 build
+          # reuses unchanged layers instead of rebuilding cold every time.
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
