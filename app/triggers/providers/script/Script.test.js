@@ -178,8 +178,8 @@ describe('Script Trigger Tests', () => {
 
         const execCall = exec.mock.results[0].value;
         expect(execCall.stdout.on).toHaveBeenCalledWith('data', expect.any(Function));
-        // Verify log messages were prefixed with container name
-        expect(console.log).toHaveBeenCalledWith(expect.stringContaining('[test-container]'));
+        // Verify log messages were prefixed with an HH:MM:SS timestamp
+        expect(console.log).toHaveBeenCalledWith(expect.stringMatching(/# \[\d{2}:\d{2}:\d{2}\] Script is running/));
     });
 
     test('setContainerNotification should update container with notification', async () => {
@@ -203,10 +203,10 @@ describe('Script Trigger Tests', () => {
 });
 
 describe('Script Trigger configuration schema', () => {
-    test('path defaults to the bundled portainer script when omitted', () => {
+    test('path defaults to the built-in native updater when omitted', () => {
         const trigger = new Script();
         const validated = trigger.validateConfiguration({ install: true });
-        expect(validated.path).toEqual('/scripts/portainer_stack_update.sh');
+        expect(validated.path).toEqual('built-in');
         expect(validated.install).toEqual(true);
         expect(validated.timeout).toEqual(300000);
     });

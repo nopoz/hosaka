@@ -32,9 +32,9 @@ See [How it works](how-it-works/) for the full watch-and-update cycle.
 
 ## Fork highlights
 
-- **One-click updates from the UI**, with the update script's output streamed
+- **One-click updates from the UI**, with the updater's output streamed
   live, line by line.
-- **A bundled Portainer stack updater**: rewrites the stack file to the new image
+- **A built-in Portainer stack updater**: rewrites the stack file to the new image
   tag and redeploys through the Portainer API, so your stack stays the source of
   truth and rollback is just redeploying the old tag.
 - **A responsive UI** that works on mobile, with live container state over SSE.

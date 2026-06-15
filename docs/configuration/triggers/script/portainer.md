@@ -1,15 +1,17 @@
 # Portainer update script
 
-Hosaka bundles a ready-to-use update script that performs in-place container
-updates through the Portainer API. It is shipped inside the image at
-`/scripts/portainer_stack_update.sh` and is the **default** script for the
-[`script` trigger](configuration/triggers/script/) - if you do not set a `PATH`,
-this is the script that runs.
+Hosaka has a built-in updater that performs in-place container updates through
+the Portainer API. It is the **default** action for the
+[`script` trigger](configuration/triggers/script/) - when `INSTALL=true` and you
+do not set a `PATH`, this is what runs, with nothing to write or mount. (A
+standalone copy of the equivalent script also ships in the image at
+`/scripts/portainer_stack_update.sh` if you want to point `PATH` at it or fork
+it.)
 
 ## How it works
 
 When you click **Update** on a container in the UI (the `script` trigger must
-have `INSTALL=true`), the script:
+have `INSTALL=true`), the updater:
 
 1. Locates the container's Portainer stack on the matching endpoint (using the
    watcher name and compose project passed in by Hosaka).
@@ -20,11 +22,11 @@ have `INSTALL=true`), the script:
    container is recreated on the target image and healthy.
 5. Confirms the old container is gone, then reports success.
 
-The full live log is streamed to the UI's script-output console.
+The full live log is streamed to the UI's update-output console.
 
 ## Designed for pinned versions
 
-This script is built for stacks that pin explicit image tags (for example
+This updater is built for stacks that pin explicit image tags (for example
 `nginx:1.27.1`) rather than moving tags like `latest`. That keeps you in control
 of updates: Hosaka detects a newer tag, and the update rewrites your stack file
 from the current pinned version to the new one. The stack definition always
@@ -33,27 +35,27 @@ roll back at any time by redeploying the previous tag.
 
 Because the update edits the stack file in place, that file **must contain the
 current `image:tag`** of the container being updated. If the stack pins a
-different tag, or uses a moving tag like `latest`, the script stops with an error
+different tag, or uses a moving tag like `latest`, the updater stops with an error
 rather than guessing - so pin the versions in your stack before using it.
 
 ## Configuration
 
 Two sets of variables are involved. The `HOSAKA_TRIGGER_SCRIPT_*` variables
 configure the generic trigger; the `PORTAINER_API_*` variables (and the optional
-timing ones) are read by the script itself.
+timing ones) are read by the updater itself.
 
 ### Trigger variables
 
 | Env var                                          |    Required    | Description                                                              | Default                                |
 |--------------------------------------------------|:--------------:|--------------------------------------------------------------------------|----------------------------------------|
 | `HOSAKA_TRIGGER_SCRIPT_{trigger_name}_INSTALL`   |  :red_circle:  | Set `true` to make this the manual "Update" button trigger in the UI\*   | `false`                                |
-| `HOSAKA_TRIGGER_SCRIPT_{trigger_name}_PATH`      | :white_circle: | Override the script. Omit to use the bundled Portainer script.           | `/scripts/portainer_stack_update.sh`   |
+| `HOSAKA_TRIGGER_SCRIPT_{trigger_name}_PATH`      | :white_circle: | Omit to use the built-in updater; set to a script path to run your own.   | `built-in`                             |
 | `HOSAKA_TRIGGER_SCRIPT_{trigger_name}_TIMEOUT`   | :white_circle: | Milliseconds before the trigger considers the script timed out.          | `300000` (5 minutes)                   |
 
 \* Only one `INSTALL` trigger may exist across all triggers; setting more than
 one makes the UI throw an error.
 
-### Script variables (read by the bundled script)
+### Portainer variables (read by the updater)
 
 | Env var                   |    Required    | Description                                                                            | Default |
 |---------------------------|:--------------:|---------------------------------------------------------------------------------------|---------|
@@ -88,8 +90,9 @@ services:
       - HOSAKA_TRIGGER_SCRIPT_PORTAINER_INSTALL=true
       - PORTAINER_API_ENDPOINT=https://portainer.example.com:9443/api
       - PORTAINER_API_KEY=ptr_xxxxxxxxxxxxxxxx
-      # PATH is optional; defaults to the bundled script:
-      # - HOSAKA_TRIGGER_SCRIPT_PORTAINER_PATH=/scripts/portainer_stack_update.sh
+      # PATH is optional; omit it to use the built-in updater. Set it only to
+      # run your own script instead:
+      # - HOSAKA_TRIGGER_SCRIPT_PORTAINER_PATH=/scripts/myscript.sh
 ```
 #### **Docker**
 ```bash
@@ -108,9 +111,5 @@ root (the Portainer script trigger is one of the documented sections there).
 
 Set `HOSAKA_TRIGGER_SCRIPT_{trigger_name}_PATH` to your own script's path and
 mount it in. See the [`script` trigger](configuration/triggers/script/) page for
-the arguments Hosaka passes.
-
-> **Mount caveat:** the bundled script lives at `/scripts/portainer_stack_update.sh`.
-> Bind-mounting an entire volume at `/scripts` shadows it. To keep the bundled
-> script available alongside your own, mount individual files
-> (`/host/mine.sh:/scripts/mine.sh`) rather than the whole directory.
+the arguments Hosaka passes. The bundled bash implementation still ships at
+`/scripts/portainer_stack_update.sh` if you want it as a starting point.

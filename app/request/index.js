@@ -1,4 +1,5 @@
 const axios = require('axios');
+const https = require('https');
 
 /**
  * Minimal drop-in replacement for the (deprecated) request-promise-native calls
@@ -24,6 +25,9 @@ async function request(options = {}) {
         auth,
         proxy,
         resolveWithFullResponse = false,
+        insecure = false,
+        responseType,
+        signal,
     } = options;
 
     const config = {
@@ -31,6 +35,19 @@ async function request(options = {}) {
         method: String(method).toLowerCase(),
         headers: { ...headers },
     };
+
+    if (responseType !== undefined) {
+        config.responseType = responseType;
+    }
+    if (signal !== undefined) {
+        config.signal = signal;
+    }
+    // Opt-in skip of TLS verification for self-signed / IP-addressed endpoints.
+    // Off by default so verification stays on; callers pass insecure: true only
+    // when the user has explicitly accepted an untrusted certificate.
+    if (insecure) {
+        config.httpsAgent = new https.Agent({ rejectUnauthorized: false });
+    }
 
     if (qs !== undefined) {
         config.params = qs;

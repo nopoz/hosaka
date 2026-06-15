@@ -1,9 +1,10 @@
 # Script
 
-The `script` trigger executes a local script file mounted inside the Hosaka container.
+The `script` trigger runs an action when an update is found: either Hosaka's
+built-in Portainer updater (the default) or a local script file you mount in.
 
-> Hosaka ships a ready-to-use Portainer update script as the default. If you just
-> want one-click Portainer updates, see [Portainer update script](configuration/triggers/script/portainer.md)
+> Hosaka's built-in Portainer updater is the default. If you just want one-click
+> Portainer updates, see [Portainer update script](configuration/triggers/script/portainer.md)
 > - you do not need to set `PATH` or mount anything.
 
 ## Notify mode vs install mode
@@ -23,10 +24,10 @@ configuring more than one causes the UI to surface an error.
 
 ## Live script output
 
-In install mode, the script's stdout and stderr are streamed line-by-line to the
-UI in real time over a Server-Sent Events connection. A console dialog opens
-automatically when the install starts and stays open until the script exits,
-letting you watch progress without polling.
+In install mode, the update output is streamed line-by-line to the UI in real
+time over a Server-Sent Events connection (for an external script, that is its
+stdout and stderr). A console dialog opens automatically when the install starts
+and stays open until the run finishes, letting you watch progress without polling.
 
 ## Script parameters
 
@@ -46,7 +47,7 @@ Supported shells for scripts are `/bin/bash`, `/bin/ash`, and `/bin/sh`.
 
 | Env var                                          |    Required    | Description                                                                                  | Supported values             | Default value when missing           |
 |--------------------------------------------------|:--------------:|----------------------------------------------------------------------------------------------|------------------------------|--------------------------------------|
-| `HOSAKA_TRIGGER_SCRIPT_{trigger_name}_PATH`      | :white_circle: | Absolute path to the script file inside the container. Omit to use the bundled Portainer script. | Any local path               | `/scripts/portainer_stack_update.sh` |
+| `HOSAKA_TRIGGER_SCRIPT_{trigger_name}_PATH`      | :white_circle: | Absolute path to a script file inside the container. Omit to use the built-in Portainer updater. | Any local path               | `built-in`                           |
 | `HOSAKA_TRIGGER_SCRIPT_{trigger_name}_INSTALL`   | :white_circle: | If `true`, switches to install mode (manual Update button only - see above)                  | `true`, `false`              | `false`                              |
 | `HOSAKA_TRIGGER_SCRIPT_{trigger_name}_TIMEOUT`   | :white_circle: | Milliseconds before the script execution is considered timed out                             | integer in ms                | `300000` (5 minutes)                 |
 

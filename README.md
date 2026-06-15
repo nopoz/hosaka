@@ -67,8 +67,8 @@ Hosaka sits in the middle, where most people actually want to be:
 | Area | WUD | Hosaka |
 |------|-----|--------|
 | **Updating from the UI** | run a trigger from the container's Triggers tab | one-click **Update** on the container row |
-| **Update progress** | none | live console output of the update script, streamed line by line |
-| **Portainer stacks** | generic script trigger, write your own | bundled one-click updater that rewrites the stack file and redeploys through the Portainer API |
+| **Update progress** | none | live console output of the update, streamed line by line |
+| **Portainer stacks** | generic script trigger, write your own | built-in one-click updater that rewrites the stack file and redeploys through the Portainer API |
 | **Mobile** | desktop-oriented: permanent nav, no mobile layout | fully responsive: hamburger nav, mobile layouts, update from your phone |
 | **Live container state** | manual refresh | list updates in place over SSE, no full-page reload |
 | **Update lifecycle** | trigger fires; output is logged server-side after it exits | tracks the container recreation, confirms the new container is live, and carries the "update complete" state onto the new container ID |
