@@ -142,7 +142,8 @@ class Registry extends Component {
                     log.debug(`Filter manifest for [arch=${image.architecture}, os=${image.os}, variant=${image.variant}]`);
                     let manifestFound;
                     const manifestFounds = responseManifests.manifests
-                        .filter((manifest) => manifest.platform.architecture === image.architecture
+                        .filter((manifest) => manifest.platform
+                            && manifest.platform.architecture === image.architecture
                             && manifest.platform.os === image.os);
 
                     // 1 manifest matching al least? Get the first one (better than nothing)

@@ -99,6 +99,62 @@ test('getImageManifestDigest should return digest for application/vnd.docker.dis
         });
 });
 
+test('getImageManifestDigest should ignore manifest list entries without a platform (buildx attestation manifests)', () => {
+    const registryMocked = new Registry();
+    registryMocked.log = log;
+    registryMocked.callRegistry = (options) => {
+        if (options.headers.Accept === 'application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.oci.image.index.v1+json') {
+            return {
+                schemaVersion: 2,
+                mediaType: 'application/vnd.oci.image.index.v1+json',
+                manifests: [
+                    {
+                        platform: {
+                            architecture: 'amd64',
+                            os: 'linux',
+                        },
+                        digest: 'digest_x',
+                        mediaType: 'application/vnd.oci.image.manifest.v1+json',
+                    },
+                    {
+                        // Attestation manifest pushed by buildx: no platform
+                        digest: 'digest_attestation',
+                        mediaType: 'application/vnd.oci.image.manifest.v1+json',
+                        annotations: {
+                            'vnd.docker.reference.type': 'attestation-manifest',
+                            'vnd.docker.reference.digest': 'digest_x',
+                        },
+                    },
+                ],
+            };
+        }
+        if (options.headers.Accept === 'application/vnd.oci.image.manifest.v1+json') {
+            return {
+                headers: {
+                    'docker-content-digest': '123456789',
+                },
+            };
+        }
+        throw new Error('Boom!');
+    };
+    expect(registryMocked.getImageManifestDigest({
+        name: 'image',
+        architecture: 'amd64',
+        os: 'linux',
+        tag: {
+            value: 'tag',
+        },
+        registry: {
+            url: 'url',
+        },
+    }))
+        .resolves
+        .toStrictEqual({
+            version: 2,
+            digest: '123456789',
+        });
+});
+
 test('getImageManifestDigest should return digest for application/vnd.docker.distribution.manifest.list.v2+json then application/vnd.docker.container.image.v1+json', () => {
     const registryMocked = new Registry();
     registryMocked.log = log;
