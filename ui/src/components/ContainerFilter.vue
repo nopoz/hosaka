@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid class="ma-0 mb-3 pa-0">
+  <v-container fluid class="filter-bar ma-0 mb-3 pa-0">
     <!-- Mobile: collapse the filters behind a toggle so the bar is a single
          compact row by default; keep Watch now always reachable. -->
     <div v-if="$vuetify.display.smAndDown" class="d-flex align-center mb-2">
@@ -23,7 +23,7 @@
     </div>
 
     <v-expand-transition>
-      <v-row dense v-show="$vuetify.display.mdAndUp || showFilters">
+      <v-row dense class="filter-row" v-show="$vuetify.display.mdAndUp || showFilters">
       <v-col cols="6" sm="4" md="2">
         <v-select
           :hide-details="true"
@@ -206,5 +206,37 @@ export default {
 <style scoped>
 .switch-top {
   margin-top: 4px;
+}
+
+/* Desktop filter layout. The equal-width Vuetify columns made the bar height
+   depend on the content width: when the nav rail expands it narrows the content,
+   the "Update available" switch label wrapped to two lines, the bar grew, and
+   the container list below it shifted down. Near the mobile breakpoint the same
+   squeeze collided the switch label into the Watch now button.
+   Fix: keep the bar on one row, give the switch and button fixed widths sized to
+   their content, and let the four selects flex to fill the rest. The bar height
+   then depends only on the window breakpoint (not the content width), so the rail
+   toggle never reflows it. The mobile layout (smAndDown) is a separate stacked
+   toggle and is unaffected. */
+@media (min-width: 960px) {
+  .filter-row {
+    flex-wrap: nowrap;
+  }
+  .filter-row > [class*="v-col"] {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: none;
+  }
+  /* Switch column: wide enough for the single-line "Update available" label. */
+  .filter-row > [class*="v-col"]:nth-child(5) {
+    flex: 0 0 180px;
+  }
+  /* Watch now button column. */
+  .filter-row > [class*="v-col"]:nth-child(6) {
+    flex: 0 0 130px;
+  }
+  .filter-row :deep(.v-switch .v-label) {
+    white-space: nowrap;
+  }
 }
 </style>
