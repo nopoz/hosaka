@@ -27,6 +27,28 @@ pcurl() {
 	curl "${insecure_opt[@]}" "$@"
 }
 
+# Docker/Portainer proxy list endpoints return a JSON array. On failure they
+# instead return an object like {"message":"..."} (or HTML/garbage). Detect a
+# non-array and surface the real reason rather than letting jq choke with a
+# cryptic "Cannot index string" three lines later, which previously masqueraded
+# as "container is not in a Portainer stack".
+require_json_array() {
+	local json="$1" context="$2"
+	if [[ "$(printf '%s' "$json" | jq -r 'type' 2>/dev/null)" != "array" ]]; then
+		local msg
+		msg=$(printf '%s' "$json" | jq -r '.message // .details // empty' 2>/dev/null)
+		echo -e "\nERROR: unexpected response from Portainer while $context."
+		if [[ -n "$msg" ]]; then
+			echo "Portainer said: $msg"
+		else
+			echo "Response was not a JSON array. First 500 chars:"
+			printf '%s' "$json" | head -c 500 | sed 's/^/  /'
+			echo
+		fi
+		return 1
+	fi
+}
+
 # Inspect the container once; echo its state vs the target:
 # ready | unhealthy | sameimage (target tag but image ID unchanged) | waiting | absent
 check_container_state() {
@@ -297,30 +319,43 @@ echo -e "compose project name: $compose_project"
 
 echo -e "\nretrieving portainer info for container \"$container_name\" in stack \"$compose_project\"..."
 
-# get container endpoint id
-if [[ $watcher_name == "local" ]]; then
-	endpoint_id=1
-else
-	endpoints_json=$(pcurl -s --location --request GET "$portainer_url/endpoints?name=$watcher_name" \
+# Discover which Portainer environment actually runs this container in this
+# compose project. We do NOT assume the "local" watcher maps to environment id 1
+# - that only holds when Hosaka and Portainer share a Docker host, which is false
+# for a remote Portainer. Discovery is authoritative: if no environment hosts the
+# container, it genuinely isn't Portainer-managed and we say so below.
+endpoints_json=$(pcurl -s --location --request GET "$portainer_url/endpoints?name=$watcher_name" \
+	--header 'Accept: application/json' \
+	--header "X-API-KEY: $api_key")
+require_json_array "$endpoints_json" "listing Portainer environments named \"$watcher_name\"" || exit 1
+
+# Narrowing by name can come back empty (the Hosaka watcher name need not equal
+# the Portainer environment name), so fall back to scanning every environment.
+candidate_ids=$(echo "$endpoints_json" | jq -r '.[].Id')
+if [[ -z "$candidate_ids" ]]; then
+	all_endpoints_json=$(pcurl -s --location --request GET "$portainer_url/endpoints" \
 		--header 'Accept: application/json' \
 		--header "X-API-KEY: $api_key")
-
-	# Match the watcher name to an endpoint by checking each candidate against
-	# the live Docker proxy (newer Portainer leaves the endpoint snapshot empty).
-	candidate_ids=$(echo "$endpoints_json" | jq -r 'if type == "array" then .[] else . end | .Id')
-	endpoint_id=""
-	for candidate_id in $candidate_ids; do
-		proxy_containers=$(pcurl -s --location --request GET "$portainer_url/endpoints/$candidate_id/docker/containers/json?all=true" \
-			--header 'Accept: application/json' \
-			--header "X-API-Key: $api_key")
-		match=$(echo "$proxy_containers" | jq -r --arg container_name "$container_name" --arg compose_project "$compose_project" \
-			'[.[] | select(.Names[] == "/\($container_name)" and .Labels["com.docker.compose.project"] == $compose_project)] | length' 2>/dev/null)
-		if [[ "$match" -gt 0 ]] 2>/dev/null; then
-			endpoint_id="$candidate_id"
-			break
-		fi
-	done
+	require_json_array "$all_endpoints_json" "listing Portainer environments" || exit 1
+	candidate_ids=$(echo "$all_endpoints_json" | jq -r '.[].Id')
 fi
+
+# Match each candidate against the live Docker proxy (newer Portainer leaves the
+# endpoint snapshot empty, so query containers directly). A non-array response
+# from a down/unreachable environment is handled by the guarded jq below: it
+# yields no match and we move on, rather than aborting the whole scan.
+endpoint_id=""
+for candidate_id in $candidate_ids; do
+	proxy_containers=$(pcurl -s --location --request GET "$portainer_url/endpoints/$candidate_id/docker/containers/json?all=true" \
+		--header 'Accept: application/json' \
+		--header "X-API-Key: $api_key")
+	match=$(echo "$proxy_containers" | jq -r --arg container_name "$container_name" --arg compose_project "$compose_project" \
+		'[.[] | select(.Names[] == "/\($container_name)" and .Labels["com.docker.compose.project"] == $compose_project)] | length' 2>/dev/null)
+	if [[ "$match" -gt 0 ]] 2>/dev/null; then
+		endpoint_id="$candidate_id"
+		break
+	fi
+done
 
 if [[ -z "$endpoint_id" || "$endpoint_id" == "null" ]]; then
 	echo -e "\nERROR: could not determine the Portainer endpoint for watcher \"$watcher_name\"."
@@ -336,6 +371,7 @@ endpoint_inspect=$(pcurl -s --location -g \
 	--request GET "$portainer_url/endpoints/$endpoint_id/docker/containers/json?all=true&filters=$filter_encoded" \
 	--header 'Accept: application/json' \
 	--header "X-API-Key: $api_key")
+require_json_array "$endpoint_inspect" "inspecting container \"$container_name\" on endpoint $endpoint_id" || exit 1
 image_id=$(echo "$endpoint_inspect" | jq '[.[] | .Portainer.ResourceControl.Id] | first')
 if [[ -z "$image_id" || "$image_id" == "null" ]]; then
 	echo -e "\nERROR: could not find Portainer stack ownership for container \"$container_name\" on endpoint $endpoint_id."
@@ -352,6 +388,7 @@ endpoint_stacks=$(pcurl -s --location -g \
 	--request GET "$portainer_url/stacks?filters=${filter_encoded}" \
 	--header 'Accept: application/json' \
 	--header "X-API-Key: $api_key")
+require_json_array "$endpoint_stacks" "listing Portainer stacks on endpoint $endpoint_id" || exit 1
 stack_id=$(echo "$endpoint_stacks" | jq --arg image_id "$image_id" '[.[] | select(.ResourceControl.Id == ($image_id|tonumber)) | .Id] | first')
 if [[ -z "$stack_id" || "$stack_id" == "null" ]]; then
 	echo -e "\nERROR: no Portainer stack found for container \"$container_name\" on endpoint $endpoint_id."
