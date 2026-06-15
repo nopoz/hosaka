@@ -501,6 +501,9 @@ async install(container) {
             });
         };
 
+        // Prefix each output line with a wall-clock timestamp (HH:MM:SS).
+        const ts = () => new Date().toTimeString().slice(0, 8);
+
         // Emit header
         emitLog(header);
 
@@ -520,7 +523,13 @@ async install(container) {
         // script, streaming each line through the same emitLog so the live-output
         // UI behaves identically to the external-script path.
         if (useBuiltin) {
-            const emitLine = (line) => emitLog(`# [${name}] ${line}\n`);
+            // Split on embedded newlines so each line gets its own timestamp;
+            // trim so lines sit flush after the stamp (the timestamp is the left
+            // margin), and keep blank separator lines blank without a stray stamp.
+            const emitLine = (raw) => String(raw).split('\n').forEach((line) => {
+                const trimmed = line.trim();
+                emitLog(trimmed ? `# [${ts()}] ${trimmed}\n` : '\n');
+            });
             try {
                 await runPortainerUpdate({
                     containerName: name,
@@ -563,7 +572,7 @@ async install(container) {
                 const lines = data.toString().split('\n');
                 lines.forEach(line => {
                     if (line.trim()) {
-                        emitLog(`# [${name}] ${line.trim()}\n`);
+                        emitLog(`# [${ts()}] ${line.trim()}\n`);
                     }
                 });
             });
@@ -572,7 +581,7 @@ async install(container) {
                 const lines = data.toString().split('\n');
                 lines.forEach(line => {
                     if (line.trim()) {
-                        emitLog(`# [${name}] ERROR: ${line.trim()}\n`);
+                        emitLog(`# [${ts()}] ERROR: ${line.trim()}\n`);
                     }
                 });
             });

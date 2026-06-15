@@ -178,8 +178,8 @@ describe('Script Trigger Tests', () => {
 
         const execCall = exec.mock.results[0].value;
         expect(execCall.stdout.on).toHaveBeenCalledWith('data', expect.any(Function));
-        // Verify log messages were prefixed with container name
-        expect(console.log).toHaveBeenCalledWith(expect.stringContaining('[test-container]'));
+        // Verify log messages were prefixed with an HH:MM:SS timestamp
+        expect(console.log).toHaveBeenCalledWith(expect.stringMatching(/# \[\d{2}:\d{2}:\d{2}\] Script is running/));
     });
 
     test('setContainerNotification should update container with notification', async () => {
