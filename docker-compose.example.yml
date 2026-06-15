@@ -38,21 +38,20 @@ services:
 
       # ── One-click updates (Portainer) ───────────────────────────────────────
       # This is on by default: it puts an "Update" button on every container in the
-      # UI. The bundled script (image: /scripts/portainer_stack_update.sh) rewrites
-      # the container's Portainer stack to the new tag and redeploys via the
-      # Portainer API. INSTALL=true is all the button needs.
+      # UI. The built-in updater rewrites the container's Portainer stack to the new
+      # tag and redeploys via the Portainer API. INSTALL=true is all the button needs.
       #
       # >>> To make the button actually WORK, set the two vars below. <<<
       # Until you do, the button still shows; clicking it just reports a friendly
       # "set PORTAINER_API_ENDPOINT / PORTAINER_API_KEY" error in the UI log. These
-      # are plain env vars read by the script (not HOSAKA_*).
+      # are plain env vars read by the updater (not HOSAKA_*).
       - HOSAKA_TRIGGER_SCRIPT_PORTAINER_INSTALL=true
       # - PORTAINER_API_ENDPOINT=https://portainer.example.com:9443/api   # must include /api
       # - PORTAINER_API_KEY=ptr_xxxxxxxxxxxxxxxx                          # Portainer access token
       # - PORTAINER_INSECURE=true                                         # skip TLS verify (self-signed cert / IP)
-      # - UPDATE_TIMEOUT=300                                              # script: wait for healthy (s)
-      # - POLL_INTERVAL=5                                                 # script: health poll interval (s)
-      # - HOSAKA_TRIGGER_SCRIPT_PORTAINER_TIMEOUT=300000                  # hard kill the script after (ms)
+      # - UPDATE_TIMEOUT=300                                              # wait for healthy (s)
+      # - POLL_INTERVAL=5                                                 # health poll interval (s)
+      # - HOSAKA_TRIGGER_SCRIPT_PORTAINER_TIMEOUT=300000                  # time out the update after (ms)
       # Only ONE trigger may have install=true, else the button is disabled.
       # To turn the button off entirely, comment out the INSTALL line above.
 
@@ -149,7 +148,7 @@ services:
       # - HOSAKA_TRIGGER_<TYPE>_<NAME>_MODE=simple     # simple (per container) | batch (one digest)
       # - HOSAKA_TRIGGER_<TYPE>_<NAME>_ONCE=true       # fire only on first detection per update
       #
-      # Bundled Portainer one-click updater: configured in the "One-click updates"
+      # Built-in Portainer one-click updater: configured in the "One-click updates"
       # section near the top of this file (on by default).
       #
       # Docker auto-update (pull + recreate the container in place):
