@@ -7,6 +7,11 @@ const Docker = require('dockerode');
 const fs = require('fs');
 const registry = require('../../../registry');
 const EventEmitter = require('events');
+const runPortainerUpdate = require('./portainerUpdate');
+
+// Sentinel path value selecting the built-in native Portainer updater instead of
+// exec-ing an external script file. Any other path value is exec'd as before.
+const BUILTIN_PATH = 'built-in';
 
 const scriptOutputEmitter = new EventEmitter();
 
@@ -31,7 +36,7 @@ class ScriptTrigger extends Trigger {
      */
     getConfigurationSchema() {
         return this.joi.object().keys({
-            path: this.joi.string().default('/scripts/portainer_stack_update.sh'),
+            path: this.joi.string().default(BUILTIN_PATH),
             install: this.joi.boolean().truthy('true').falsy('false').default(false),
             timeout: this.joi.number().default(300000),
         });
@@ -459,7 +464,10 @@ async install(container) {
         }
 
         const compose_project = container.compose_project || 'unknown';
-        const command = shell([path, name, imageName, localValue, remoteValue, watcher, compose_project]);
+        const useBuiltin = String(path) === BUILTIN_PATH;
+        const command = useBuiltin
+            ? null
+            : shell([path, name, imageName, localValue, remoteValue, watcher, compose_project]);
 
         // Prepare header
         const header = [
@@ -476,7 +484,7 @@ async install(container) {
             `#   - Watcher: ${watcher}`,
             `#   - Compose Project: ${compose_project}`,
             '#',
-            `# Full Command: ${command}`,
+            useBuiltin ? '# Updater: built-in (native Portainer)' : `# Full Command: ${command}`,
             '# Script Output:',
             '------------------------------------------------------------------------------',
             ''
@@ -495,6 +503,52 @@ async install(container) {
 
         // Emit header
         emitLog(header);
+
+        const buildFooter = (code) => [
+            '------------------------------------------------------------------------------',
+            '# Execution Summary:',
+            `# Container: ${name}`,
+            `# Exit Code: ${code}`,
+            code === 0 ? '# Status: Success' : null,
+            '##############################################################################',
+            '#                             SCRIPT EXECUTION END                           #',
+            '##############################################################################',
+            '',
+        ].filter(Boolean).join('\n');
+
+        // Built-in native Portainer updater: run in-process instead of exec-ing a
+        // script, streaming each line through the same emitLog so the live-output
+        // UI behaves identically to the external-script path.
+        if (useBuiltin) {
+            const emitLine = (line) => emitLog(`# [${name}] ${line}\n`);
+            try {
+                await runPortainerUpdate({
+                    containerName: name,
+                    imageName,
+                    currentVersion: localValue,
+                    targetVersion: remoteValue,
+                    watcher,
+                    composeProject: compose_project,
+                    timeout,
+                }, emitLine);
+                emitLog(buildFooter(0));
+                scriptOutputEmitter.emit('complete', {
+                    containerId: container.id,
+                    containerName: container.name,
+                    timestamp: Date.now(),
+                });
+            } catch (error) {
+                emitLine(`ERROR: ${error.message}`);
+                emitLog(buildFooter(1));
+                scriptOutputEmitter.emit('complete', {
+                    containerId: container.id,
+                    containerName: container.name,
+                    timestamp: Date.now(),
+                });
+                throw error;
+            }
+            return;
+        }
 
         return new Promise((resolve, reject) => {
             const process = exec(command, { timeout }, (error) => {

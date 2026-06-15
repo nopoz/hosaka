@@ -203,10 +203,10 @@ describe('Script Trigger Tests', () => {
 });
 
 describe('Script Trigger configuration schema', () => {
-    test('path defaults to the bundled portainer script when omitted', () => {
+    test('path defaults to the built-in native updater when omitted', () => {
         const trigger = new Script();
         const validated = trigger.validateConfiguration({ install: true });
-        expect(validated.path).toEqual('/scripts/portainer_stack_update.sh');
+        expect(validated.path).toEqual('built-in');
         expect(validated.install).toEqual(true);
         expect(validated.timeout).toEqual(300000);
     });
