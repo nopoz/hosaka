@@ -387,6 +387,11 @@ export default {
   padding: 12px;
   margin: 0;
   line-height: 1.2;
+  /* Firefox ignores the ::-webkit-scrollbar rules below and would fall back to a
+     grey scrollbar; the standard properties theme it there too. */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--v-theme-on-surface), 0.35)
+    rgb(var(--v-theme-surface-light));
 }
 
 /* Wrap long lines instead of forcing horizontal scroll. */

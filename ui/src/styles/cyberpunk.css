@@ -129,3 +129,84 @@ pre,
   filter: drop-shadow(0 0 4px rgba(255, 176, 0, 0.55))
     drop-shadow(0 0 10px rgba(255, 176, 0, 0.3));
 }
+
+/* ---- Sprawl Terminal: phosphor glow on the amber elements ----
+   Models a monochrome CRT: the bloom tracks how much "light" an element emits.
+   Text glyphs and solid amber fills emit the most (brighter glow); thin outlined
+   borders and hairlines emit little (subtle glow). Boxes get an inner AND outer
+   shadow so the bloom spills both ways and no edge stays razor-crisp. Structural
+   brown chrome (surfaces, dividers, the app-shell hairline) stays flat -- only
+   the phosphor colour blooms. */
+
+/* Text -- outer glow only (glyphs emit a moderate, even light). Covers the nav
+   icons + labels, the app-bar view title, and the console icons. */
+.v-theme--sprawl-terminal .v-navigation-drawer .v-icon,
+.v-theme--sprawl-terminal .console-window .v-icon {
+  text-shadow: 0 0 4px rgba(255, 176, 0, 0.5), 0 0 9px rgba(255, 176, 0, 0.28);
+}
+.v-theme--sprawl-terminal .v-navigation-drawer .nav-title,
+.v-theme--sprawl-terminal .v-app-bar .v-toolbar-title {
+  text-shadow: 0 0 4px rgba(255, 176, 0, 0.5), 0 0 9px rgba(255, 176, 0, 0.3);
+}
+
+/* Container-row chips. Outlined chips are a thin border + label, so a subtle
+   inner+outer bloom (little light). The filled `major` anchor emits across its
+   whole face -> brighter outer halo, no inner glow (amber-on-amber is moot and
+   its text is black). */
+.v-theme--sprawl-terminal .v-card .v-toolbar .v-chip {
+  text-shadow: 0 0 4px rgba(255, 176, 0, 0.45);
+  box-shadow: 0 0 5px rgba(255, 176, 0, 0.2),
+    inset 0 0 5px rgba(255, 176, 0, 0.13);
+}
+.v-theme--sprawl-terminal .v-card .v-toolbar .v-chip.sev-major {
+  text-shadow: none;
+  box-shadow: 0 0 10px rgba(255, 176, 0, 0.55), 0 0 4px rgba(255, 176, 0, 0.4);
+}
+
+/* Filter bar. Outlined selects get the thin-border inner+outer bloom. The
+   labels sit at 0.7 opacity, which dims their glow, so they need a higher alpha
+   to read. The filled Watch now button emits across its face -> brighter outer
+   halo. */
+.v-theme--sprawl-terminal .filter-bar .v-field {
+  border-radius: 4px;
+  box-shadow: 0 0 5px rgba(255, 176, 0, 0.2),
+    inset 0 0 5px rgba(255, 176, 0, 0.13);
+}
+.v-theme--sprawl-terminal .filter-bar .v-field__input,
+.v-theme--sprawl-terminal .filter-bar .v-label,
+.v-theme--sprawl-terminal .filter-bar .v-select__selection-text,
+.v-theme--sprawl-terminal .filter-bar .v-icon {
+  text-shadow: 0 0 4px rgba(255, 176, 0, 0.75), 0 0 9px rgba(255, 176, 0, 0.4);
+}
+.v-theme--sprawl-terminal .filter-bar .v-btn {
+  box-shadow: 0 0 10px rgba(255, 176, 0, 0.5), 0 0 4px rgba(255, 176, 0, 0.35);
+}
+
+/* Switch: the on-thumb is a solid amber dot (bright -> outer halo); the off
+   track is a thin dim bar (little light -> only a faint glow). */
+.v-theme--sprawl-terminal .v-switch .v-selection-control--dirty .v-switch__thumb {
+  box-shadow: 0 0 8px 1px rgba(255, 176, 0, 0.6);
+}
+.v-theme--sprawl-terminal
+  .v-switch
+  .v-selection-control:not(.v-selection-control--dirty)
+  .v-switch__track {
+  background-color: rgba(255, 176, 0, 0.3);
+  opacity: 1;
+  box-shadow: 0 0 4px rgba(255, 176, 0, 0.18);
+}
+
+/* Console: the screen text glows (outer); the window carries a soft inner
+   phosphor wash. Its outer frame is a thin 1px border, so its outer halo is
+   kept faint (a thin line emits little light). */
+.v-theme--sprawl-terminal .log-output {
+  text-shadow: 0 0 4px rgba(255, 176, 0, 0.4), 0 0 8px rgba(255, 176, 0, 0.2);
+  box-shadow: inset 0 0 24px rgba(255, 176, 0, 0.06),
+    0 0 4px rgba(255, 176, 0, 0.07);
+}
+/* The console action buttons ("Close Script Output" / "Close") are solid amber
+   fills -> bright outer halo, matching the other filled buttons. The text-only
+   X button keeps just its icon glow (covered by .console-window .v-icon). */
+.v-theme--sprawl-terminal .console-window .v-btn--variant-flat {
+  box-shadow: 0 0 10px rgba(255, 176, 0, 0.5), 0 0 4px rgba(255, 176, 0, 0.35);
+}
