@@ -341,8 +341,11 @@ async function runPortainerUpdate(params, emitLine) {
     const {
         containerName, imageName, currentVersion, targetVersion, watcher, composeProject,
     } = params;
-    const timeoutSec = Math.round((params.timeout || 300000) / 1000);
-    const pollIntervalSec = params.pollInterval || 5;
+    // UPDATE_TIMEOUT / POLL_INTERVAL env vars override, matching the bash script;
+    // otherwise fall back to the trigger TIMEOUT and a 5s poll.
+    const timeoutSec = parseInt(process.env.UPDATE_TIMEOUT, 10)
+        || Math.round((params.timeout || 300000) / 1000);
+    const pollIntervalSec = parseInt(process.env.POLL_INTERVAL, 10) || params.pollInterval || 5;
 
     if (!containerName || !imageName || !currentVersion || !targetVersion || !composeProject) {
         throw new Error(
