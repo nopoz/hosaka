@@ -2,17 +2,10 @@ const readline = require('readline');
 const request = require('../../../request');
 
 /**
- * Native Node port of scripts/portainer_stack_update.sh.
- *
- * Edits a container's Portainer stack file (image:current -> image:target) and
- * PUTs a stack update, then watches the container reach the target image via the
- * Portainer-proxied Docker event stream (with an inspect-poll backstop). All
- * HTTP goes through the shared axios adapter; JSON is handled natively, so the
- * jq/curl shape bugs the bash version suffered from (issue #97) cannot recur.
- *
- * Talks to Portainer through PORTAINER_API_ENDPOINT / PORTAINER_API_KEY (and the
- * opt-in PORTAINER_INSECURE for self-signed / IP endpoints), read from the
- * container environment exactly as the bash script did.
+ * Native Node port of scripts/portainer_stack_update.sh: rewrites a container's
+ * Portainer stack file (image:current -> image:target), PUTs the update, and
+ * watches the container reach the target image. Reads PORTAINER_API_ENDPOINT /
+ * PORTAINER_API_KEY / PORTAINER_INSECURE from the environment.
  */
 
 const MOVING_TAGS = /:(latest|stable|edge|main|master|nightly|rolling|dev)(["'\s]|$)/;
@@ -33,10 +26,9 @@ function lastSegment(imageRef) {
     return String(imageRef).split('/').pop();
 }
 
-// A Portainer/Docker proxy list endpoint must return a JSON array. On failure it
-// returns an object like { message: "..." }; surface the real reason instead of
-// letting downstream array access produce a cryptic error (this is the #97 fix,
-// now structural rather than a guard bolted onto a jq pipeline).
+// Proxy list endpoints return a JSON array; on failure they return an object
+// like { message: "..." }. Surface that instead of a cryptic downstream array
+// error (issue #97).
 function requireArray(value, context) {
     if (!Array.isArray(value)) {
         const msg = value && (value.message || value.details);
@@ -61,11 +53,11 @@ function api(env, opts) {
     });
 }
 
-// Demux Docker's multiplexed log stream. Non-TTY containers prefix each frame
-// with 8 bytes: [stream:1][000][payload-len:4 BE]. Replaces the od/awk monster.
+// Demux Docker's multiplexed log stream: non-TTY containers prefix each frame
+// with 8 bytes [stream:1][000][payload-len:4 BE].
 function demuxDockerStream(buf) {
     if (!buf || !buf.length) return '';
-    // A TTY/raw stream won't carry frame headers; the first byte is real text.
+    // A TTY/raw stream has no frame headers; its first byte is real text.
     if (buf[0] > 2) return buf.toString('utf8');
     let out = '';
     let i = 0;
@@ -127,10 +119,8 @@ async function preflight(env) {
     }
 }
 
-// Discover the environment that actually runs the container in this compose
-// project. No "local watcher == environment 1" assumption (the #97 root cause):
-// narrow by watcher name, fall back to a full scan, and match each candidate
-// against its live Docker proxy. Returns { endpointId, container }.
+// Discover the environment that actually runs the container; never assume the
+// "local" watcher maps to environment 1 (the original #97 root cause).
 async function discoverEndpoint(env, { containerName, composeProject, watcher }) {
     const named = await api(env, { path: `/endpoints?name=${encodeURIComponent(watcher)}` });
     requireArray(named, `listing Portainer environments named "${watcher}"`);
@@ -147,7 +137,7 @@ async function discoverEndpoint(env, { containerName, composeProject, watcher })
         try {
             containers = await api(env, { path: `/endpoints/${id}/docker/containers/json?all=true` });
         } catch (err) {
-            continue; // environment down/unreachable; try the next one
+            continue;
         }
         if (!Array.isArray(containers)) continue;
         const match = containers.find((c) => (c.Names || []).includes(`/${containerName}`)
@@ -243,9 +233,8 @@ async function fetchContainerLogs(env, endpointId, containerName, lines, emit) {
     }
 }
 
-// Wait for the container to reach the target image, driven by the live Docker
-// event stream with a periodic inspect backstop (events can be missed) and an
-// overall timeout. Resolves on success; throws on unhealthy/timeout.
+// Wait for the container to reach the target image via the live Docker event
+// stream, with an inspect backstop (events can be missed) and an overall timeout.
 function waitForContainerUpdate(env, { endpointId, containerName, expectedImage, timeoutSec, initialImageId, pollIntervalSec }, emit) {
     return new Promise((resolve, reject) => {
         const controller = new AbortController();
@@ -309,13 +298,13 @@ function waitForContainerUpdate(env, { endpointId, containerName, expectedImage,
                     verify();
                 }
             });
-            stream.on('error', () => { /* aborted on settle, or stream dropped; backstop covers it */ });
+            // A settle aborts the stream; the backstop covers any other drop.
+            stream.on('error', () => {});
         }).catch(() => {
-            // Event stream could not be opened; fall back to the inspect backstop.
             if (!settled) emit('  (event stream unavailable - falling back to inspect polling)');
         });
 
-        // Kick an immediate inspect so an already-complete update resolves fast.
+        // Resolve fast if the update is already complete.
         verify();
     });
 }
