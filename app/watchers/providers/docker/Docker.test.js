@@ -946,3 +946,28 @@ test('findNewVersion (case C: semver no regex) resolves to highest tag', async (
         digest: 'sha256:7.8.9',
     });
 });
+
+// Efficiency: with an include regex set, the manifest loop must skip tags that
+// the regex excludes. Today it manifests every tag; after the reorder it must
+// only touch matching tags + the current tag (+ the trailing top-candidate
+// digest lookup).
+test('findNewVersion (case A) only manifests include-matching tags', async () => {
+    const { fn, counter } = countingManifest({});
+    hub.getImageManifestDigest = fn;
+    hub.getTags = () => (['9.0.0', '8.1.0', '8.0.1', '8.0.0', '7.9.9', 'latest', 'foo.sig']);
+    const container = buildDigestWatchContainer({
+        includeTags: '^8\\.',
+        image: { tag: { value: '8.0.0', semver: true } },
+    });
+
+    await docker.findNewVersion(container, docker.log);
+
+    // Non-matching tags must never be manifested.
+    expect(counter.tags).not.toContain('9.0.0');
+    expect(counter.tags).not.toContain('7.9.9');
+    expect(counter.tags).not.toContain('latest');
+    expect(counter.tags).not.toContain('foo.sig');
+    // Only the three 8.x tags get manifested ('8.1.0' is also re-fetched by the
+    // trailing top-candidate digest resolution).
+    expect(new Set(counter.tags)).toEqual(new Set(['8.1.0', '8.0.1', '8.0.0']));
+});
