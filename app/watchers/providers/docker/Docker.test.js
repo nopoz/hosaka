@@ -855,3 +855,139 @@ test.each(digestToWatchTestCases)(
         expect(isDigestToWatch(item.label, item.semver)).toEqual(item.result);
     },
 );
+
+// --- manifest pre-filter reorder: shared helpers ---------------------------
+
+// A getImageManifestDigest fake that records every tag it is asked about.
+function countingManifest(digestByTag) {
+    const counter = { calls: 0, tags: [] };
+    const fn = async (image) => {
+        counter.calls += 1;
+        counter.tags.push(image.tag.value);
+        const digest = digestByTag[image.tag.value] || `sha256:${image.tag.value}`;
+        return { digest, version: 2 };
+    };
+    return { fn, counter };
+}
+
+function buildDigestWatchContainer(overrides = {}) {
+    const imageOverrides = overrides.image || {};
+    return {
+        id: 'id',
+        name: 'name',
+        watcher: 'test',
+        includeTags: undefined,
+        excludeTags: undefined,
+        transformTags: undefined,
+        ...overrides,
+        image: {
+            id: 'image-id',
+            name: 'organization/image',
+            registry: { name: 'hub', url: 'http://registry' },
+            tag: { value: '8.0.0', semver: true },
+            digest: { watch: true, value: 'xxx', repo: 'yyy' },
+            architecture: 'arch',
+            os: 'os',
+            ...imageOverrides,
+        },
+    };
+}
+
+// Case A: include regex on a semver container. The alias branch stays dormant
+// (digest.value 'xxx' never matches a manifested digest), so result is driven
+// purely by the include regex + semver ordering.
+test('findNewVersion (case A: include regex) resolves to highest matching tag', async () => {
+    const { fn } = countingManifest({});
+    hub.getImageManifestDigest = fn;
+    hub.getTags = () => (['9.0.0', '8.1.0', '8.0.1', '8.0.0', '7.9.9', 'latest', 'foo.sig']);
+    const container = buildDigestWatchContainer({
+        includeTags: '^8\\.',
+        image: { tag: { value: '8.0.0', semver: true } },
+    });
+    await expect(docker.findNewVersion(container, docker.log)).resolves.toMatchObject({
+        tag: '8.1.0',
+        digest: 'sha256:8.1.0',
+    });
+});
+
+// Case B: non-semver 'latest' whose digest aliases a concrete version tag.
+// The alias branch resolves result.tag to the concrete version. This must NOT
+// change after the reorder (no regex -> full scan retained).
+test('findNewVersion (case B: latest alias) resolves to the aliased version', async () => {
+    const { fn } = countingManifest({
+        latest: 'sha256:shared',
+        '1.2.3': 'sha256:shared',
+        '1.2.2': 'sha256:old',
+    });
+    hub.getImageManifestDigest = fn;
+    hub.getTags = () => (['latest', '1.2.3', '1.2.2']);
+    const container = buildDigestWatchContainer({
+        image: {
+            tag: { value: 'latest', semver: false },
+            digest: { watch: true, value: 'sha256:shared', repo: 'yyy' },
+        },
+    });
+    await expect(docker.findNewVersion(container, docker.log)).resolves.toMatchObject({
+        tag: '1.2.3',
+    });
+});
+
+// Case C: plain semver, digest watch, no regex. The common path; guards against
+// regression on no-regex containers.
+test('findNewVersion (case C: semver no regex) resolves to highest tag', async () => {
+    const { fn } = countingManifest({});
+    hub.getImageManifestDigest = fn;
+    hub.getTags = () => (['7.8.9', '4.5.6', '3.0.0']);
+    const container = buildDigestWatchContainer({
+        image: { tag: { value: '4.5.6', semver: true }, digest: { watch: true, value: 'xxx', repo: 'yyy' } },
+    });
+    await expect(docker.findNewVersion(container, docker.log)).resolves.toMatchObject({
+        tag: '7.8.9',
+        digest: 'sha256:7.8.9',
+    });
+});
+
+// Efficiency: with an include regex set, the manifest loop must skip tags that
+// the regex excludes. Today it manifests every tag; after the reorder it must
+// only touch matching tags + the current tag (+ the trailing top-candidate
+// digest lookup).
+test('findNewVersion (case A) only manifests include-matching tags', async () => {
+    const { fn, counter } = countingManifest({});
+    hub.getImageManifestDigest = fn;
+    hub.getTags = () => (['9.0.0', '8.1.0', '8.0.1', '8.0.0', '7.9.9', 'latest', 'foo.sig']);
+    const container = buildDigestWatchContainer({
+        includeTags: '^8\\.',
+        image: { tag: { value: '8.0.0', semver: true } },
+    });
+
+    await docker.findNewVersion(container, docker.log);
+
+    // Non-matching tags must never be manifested.
+    expect(counter.tags).not.toContain('9.0.0');
+    expect(counter.tags).not.toContain('7.9.9');
+    expect(counter.tags).not.toContain('latest');
+    expect(counter.tags).not.toContain('foo.sig');
+    // Only the three 8.x tags get manifested ('8.1.0' is also re-fetched by the
+    // trailing top-candidate digest resolution).
+    expect(new Set(counter.tags)).toEqual(new Set(['8.1.0', '8.0.1', '8.0.0']));
+});
+
+// Efficiency: excludeTags set without includeTags. Excluded tags are skipped,
+// and the current running tag is always kept (needed for the alias digest
+// lookup) even though there is no include regex.
+test('findNewVersion (exclude only) skips excluded tags but keeps current', async () => {
+    const { fn, counter } = countingManifest({});
+    hub.getImageManifestDigest = fn;
+    hub.getTags = () => (['8.2.0', '8.1.0', '8.0.0', '8.0.0-rc1', '8.1.0-rc2']);
+    const container = buildDigestWatchContainer({
+        excludeTags: '-rc',
+        image: { tag: { value: '8.0.0', semver: true } },
+    });
+
+    await docker.findNewVersion(container, docker.log);
+
+    expect(counter.tags).not.toContain('8.0.0-rc1');
+    expect(counter.tags).not.toContain('8.1.0-rc2');
+    expect(counter.tags).toContain('8.0.0');
+    expect(new Set(counter.tags)).toEqual(new Set(['8.2.0', '8.1.0', '8.0.0']));
+});

@@ -767,7 +767,24 @@ async watchContainer(container, skipRegistryCheck = false) {
         if (container.image.digest.watch) {
             imageDigestMap = new Map();
 
-            for (const tag of tags) {
+            // Narrow the (serial, per-tag) manifest fetch by the container's
+            // include/exclude regex before hitting the registry. Only applied
+            // when those labels are set; without a regex the full tag set is
+            // kept so alias/digest resolution (e.g. a `latest` tag mapping to a
+            // concrete version) is unchanged. Always keep the current tag so
+            // the alias lookup for the running image still resolves.
+            let tagsToManifest = tags;
+            if (container.includeTags) {
+                const includeTagsRegex = new RegExp(container.includeTags);
+                tagsToManifest = tagsToManifest.filter((tag) => includeTagsRegex.test(tag));
+            }
+            if (container.excludeTags) {
+                const excludeTagsRegex = new RegExp(container.excludeTags);
+                tagsToManifest = tagsToManifest.filter((tag) => !excludeTagsRegex.test(tag));
+            }
+            const manifestTags = new Set([...tagsToManifest, container.image.tag.value]);
+
+            for (const tag of manifestTags) {
                 const digest = await registryProvider.getImageManifestDigest({
                     ...container.image,
                     tag: { value: tag },
