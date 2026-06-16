@@ -971,3 +971,23 @@ test('findNewVersion (case A) only manifests include-matching tags', async () =>
     // trailing top-candidate digest resolution).
     expect(new Set(counter.tags)).toEqual(new Set(['8.1.0', '8.0.1', '8.0.0']));
 });
+
+// Efficiency: excludeTags set without includeTags. Excluded tags are skipped,
+// and the current running tag is always kept (needed for the alias digest
+// lookup) even though there is no include regex.
+test('findNewVersion (exclude only) skips excluded tags but keeps current', async () => {
+    const { fn, counter } = countingManifest({});
+    hub.getImageManifestDigest = fn;
+    hub.getTags = () => (['8.2.0', '8.1.0', '8.0.0', '8.0.0-rc1', '8.1.0-rc2']);
+    const container = buildDigestWatchContainer({
+        excludeTags: '-rc',
+        image: { tag: { value: '8.0.0', semver: true } },
+    });
+
+    await docker.findNewVersion(container, docker.log);
+
+    expect(counter.tags).not.toContain('8.0.0-rc1');
+    expect(counter.tags).not.toContain('8.1.0-rc2');
+    expect(counter.tags).toContain('8.0.0');
+    expect(new Set(counter.tags)).toEqual(new Set(['8.2.0', '8.1.0', '8.0.0']));
+});
