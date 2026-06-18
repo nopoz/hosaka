@@ -51,6 +51,17 @@
         <v-icon start>ri-arrow-up-circle-line</v-icon>
         Update
       </v-chip>
+      <v-chip
+        v-if="aiEnabled && container.updateAvailable"
+        label
+        color="info"
+        variant="outlined"
+        @click.stop="showUpdateAnalysis = true"
+        class="mr-1"
+      >
+        <v-icon start>ri-search-eye-line</v-icon>
+        Analyze
+      </v-chip>
       <v-tooltip location="bottom">
         <template v-slot:activator="{ props }">
           <v-chip
@@ -120,6 +131,17 @@
         >
           <v-icon start>ri-arrow-up-circle-line</v-icon>
           Update
+        </v-btn>
+        <v-btn
+          v-if="aiEnabled"
+          color="info"
+          variant="outlined"
+          size="small"
+          class="ml-2 flex-shrink-0"
+          @click.stop="showUpdateAnalysis = true"
+        >
+          <v-icon start>ri-search-eye-line</v-icon>
+          Analyze
         </v-btn>
       </div>
     </div>
@@ -245,6 +267,10 @@
       @update-complete="handleUpdateComplete"
       @dialog-closed="handleDialogClosed"
     />
+    <update-analysis-dialog
+      v-model="showUpdateAnalysis"
+      :container="container"
+    />
   </v-card>
 </template>
 
@@ -258,6 +284,7 @@ import { getRegistryProviderIcon } from "@/services/registry";
 import { date, short } from "@/filters";
 import { copyTextToClipboard } from "@/utils/clipboard";
 import ScriptOutputDialog from './ScriptOutputDialog.vue';
+import UpdateAnalysisDialog from './UpdateAnalysisDialog.vue';
 
 export default {
   components: {
@@ -265,7 +292,8 @@ export default {
     ContainerImage,
     ContainerUpdate,
     ContainerError,
-    ScriptOutputDialog
+    ScriptOutputDialog,
+    UpdateAnalysisDialog,
   },
 
   props: {
@@ -281,6 +309,7 @@ export default {
       tab: 0,
       showScriptOutput: false,
       updateInProgress: false,
+      showUpdateAnalysis: false,
     };
   },
   computed: {
@@ -290,6 +319,10 @@ export default {
     // reveals the Delete control once the feature flag arrives.
     deleteEnabled() {
       return this.$serverConfig?.feature?.delete ?? false;
+    },
+
+    aiEnabled() {
+      return this.$serverConfig?.ai?.enabled ?? false;
     },
 
     containerIcon() {

@@ -28,6 +28,7 @@ async function request(options = {}) {
         insecure = false,
         responseType,
         signal,
+        timeout,
     } = options;
 
     const config = {
@@ -41,6 +42,9 @@ async function request(options = {}) {
     }
     if (signal !== undefined) {
         config.signal = signal;
+    }
+    if (timeout !== undefined) {
+        config.timeout = timeout;
     }
     // Opt-in skip of TLS verification for self-signed / IP-addressed endpoints.
     // Off by default so verification stays on; callers pass insecure: true only

@@ -49,6 +49,12 @@ Hosaka sits in the middle, where most people actually want to be:
   going to look for it. A `hosaka.link.template` label turns each update into a
   direct link to that version's release notes, so you can read what changed
   without hunting down the changelog.
+- **Understand an update before you take it.** Hosaka can analyze an update on
+  demand: it reads the release notes between the version you run and the one on
+  offer, summarizes what changed, calls out breaking changes with the version
+  that introduced each one, and rates the overall upgrade risk. It runs only
+  when you click Analyze, and only once you have added an AI key, so a second
+  opinion is there when you want it and out of the way when you do not.
 - **Update on your terms.** Nothing changes until you click. Every update is
   classified as major, minor, patch, or prerelease, so you can take a patch and
   hold back a major.
@@ -68,6 +74,7 @@ Hosaka sits in the middle, where most people actually want to be:
 |------|-----|--------|
 | **Updating from the UI** | run a trigger from the container's Triggers tab | one-click **Update** on the container row |
 | **Update progress** | none | live console output of the update, streamed line by line |
+| **Update analysis** | none | on-demand AI summary of the release notes between your version and the target, flagging breaking changes and an overall risk level |
 | **Portainer stacks** | generic script trigger, write your own | built-in one-click updater that rewrites the stack file and redeploys through the Portainer API |
 | **Mobile** | desktop-oriented: permanent nav, no mobile layout | fully responsive: hamburger nav, mobile layouts, update from your phone |
 | **Live container state** | manual refresh | list updates in place over SSE, no full-page reload |
@@ -129,6 +136,16 @@ marked done until the new container comes back healthy.
 - Digest watching catches new images behind mutable tags like `latest`
 - Per-tag include/exclude regex and tag transforms to handle any versioning scheme
 - Scheduled (cron) scans plus instant detection from Docker events
+
+**Update analysis, on demand (AI)**
+- Click **Analyze** on any container with an update to get a structured summary
+  of the release notes between your version and the target
+- Breaking changes are called out and attributed to the version that introduced
+  them, with an overall risk level (none, low, medium, high)
+- Pulls notes straight from GitHub Releases, follows linked changelogs, and falls
+  back to the release page you point it at; results are cached and re-runnable
+- Off until you add a Google Gemini API key, and it runs only when you ask, never
+  on its own
 
 **Per-container control, no central config**
 - Drive everything with `hosaka.*` Docker labels: opt in/out, set tag filters,
@@ -213,6 +230,7 @@ Full docs are published at **[nopoz.github.io/hosaka](https://nopoz.github.io/ho
   - [Registries](https://nopoz.github.io/hosaka/#/configuration/registries/)
   - [Triggers](https://nopoz.github.io/hosaka/#/configuration/triggers/)
   - [Authentication](https://nopoz.github.io/hosaka/#/configuration/authentications/)
+  - [AI update analysis](https://nopoz.github.io/hosaka/#/configuration/ai/)
 - [UI](https://nopoz.github.io/hosaka/#/ui/)
 - [REST API](https://nopoz.github.io/hosaka/#/api/)
 - [Monitoring](https://nopoz.github.io/hosaka/#/monitoring/)
@@ -234,6 +252,8 @@ Keycloak, and other OIDC providers).
 
 **Monitoring:** Prometheus metrics and a `/health` endpoint, ready for Grafana.
 
+**AI analysis:** Google Gemini, for optional on-demand update analysis.
+
 **Home:** Home-Assistant.
 
 ## Security
@@ -254,6 +274,12 @@ a privileged tool.
 - **Keep secrets out of plain config.** Registry credentials and trigger tokens
   can be loaded from files with the `__FILE` env var suffix (Docker secrets)
   instead of being written in your compose file.
+- **AI analysis talks to a third party.** When you enable update analysis, Hosaka
+  sends the gathered release-note text, along with the image name and the two
+  version tags, to Google Gemini to summarize. It sends only public release
+  notes, never your container config or secrets, and only when you click Analyze.
+  The API key is a secret and supports `__FILE`; leave it unset to keep the
+  feature off entirely.
 
 ## More of my projects
 

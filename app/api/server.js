@@ -1,6 +1,6 @@
 const express = require('express');
 const nocache = require('nocache');
-const { getServerConfiguration } = require('../configuration');
+const { getServerConfiguration, getAiPublicConfiguration } = require('../configuration');
 
 const router = express.Router();
 
@@ -11,7 +11,10 @@ const router = express.Router();
  */
 function getServer(req, res) {
     res.status(200).json({
-        configuration: getServerConfiguration(),
+        configuration: {
+            ...getServerConfiguration(),
+            ai: getAiPublicConfiguration(),
+        },
     });
 }
 

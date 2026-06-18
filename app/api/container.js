@@ -11,6 +11,7 @@ const { getServerConfiguration, getTriggerConfigurations } = require('../configu
 const HttpTrigger = require('../triggers/providers/http/Http');
 const ScriptTrigger = require('../triggers/providers/script/Script');
 const { scriptOutputEmitter } = ScriptTrigger;
+const ai = require('../ai');
 
 const router = express.Router();
 
@@ -174,6 +175,32 @@ async function installContainer(req, res) {
         res.status(500).json({
             error: `Error when installing container ${id} (${e.message})`,
         });
+    }
+}
+
+/**
+ * Run an on-demand AI analysis of the update for a container.
+ * @param {Object} req
+ * @param {Object} res
+ */
+async function analyzeUpdateContainer(req, res) {
+    const { id } = req.params;
+    const container = storeContainer.getContainer(id);
+    if (!container) {
+        return res.sendStatus(404);
+    }
+    const force = req.query.force === 'true' || req.query.force === true;
+    try {
+        const result = await ai.analyzeUpdate(container, { force });
+        return res.status(200).json(result);
+    } catch (e) {
+        if (e.code === 'AI_DISABLED') {
+            return res.status(503).json({ error: e.message });
+        }
+        if (e.code === 'NO_UPDATE') {
+            return res.status(400).json({ error: e.message });
+        }
+        return res.status(502).json({ error: `Error analyzing update for ${id} (${e.message})` });
     }
 }
 
@@ -541,6 +568,7 @@ function init() {
     router.delete('/:id', deleteContainer);
     router.post('/:id/watch', watchContainer);
     router.post('/:id/install', installContainer);
+    router.post('/:id/analyze-update', analyzeUpdateContainer);
     router.post('/:id/clear-notification', clearContainerNotification);
     router.get('/:id/install/logs', streamInstallLogs);
     router.post('/refresh', refreshContainer);

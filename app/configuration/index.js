@@ -131,6 +131,55 @@ function getServerConfiguration() {
     return configurationToValidate.value;
 }
 
+/**
+ * Get AI configuration (full, includes secrets — backend use only).
+ */
+function getAiConfiguration() {
+    const configurationFromEnv = get('hosaka.ai', hosakaEnvVars);
+    const configurationSchema = joi.object().keys({
+        provider: joi.string().allow(''),
+        gemini: joi.object({
+            apikey: joi.string().allow(''),
+            model: joi.string().allow(''),
+        }),
+        github: joi.object({
+            token: joi.string().allow(''),
+        }),
+    });
+
+    const configurationToValidate = configurationSchema.validate(configurationFromEnv || {});
+    if (configurationToValidate.error) {
+        throw configurationToValidate.error;
+    }
+    const { value } = configurationToValidate;
+    const provider = value.provider || 'gemini';
+    const gemini = {
+        apikey: (value.gemini && value.gemini.apikey) || '',
+        model: (value.gemini && value.gemini.model) || 'gemini-3.1-flash-lite',
+    };
+    const github = {
+        token: (value.github && value.github.token) || '',
+    };
+    return {
+        provider,
+        gemini,
+        github,
+        enabled: Boolean(gemini.apikey),
+    };
+}
+
+/**
+ * Get the sanitized AI configuration exposed to the UI (no secrets).
+ */
+function getAiPublicConfiguration() {
+    const config = getAiConfiguration();
+    return {
+        enabled: config.enabled,
+        provider: config.provider,
+        model: config.gemini.model,
+    };
+}
+
 function getPublicUrl(req) {
     const publicUrl = hosakaEnvVars.HOSAKA_PUBLIC_URL;
     if (publicUrl) {
@@ -152,5 +201,7 @@ module.exports = {
     getRegistryConfigurations,
     getAuthenticationConfigurations,
     getServerConfiguration,
+    getAiConfiguration,
+    getAiPublicConfiguration,
     getPublicUrl,
 };

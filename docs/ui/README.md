@@ -21,6 +21,20 @@ in real time over a Server-Sent Events connection at
 exits, so you can follow the progress of a Portainer stack redeploy or any
 other update script without polling.
 
+## AI update analysis
+
+When AI analysis is configured, each container row with an available update also
+shows an **Analyze** button (a search-eye icon). Clicking it opens a dialog and
+calls `POST /api/containers/:id/analyze-update`, which gathers the release notes
+between the running version and the update target and asks the configured AI
+provider to summarize them. The dialog shows an overall risk level, a short
+overview, the breaking changes (each linked to the version that introduced it),
+the notable non-breaking changes, and links to the source release notes.
+
+Results are cached per container and version pair; **Regenerate** re-runs the
+analysis (`?force=true`). The button only appears when an API key is set; see
+[AI update analysis](configuration/ai/) for setup.
+
 ## Live container state
 
 The container list updates in place without a full-page refresh. The UI holds an
