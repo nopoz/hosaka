@@ -69,8 +69,17 @@ export default {
      * Save current user when authenticated.
      * @param user
      */
-    onAuthenticated(user) {
+    async onAuthenticated(user) {
       this.user = user;
+      // Fetch the server config here, when auth is known, rather than in a
+      // render hook: anonymous auth has no /login -> /containers bounce, so the
+      // App re-render that beforeUpdate relied on never happened and the config
+      // (feature flags, ai.enabled) stayed undefined. This fires on every nav,
+      // so the guard keeps it to a single fetch.
+      if (!this.$serverConfig) {
+        const server = await getServer();
+        this.$setServerConfig(server.configuration);
+      }
     },
 
     /**
@@ -114,13 +123,6 @@ export default {
     this.$bus.off("authenticated", this.onAuthenticated);
     this.$bus.off("notify", this.notify);
     this.$bus.off("notify:close", this.notifyClose);
-  },
-
-  async beforeUpdate() {
-    if (this.authenticated && !this.$serverConfig) {
-      const server = await getServer();
-      this.$serverConfig = server.configuration;
-    }
   },
 };
 </script>
