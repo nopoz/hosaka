@@ -137,10 +137,10 @@ function getServerConfiguration() {
 function getAiConfiguration() {
     const configurationFromEnv = get('hosaka.ai', hosakaEnvVars);
     const configurationSchema = joi.object().keys({
-        provider: joi.string(),
+        provider: joi.string().allow(''),
         gemini: joi.object({
             apikey: joi.string().allow(''),
-            model: joi.string(),
+            model: joi.string().allow(''),
         }),
         github: joi.object({
             token: joi.string().allow(''),

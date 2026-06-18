@@ -134,3 +134,10 @@ test('getAiPublicConfiguration omits the api key and token', () => {
     delete configuration.hosakaEnvVars.HOSAKA_AI_GEMINI_APIKEY;
     delete configuration.hosakaEnvVars.HOSAKA_AI_GEMINI_MODEL;
 });
+
+test('getAiConfiguration falls back to default model when the env value is empty', () => {
+    configuration.hosakaEnvVars.HOSAKA_AI_GEMINI_MODEL = '';
+    const config = configuration.getAiConfiguration();
+    expect(config.gemini.model).toBe('gemini-2.5-flash-lite');
+    delete configuration.hosakaEnvVars.HOSAKA_AI_GEMINI_MODEL;
+});
