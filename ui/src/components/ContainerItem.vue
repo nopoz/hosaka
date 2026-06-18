@@ -51,6 +51,17 @@
         <v-icon start>ri-arrow-up-circle-line</v-icon>
         Update
       </v-chip>
+      <v-chip
+        v-if="aiEnabled && container.updateAvailable"
+        label
+        color="info"
+        variant="outlined"
+        @click.stop="showUpdateAnalysis = true"
+        class="mr-1"
+      >
+        <v-icon start>ri-magic-line</v-icon>
+        Analyze
+      </v-chip>
       <v-tooltip location="bottom">
         <template v-slot:activator="{ props }">
           <v-chip
@@ -121,6 +132,17 @@
           <v-icon start>ri-arrow-up-circle-line</v-icon>
           Update
         </v-btn>
+        <v-btn
+          v-if="aiEnabled"
+          color="info"
+          variant="outlined"
+          size="small"
+          class="ml-2 flex-shrink-0"
+          @click.stop="showUpdateAnalysis = true"
+        >
+          <v-icon start>ri-magic-line</v-icon>
+          Analyze
+        </v-btn>
       </div>
     </div>
     <v-expand-transition>
@@ -160,17 +182,6 @@
             <container-image :image="container.image" />
           </v-window-item>
           <v-window-item v-if="container.result">
-            <div v-if="aiEnabled" class="text-center pa-2">
-              <v-btn
-                size="small"
-                color="info"
-                variant="outlined"
-                @click="showUpdateAnalysis = true"
-              >
-                <v-icon start>ri-magic-line</v-icon>
-                Analyze update
-              </v-btn>
-            </div>
             <container-update
               :result="container.result"
               :semver="container.image.tag.semver"
