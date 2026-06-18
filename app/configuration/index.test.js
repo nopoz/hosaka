@@ -109,7 +109,7 @@ test('getAiConfiguration returns defaults and disabled when no key', () => {
     delete configuration.hosakaEnvVars.HOSAKA_AI_GITHUB_TOKEN;
     expect(configuration.getAiConfiguration()).toStrictEqual({
         provider: 'gemini',
-        gemini: { apikey: '', model: 'gemini-2.5-flash-lite' },
+        gemini: { apikey: '', model: 'gemini-3.1-flash-lite' },
         github: { token: '' },
         enabled: false,
     });
@@ -138,6 +138,6 @@ test('getAiPublicConfiguration omits the api key and token', () => {
 test('getAiConfiguration falls back to default model when the env value is empty', () => {
     configuration.hosakaEnvVars.HOSAKA_AI_GEMINI_MODEL = '';
     const config = configuration.getAiConfiguration();
-    expect(config.gemini.model).toBe('gemini-2.5-flash-lite');
+    expect(config.gemini.model).toBe('gemini-3.1-flash-lite');
     delete configuration.hosakaEnvVars.HOSAKA_AI_GEMINI_MODEL;
 });

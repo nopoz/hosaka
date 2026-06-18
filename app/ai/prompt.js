@@ -31,6 +31,7 @@ const RESPONSE_SCHEMA = {
                         description: 'The exact version tag from the notes where this change appears, if identifiable. Omit if unclear.',
                     },
                 },
+                required: ['title', 'detail'],
             },
         },
         highlights: {

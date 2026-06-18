@@ -155,7 +155,7 @@ function getAiConfiguration() {
     const provider = value.provider || 'gemini';
     const gemini = {
         apikey: (value.gemini && value.gemini.apikey) || '',
-        model: (value.gemini && value.gemini.model) || 'gemini-2.5-flash-lite',
+        model: (value.gemini && value.gemini.model) || 'gemini-3.1-flash-lite',
     };
     const github = {
         token: (value.github && value.github.token) || '',

@@ -27,6 +27,11 @@ test('RESPONSE_SCHEMA constrains riskLevel to an enum and requires core fields',
     expect(RESPONSE_SCHEMA.required).toEqual(expect.arrayContaining(['riskLevel', 'overview']));
 });
 
+test('RESPONSE_SCHEMA requires a title and detail on each breaking change', () => {
+    expect(RESPONSE_SCHEMA.properties.breakingChanges.items.required)
+        .toStrictEqual(['title', 'detail']);
+});
+
 test('RESPONSE_SCHEMA carries optional version refs on changes', () => {
     expect(RESPONSE_SCHEMA.properties.breakingChanges.items.properties.version.type).toBe('string');
     expect(RESPONSE_SCHEMA.properties.highlights.items.properties.version.type).toBe('string');
