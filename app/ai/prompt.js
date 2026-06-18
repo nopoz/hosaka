@@ -10,7 +10,7 @@ const RESPONSE_SCHEMA = {
         riskLevel: {
             type: 'string',
             enum: ['none', 'low', 'medium', 'high'],
-            description: 'Overall upgrade risk: high if manual migration or breaking config/data changes are required, none if purely additive/bugfix.',
+            description: 'Overall upgrade risk. none: purely additive or bug-fix, no action and nothing deprecated. low: minor default/behavior tweaks or newly deprecated-but-still-working options; review optional. medium: behavior changes or deprecations that likely need a config review or small adjustment, but remain backward compatible with no forced migration. high: breaking config/data/API changes, removed options, dropped platforms, or required manual migration. Pick the highest level any change in the notes justifies.',
         },
         breakingChanges: {
             type: 'array',
@@ -109,7 +109,13 @@ function buildPrompt(container, notes) {
         'Summarize what changed and flag potentially breaking changes such as renamed',
         'or removed config/env keys, changed volume or data layouts, API/CLI changes,',
         'dropped platforms, or required manual migration steps.',
-        'riskLevel must be one of: none, low, medium, high.',
+        'riskLevel must be one of: none (purely additive or bug-fix, no action),',
+        'low (minor default/behavior tweaks or deprecations that still work; review',
+        'optional), medium (behavior changes or deprecations that likely need a config',
+        'review or small adjustment but stay backward compatible with no forced',
+        'migration), high (breaking config/data/API changes, removed options, dropped',
+        'platforms, or required manual migration). Pick the highest level any change',
+        'in the notes justifies.',
         'For each breaking change and highlight, set version to the exact version tag',
         'from the notes where it appears, when identifiable.',
         'Output only the structured fields. Do not include your reasoning,',
