@@ -1,6 +1,7 @@
 - [Introduction](/)
 - [Quick start](quickstart/)
 - [Configuration](configuration/)
+    - [AI update analysis](configuration/ai/)
     - [Authentication](configuration/authentications/)    
     - [Logs](configuration/logs/)
     - [Registries](configuration/registries/)

@@ -67,6 +67,16 @@ services:
       # - HOSAKA_SERVER_TLS_KEY=/certs/server.key
       # - HOSAKA_SERVER_TLS_CERT=/certs/server.crt
 
+      # ── AI update analysis (optional, off by default) ───────────────────────
+      # Adds an "Analyze" button to each container that has an update. On click,
+      # Hosaka gathers the release notes between the running version and the target
+      # and asks Google Gemini to summarize them: an overall risk level, breaking
+      # changes, and what changed. On-demand only; nothing is sent anywhere until you
+      # click. The feature (and the button) stay off until you set an API key.
+      # - HOSAKA_AI_GEMINI_APIKEY=AIza...                # Google Gemini API key; enabling the feature (__FILE supported)
+      # - HOSAKA_AI_GEMINI_MODEL=gemini-3.1-flash-lite   # override the Gemini model (this is the default)
+      # - HOSAKA_AI_GITHUB_TOKEN=ghp_xxxxxxxx            # optional: raise the GitHub API rate limit for fetching release notes (__FILE supported)
+
       # ── Store (LokiJS state) ────────────────────────────────────────────────
       # - HOSAKA_STORE_PATH=/store               # directory for the state DB (default /store)
       # - HOSAKA_STORE_FILE=hosaka.json          # state DB filename

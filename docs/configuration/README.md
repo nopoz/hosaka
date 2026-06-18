@@ -2,6 +2,8 @@
 Hosaka is relying on **Environment Variables** and **[Docker labels](https://docs.docker.com/config/labels-custom-metadata/)** to configure all the components.
 
 Please find below the documentation for each of them:
+> [**AI update analysis**](/configuration/ai/)
+
 > [**Authentication**](/configuration/authentications/)
 
 > [**Logs**](/configuration/logs/)
