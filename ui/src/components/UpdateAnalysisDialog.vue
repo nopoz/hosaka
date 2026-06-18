@@ -98,15 +98,15 @@
 
           <div v-if="sources.length" class="text-caption text-medium-emphasis">
             <span class="me-1">Sources:</span>
-            <template v-for="(s, i) in sources" :key="s.tag + i">
+            <template v-for="(s, i) in sources" :key="s.label + i">
               <a
                 v-if="s.url"
                 :href="s.url"
                 target="_blank"
                 rel="noopener"
                 class="version-ref"
-              >{{ s.tag }}</a>
-              <span v-else>{{ s.tag }}</span
+              >{{ s.label }}</a>
+              <span v-else>{{ s.label }}</span
               ><span v-if="i < sources.length - 1">,&nbsp;</span>
             </template>
           </div>
@@ -181,11 +181,21 @@ export default {
 
     // The gathered notes are the authoritative, linkable list of sources (each
     // carries the release/changelog URL). The model's versionsCovered is only
-    // free text, so we link from these instead.
+    // free text, so we link from these instead. GitHub notes link a version tag
+    // to that release; the web fallback is a single flat changelog page, so we
+    // label it by its page (host/path) rather than imply a version-specific link.
     sources() {
-      return ((this.result && this.result.sourceNotes) || [])
+      if (!this.result) {
+        return [];
+      }
+      const isWeb = this.result.source === 'web';
+      return (this.result.sourceNotes || [])
         .filter((note) => note && note.tag)
-        .map((note) => ({ tag: note.tag, url: note.url || null }));
+        .map((note) => ({
+          tag: note.tag,
+          label: isWeb ? (this.urlLabel(note.url) || note.tag) : note.tag,
+          url: note.url || null,
+        }));
     },
 
     // Key by both the raw tag and a v-stripped form: the model often emits
@@ -226,6 +236,20 @@ export default {
   },
 
   methods: {
+    // Host + path of a URL (no protocol/query), used to label a flat changelog
+    // source so it doesn't masquerade as a version-specific link.
+    urlLabel(url) {
+      if (!url) {
+        return null;
+      }
+      try {
+        const u = new URL(url);
+        return `${u.hostname}${u.pathname.replace(/\/$/, '')}`;
+      } catch (e) {
+        return null;
+      }
+    },
+
     versionUrl(version) {
       if (!version) {
         return null;
