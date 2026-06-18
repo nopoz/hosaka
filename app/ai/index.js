@@ -1,6 +1,8 @@
+const log = require('../log').child({ component: 'ai' });
 const { getAiConfiguration } = require('../configuration');
 const { detectRepo, listReleasesBetween } = require('./github');
 const { fetchNotesFromUrl } = require('./webFallback');
+const { enrichNotes } = require('./enrich');
 const { buildPrompt } = require('./prompt');
 const { getProvider } = require('./providers');
 const cache = require('./cache');
@@ -31,10 +33,15 @@ async function analyzeUpdate(container, { force = false } = {}) {
     const current = container.image.tag.value;
     const target = container.result.tag;
     const model = config.gemini.model;
+    const image = container.image.name;
+    log.info({
+        image, current, target, force,
+    }, 'analyzing update');
     const cacheKey = cache.key({ id: container.id, current, target, model });
     if (!force) {
         const cached = cache.get(cacheKey);
         if (cached) {
+            log.debug({ image, current, target }, 'returning cached analysis');
             return cached;
         }
     }
@@ -43,21 +50,30 @@ async function analyzeUpdate(container, { force = false } = {}) {
     let notes = [];
     let source = 'none';
     if (repo) {
+        log.info({ owner: repo.owner, repo: repo.repo }, 'detected github repo');
         notes = await listReleasesBetween(repo, current, target, config.github.token);
+        log.info({ count: notes.length }, 'github releases in range');
         if (notes.length) {
             source = 'github';
+            notes = await enrichNotes(notes, log);
         }
+    } else {
+        log.info({ image }, 'no github repo detected');
     }
     if (!notes.length) {
         const url = (container.result && container.result.link) || container.link;
         const text = url ? await fetchNotesFromUrl(url) : '';
         if (text) {
-            notes = [{ tag: target, date: null, body: text }];
+            notes = [{
+                tag: target, date: null, body: text, url,
+            }];
             source = 'web';
+            log.info({ url }, 'using web fallback for notes');
         }
     }
 
     if (!notes.length) {
+        log.info({ image, current, target }, 'no release notes located');
         const empty = {
             riskLevel: 'unknown',
             breakingChanges: [],
@@ -72,14 +88,32 @@ async function analyzeUpdate(container, { force = false } = {}) {
     }
 
     const provider = getProvider(config.provider);
-    const { system, user, schema } = buildPrompt(container, notes);
-    const result = await provider.generate({
-        system,
-        user,
-        schema,
-        model,
-        apiKey: config.gemini.apikey,
-    });
+    const {
+        system, user, schema, dropped, chars,
+    } = buildPrompt(container, notes);
+    if (dropped) {
+        log.warn({ dropped, image }, 'release notes truncated to fit the prompt budget');
+    }
+    log.info({
+        provider: config.provider, model, source, notes: notes.length, chars,
+    }, 'requesting analysis from model');
+    const started = Date.now();
+    let result;
+    try {
+        result = await provider.generate({
+            system,
+            user,
+            schema,
+            model,
+            apiKey: config.gemini.apikey,
+        });
+    } catch (e) {
+        log.error({ image, err: e.message, ms: Date.now() - started }, 'model analysis failed');
+        throw e;
+    }
+    log.info({
+        image, riskLevel: result.riskLevel, ms: Date.now() - started,
+    }, 'analysis complete');
     result.source = source;
     result.sourceNotes = notes;
     cache.set(cacheKey, result);

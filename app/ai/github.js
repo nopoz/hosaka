@@ -55,6 +55,7 @@ async function listReleasesBetween(repo, current, target, token) {
         qs: { per_page: 100 },
         headers,
         resolveWithFullResponse: true,
+        timeout: 15000,
     });
     const releases = Array.isArray(response.body) ? response.body : [];
     const kept = [];
@@ -75,6 +76,7 @@ async function listReleasesBetween(repo, current, target, token) {
                 date: release.published_at || null,
                 body: release.body || '',
                 prerelease: Boolean(release.prerelease),
+                url: release.html_url || null,
             });
         }
     });

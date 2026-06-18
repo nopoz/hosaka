@@ -35,7 +35,9 @@ test('listReleasesBetween keeps current<tag<=target, excludes drafts and non-sem
         headers: {},
         body: [
             { tag_name: 'v1.5.0', body: 'too new' },
-            { tag_name: 'v1.4.2', name: 'r142', body: 'b142', published_at: '2026-01-02', prerelease: false },
+            {
+                tag_name: 'v1.4.2', name: 'r142', body: 'b142', published_at: '2026-01-02', prerelease: false, html_url: 'https://github.com/nopoz/hosaka/releases/tag/v1.4.2',
+            },
             { tag_name: 'v1.4.0', name: 'r140', body: 'b140', published_at: '2026-01-01' },
             { tag_name: 'v1.3.0', body: 'draft', draft: true },
             { tag_name: 'nightly', body: 'non-semver' },
@@ -47,7 +49,12 @@ test('listReleasesBetween keeps current<tag<=target, excludes drafts and non-sem
     );
     expect(result.map((r) => r.tag)).toStrictEqual(['v1.4.0', 'v1.4.2']);
     expect(result[1]).toStrictEqual({
-        tag: 'v1.4.2', name: 'r142', date: '2026-01-02', body: 'b142', prerelease: false,
+        tag: 'v1.4.2',
+        name: 'r142',
+        date: '2026-01-02',
+        body: 'b142',
+        prerelease: false,
+        url: 'https://github.com/nopoz/hosaka/releases/tag/v1.4.2',
     });
     expect(request).toHaveBeenCalledWith(expect.objectContaining({
         uri: 'https://api.github.com/repos/nopoz/hosaka/releases',

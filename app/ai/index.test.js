@@ -70,6 +70,23 @@ test('happy path: github notes -> provider -> structured result', async () => {
     expect(generate).toHaveBeenCalledTimes(1);
 });
 
+test('enriches a github note that defers to an external changelog', async () => {
+    getAiConfiguration.mockReturnValue(ENABLED);
+    detectRepo.mockReturnValue({ owner: 'tailscale', repo: 'tailscale' });
+    listReleasesBetween.mockResolvedValue([
+        {
+            tag: 'v1.98.2',
+            date: null,
+            body: 'Please refer to the changelog available at https://tailscale.com/changelog',
+        },
+    ]);
+    fetchNotesFromUrl.mockResolvedValue('REAL CHANGELOG CONTENT');
+    await analyzeUpdate(makeContainer(), {});
+    expect(fetchNotesFromUrl).toHaveBeenCalledWith('https://tailscale.com/changelog');
+    const sentUser = generate.mock.calls[0][0].user;
+    expect(sentUser).toContain('REAL CHANGELOG CONTENT');
+});
+
 test('caches by id+current+target+model; force bypasses', async () => {
     getAiConfiguration.mockReturnValue(ENABLED);
     detectRepo.mockReturnValue({ owner: 'nopoz', repo: 'hosaka' });

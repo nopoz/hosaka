@@ -14,6 +14,7 @@ async function fetchNotesFromUrl(url) {
             uri: url,
             method: 'GET',
             headers: { Accept: 'text/html', 'User-Agent': 'hosaka' },
+            timeout: 15000,
         });
         const text = String(html)
             .replace(/<script[\s\S]*?<\/script>/gi, ' ')
