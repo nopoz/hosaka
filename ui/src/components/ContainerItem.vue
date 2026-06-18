@@ -59,7 +59,7 @@
         @click.stop="showUpdateAnalysis = true"
         class="mr-1"
       >
-        <v-icon start>ri-magic-line</v-icon>
+        <v-icon start>ri-search-eye-line</v-icon>
         Analyze
       </v-chip>
       <v-tooltip location="bottom">
@@ -140,7 +140,7 @@
           class="ml-2 flex-shrink-0"
           @click.stop="showUpdateAnalysis = true"
         >
-          <v-icon start>ri-magic-line</v-icon>
+          <v-icon start>ri-search-eye-line</v-icon>
           Analyze
         </v-btn>
       </div>
