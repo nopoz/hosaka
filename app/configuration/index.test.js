@@ -101,3 +101,36 @@ test('replaceSecrets must read secret in file', () => {
         HOSAKA_SERVER_X: 'super_secret',
     });
 });
+
+test('getAiConfiguration returns defaults and disabled when no key', () => {
+    delete configuration.hosakaEnvVars.HOSAKA_AI_PROVIDER;
+    delete configuration.hosakaEnvVars.HOSAKA_AI_GEMINI_APIKEY;
+    delete configuration.hosakaEnvVars.HOSAKA_AI_GEMINI_MODEL;
+    delete configuration.hosakaEnvVars.HOSAKA_AI_GITHUB_TOKEN;
+    expect(configuration.getAiConfiguration()).toStrictEqual({
+        provider: 'gemini',
+        gemini: { apikey: '', model: 'gemini-2.5-flash-lite' },
+        github: { token: '' },
+        enabled: false,
+    });
+});
+
+test('getAiConfiguration is enabled when an api key is set', () => {
+    configuration.hosakaEnvVars.HOSAKA_AI_GEMINI_APIKEY = 'secret';
+    const config = configuration.getAiConfiguration();
+    expect(config.enabled).toBe(true);
+    expect(config.gemini.apikey).toBe('secret');
+    delete configuration.hosakaEnvVars.HOSAKA_AI_GEMINI_APIKEY;
+});
+
+test('getAiPublicConfiguration omits the api key and token', () => {
+    configuration.hosakaEnvVars.HOSAKA_AI_GEMINI_APIKEY = 'secret';
+    configuration.hosakaEnvVars.HOSAKA_AI_GEMINI_MODEL = 'gemini-2.5-flash';
+    expect(configuration.getAiPublicConfiguration()).toStrictEqual({
+        enabled: true,
+        provider: 'gemini',
+        model: 'gemini-2.5-flash',
+    });
+    delete configuration.hosakaEnvVars.HOSAKA_AI_GEMINI_APIKEY;
+    delete configuration.hosakaEnvVars.HOSAKA_AI_GEMINI_MODEL;
+});
