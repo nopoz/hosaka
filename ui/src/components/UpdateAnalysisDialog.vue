@@ -51,53 +51,65 @@
             </v-chip>
           </div>
 
-          <div v-if="result.breakingChanges && result.breakingChanges.length" class="mb-4">
-            <div class="text-subtitle-2 mb-1">Breaking changes</div>
-            <v-list density="compact" class="bg-transparent">
-              <v-list-item
-                v-for="(bc, i) in result.breakingChanges"
-                :key="i"
-                class="px-0"
-              >
-                <v-list-item-title class="font-weight-medium text-wrap">
-                  {{ bc.title }}
-                </v-list-item-title>
-                <v-list-item-subtitle v-if="bc.detail" class="text-wrap">
-                  {{ bc.detail }}
-                </v-list-item-subtitle>
-              </v-list-item>
-            </v-list>
+          <p v-if="result.overview" class="text-body-2 mb-4">
+            <inline-markup :text="result.overview" />
+          </p>
+
+          <div v-if="sortedBreakingChanges.length" class="mb-4">
+            <div class="text-subtitle-2 mb-2">Breaking changes</div>
+            <div v-for="(bc, i) in sortedBreakingChanges" :key="i" class="mb-3">
+              <div class="font-weight-medium">
+                <inline-markup :text="bc.title" />
+                <a
+                  v-if="bc.version && versionUrl(bc.version)"
+                  :href="versionUrl(bc.version)"
+                  target="_blank"
+                  rel="noopener"
+                  class="version-ref ms-1"
+                >{{ bc.version }}</a>
+                <span v-else-if="bc.version" class="version-ref-plain ms-1">
+                  {{ bc.version }}
+                </span>
+              </div>
+              <div v-if="bc.detail" class="text-body-2">
+                <inline-markup :text="bc.detail" />
+              </div>
+            </div>
           </div>
 
-          <div v-if="result.highlights && result.highlights.length" class="mb-4">
-            <div class="text-subtitle-2 mb-1">What changed</div>
-            <ul class="ms-4">
-              <li v-for="(h, i) in result.highlights" :key="i">{{ h }}</li>
+          <div v-if="sortedHighlights.length" class="mb-4">
+            <div class="text-subtitle-2 mb-2">What changed</div>
+            <ul class="highlight-list">
+              <li v-for="(h, i) in sortedHighlights" :key="i" class="mb-1">
+                <inline-markup :text="highlightText(h)" />
+                <a
+                  v-if="highlightVersion(h) && versionUrl(highlightVersion(h))"
+                  :href="versionUrl(highlightVersion(h))"
+                  target="_blank"
+                  rel="noopener"
+                  class="version-ref ms-1"
+                >{{ highlightVersion(h) }}</a>
+                <span v-else-if="highlightVersion(h)" class="version-ref-plain ms-1">
+                  {{ highlightVersion(h) }}
+                </span>
+              </li>
             </ul>
           </div>
 
-          <p v-if="result.overview" class="text-body-2 mb-4">{{ result.overview }}</p>
-
-          <div
-            v-if="result.versionsCovered && result.versionsCovered.length"
-            class="text-caption text-medium-emphasis mb-2"
-          >
-            Covers {{ result.versionsCovered.join(', ') }}
+          <div v-if="sources.length" class="text-caption text-medium-emphasis">
+            <span class="me-1">Sources:</span>
+            <template v-for="(s, i) in sources" :key="s.tag + i">
+              <a
+                v-if="s.url"
+                :href="s.url"
+                target="_blank"
+                rel="noopener"
+                class="version-ref"
+              >{{ s.tag }}</a>
+              <span v-else>{{ s.tag }}</span
+              ><span v-if="i < sources.length - 1">,&nbsp;</span>
+            </template>
           </div>
-
-          <v-expansion-panels
-            v-if="result.sourceNotes && result.sourceNotes.length"
-            variant="accordion"
-          >
-            <v-expansion-panel title="Source release notes">
-              <template #text>
-                <div v-for="(note, i) in result.sourceNotes" :key="i" class="mb-3">
-                  <div class="text-subtitle-2">{{ note.tag }}</div>
-                  <pre class="source-note">{{ note.body }}</pre>
-                </div>
-              </template>
-            </v-expansion-panel>
-          </v-expansion-panels>
         </div>
 
         <div v-else class="text-center text-medium-emphasis py-8">
@@ -110,9 +122,14 @@
 
 <script>
 import axios from 'axios';
+import InlineMarkup from './InlineMarkup.vue';
 
 export default {
   name: 'UpdateAnalysisDialog',
+
+  components: {
+    InlineMarkup,
+  },
 
   props: {
     modelValue: {
@@ -161,6 +178,43 @@ export default {
           return 'secondary';
       }
     },
+
+    // The gathered notes are the authoritative, linkable list of sources (each
+    // carries the release/changelog URL). The model's versionsCovered is only
+    // free text, so we link from these instead.
+    sources() {
+      return ((this.result && this.result.sourceNotes) || [])
+        .filter((note) => note && note.tag)
+        .map((note) => ({ tag: note.tag, url: note.url || null }));
+    },
+
+    // Key by both the raw tag and a v-stripped form: the model often emits
+    // "2.10.0" while the release tag is "v2.10.0", and we still want those
+    // inline refs to link.
+    sourceUrlByTag() {
+      const map = {};
+      this.sources.forEach((s) => {
+        if (s.url) {
+          map[s.tag] = s.url;
+          map[s.tag.replace(/^v/i, '')] = s.url;
+        }
+      });
+      return map;
+    },
+
+    // Newest version first; entries without an identifiable version sink to the
+    // bottom. Array.sort is stable, so same-version items keep the model's order.
+    sortedBreakingChanges() {
+      const list = (this.result && this.result.breakingChanges) || [];
+      return [...list].sort((a, b) => this.compareVersionsDesc(a.version, b.version));
+    },
+
+    sortedHighlights() {
+      const list = (this.result && this.result.highlights) || [];
+      return [...list].sort(
+        (a, b) => this.compareVersionsDesc(this.highlightVersion(a), this.highlightVersion(b)),
+      );
+    },
   },
 
   watch: {
@@ -172,6 +226,54 @@ export default {
   },
 
   methods: {
+    versionUrl(version) {
+      if (!version) {
+        return null;
+      }
+      return this.sourceUrlByTag[version]
+        || this.sourceUrlByTag[String(version).replace(/^v/i, '')]
+        || null;
+    },
+
+    // highlights may be {text, version} objects or plain strings (older output).
+    highlightText(h) {
+      return typeof h === 'string' ? h : (h && h.text) || '';
+    },
+
+    highlightVersion(h) {
+      return typeof h === 'object' && h ? h.version : null;
+    },
+
+    parseVersion(version) {
+      if (!version) {
+        return null;
+      }
+      const parts = String(version).replace(/^v/i, '').match(/\d+/g);
+      return parts ? parts.map(Number) : null;
+    },
+
+    // Descending comparator; null versions sort last.
+    compareVersionsDesc(a, b) {
+      const pa = this.parseVersion(a);
+      const pb = this.parseVersion(b);
+      if (!pa && !pb) {
+        return 0;
+      }
+      if (!pa) {
+        return 1;
+      }
+      if (!pb) {
+        return -1;
+      }
+      for (let i = 0; i < Math.max(pa.length, pb.length); i += 1) {
+        const diff = (pb[i] || 0) - (pa[i] || 0);
+        if (diff !== 0) {
+          return diff;
+        }
+      }
+      return 0;
+    },
+
     async analyze(force) {
       this.loading = true;
       this.error = null;
@@ -196,11 +298,24 @@ export default {
 </script>
 
 <style scoped>
-.source-note {
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-  font-family: "JetBrains Mono", monospace;
-  font-size: 12px;
-  margin: 0;
+.highlight-list {
+  padding-left: 1.25rem;
+}
+
+.version-ref {
+  color: rgb(var(--v-theme-info));
+  text-decoration: none;
+  font-size: 0.85em;
+  white-space: nowrap;
+}
+
+.version-ref:hover {
+  text-decoration: underline;
+}
+
+.version-ref-plain {
+  color: rgba(var(--v-theme-on-surface), 0.6);
+  font-size: 0.85em;
+  white-space: nowrap;
 }
 </style>
