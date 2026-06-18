@@ -160,6 +160,17 @@
             <container-image :image="container.image" />
           </v-window-item>
           <v-window-item v-if="container.result">
+            <div v-if="aiEnabled" class="text-center pa-2">
+              <v-btn
+                size="small"
+                color="info"
+                variant="outlined"
+                @click="showUpdateAnalysis = true"
+              >
+                <v-icon start>ri-magic-line</v-icon>
+                Analyze update
+              </v-btn>
+            </div>
             <container-update
               :result="container.result"
               :semver="container.image.tag.semver"
@@ -245,6 +256,10 @@
       @update-complete="handleUpdateComplete"
       @dialog-closed="handleDialogClosed"
     />
+    <update-analysis-dialog
+      v-model="showUpdateAnalysis"
+      :container="container"
+    />
   </v-card>
 </template>
 
@@ -258,6 +273,7 @@ import { getRegistryProviderIcon } from "@/services/registry";
 import { date, short } from "@/filters";
 import { copyTextToClipboard } from "@/utils/clipboard";
 import ScriptOutputDialog from './ScriptOutputDialog.vue';
+import UpdateAnalysisDialog from './UpdateAnalysisDialog.vue';
 
 export default {
   components: {
@@ -265,7 +281,8 @@ export default {
     ContainerImage,
     ContainerUpdate,
     ContainerError,
-    ScriptOutputDialog
+    ScriptOutputDialog,
+    UpdateAnalysisDialog,
   },
 
   props: {
@@ -281,6 +298,7 @@ export default {
       tab: 0,
       showScriptOutput: false,
       updateInProgress: false,
+      showUpdateAnalysis: false,
     };
   },
   computed: {
@@ -290,6 +308,10 @@ export default {
     // reveals the Delete control once the feature flag arrives.
     deleteEnabled() {
       return this.$serverConfig?.feature?.delete ?? false;
+    },
+
+    aiEnabled() {
+      return this.$serverConfig?.ai?.enabled ?? false;
     },
 
     containerIcon() {
