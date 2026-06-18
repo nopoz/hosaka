@@ -138,8 +138,6 @@ describe('checkContainerState', () => {
 });
 
 describe('unhealthyVerdict', () => {
-    // First unhealthy sighting starts the grace window instead of failing - a
-    // freshly-started container often flaps unhealthy during warmup.
     test('starts the grace window on the first unhealthy sighting', () => {
         expect(unhealthyVerdict(null, 1000, 30)).toBe('start-grace');
     });

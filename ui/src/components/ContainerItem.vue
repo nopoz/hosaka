@@ -503,13 +503,8 @@ export default {
 
       } catch (error) {
         console.error('Install error:', error);
-        // If the script already started streaming, the console dialog owns the
-        // outcome: it renders the failure (exit-code footer / error line) and its
-        // own Close button. The install POST rejecting is just the same failure
-        // arriving on a second channel - don't yank the console out from under
-        // the logs or flash a duplicate toast. A momentary post-update verifier
-        // hiccup (e.g. a healthcheck flap) lands here too, so tearing the window
-        // down would hide an upgrade that actually succeeded.
+        // Once output is streaming the dialog renders the failure itself, so a
+        // rejected request is a duplicate signal - leave the console in place.
         const dialog = this.$refs.scriptOutput;
         const scriptStarted = dialog
           && (dialog.logs.length > 0 || dialog.isComplete || dialog.scriptExitCode !== null);
@@ -517,8 +512,7 @@ export default {
           return;
         }
 
-        // Pre-flight failure (install disabled, container gone, multiple
-        // triggers): nothing streamed, so close the empty console and surface it.
+        // Pre-flight failure that never streamed: close the empty console and toast.
         this.updateInProgress = false;
         this.showScriptOutput = false;
         const errorMessage = error.response?.data?.error || error.message || 'Unknown error';

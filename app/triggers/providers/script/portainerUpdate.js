@@ -209,10 +209,8 @@ async function checkContainerState(env, endpointId, containerName, expectedImage
     return 'waiting';
 }
 
-// A container with a healthcheck commonly flaps 'unhealthy' during warmup right
-// after start, before its first check passes. Treat the first sighting as the
-// start of a grace window and only fail once it has stayed unhealthy past
-// graceSec - otherwise a successful update gets reported as a failure.
+// Tolerate the unhealthy flap common during container warmup: only fail once a
+// container has stayed unhealthy past graceSec, not on the first sighting.
 function unhealthyVerdict(unhealthySince, now, graceSec) {
     if (unhealthySince === null) return 'start-grace';
     return (now - unhealthySince >= graceSec) ? 'fail' : 'wait';
@@ -286,8 +284,6 @@ function waitForContainerUpdate(env, { endpointId, containerName, expectedImage,
                     fail(new Error(`container running but health check stayed unhealthy for ${healthGraceSec}s`));
                 }
             } else {
-                // 'waiting' or a recovered check - reset the grace window so a
-                // later flap starts counting fresh.
                 unhealthySince = null;
             }
         };
@@ -305,10 +301,8 @@ function waitForContainerUpdate(env, { endpointId, containerName, expectedImage,
             full: true,
         }).then(({ body: stream }) => {
             const rl = readline.createInterface({ input: stream });
-            // Settling aborts the request mid-read, which makes the input stream
-            // emit 'error' (aborted); readline re-emits it on the interface. With
-            // no listener Node treats it as an unhandled 'error' and crashes the
-            // whole process, so swallow it the same way as the stream error.
+            // Settling aborts the stream mid-read; without this handler readline's
+            // re-emitted 'error' goes unhandled and crashes the process.
             rl.on('error', () => {});
             rl.on('line', (line) => {
                 let ev;
@@ -371,8 +365,7 @@ async function runPortainerUpdate(params, emitLine) {
     const timeoutSec = parseInt(process.env.UPDATE_TIMEOUT, 10)
         || Math.round((params.timeout || 300000) / 1000);
     const pollIntervalSec = parseInt(process.env.POLL_INTERVAL, 10) || params.pollInterval || 5;
-    // Grace given to a freshly-started container that reports 'unhealthy' before
-    // its healthcheck settles; overridable via HEALTH_GRACE (seconds).
+    // Seconds an updated container may report unhealthy before it counts as a failure.
     const healthGraceSec = parseInt(process.env.HEALTH_GRACE, 10) || params.healthGrace || 30;
 
     if (!containerName || !imageName || !currentVersion || !targetVersion || !composeProject) {
