@@ -3,6 +3,7 @@ const runPortainerUpdate = require('./portainerUpdate');
 
 const {
     requireArray, demuxDockerStream, rewriteStackFile, discoverEndpoint, checkContainerState,
+    unhealthyVerdict,
 } = runPortainerUpdate.internals;
 
 jest.mock('../../../request');
@@ -133,5 +134,19 @@ describe('checkContainerState', () => {
     test('reports absent when the container is not listed', async () => {
         route([['/endpoints/1/docker/containers/json?all=true', []]]);
         expect(await checkContainerState(env, 1, 'c', 'c:2.0', '')).toBe('absent');
+    });
+});
+
+describe('unhealthyVerdict', () => {
+    // First unhealthy sighting starts the grace window instead of failing - a
+    // freshly-started container often flaps unhealthy during warmup.
+    test('starts the grace window on the first unhealthy sighting', () => {
+        expect(unhealthyVerdict(null, 1000, 30)).toBe('start-grace');
+    });
+    test('keeps waiting while still inside the grace window', () => {
+        expect(unhealthyVerdict(1000, 1020, 30)).toBe('wait');
+    });
+    test('fails once unhealthy persists past the grace window', () => {
+        expect(unhealthyVerdict(1000, 1031, 30)).toBe('fail');
     });
 });

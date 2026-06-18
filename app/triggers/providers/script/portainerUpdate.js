@@ -209,6 +209,15 @@ async function checkContainerState(env, endpointId, containerName, expectedImage
     return 'waiting';
 }
 
+// A container with a healthcheck commonly flaps 'unhealthy' during warmup right
+// after start, before its first check passes. Treat the first sighting as the
+// start of a grace window and only fail once it has stayed unhealthy past
+// graceSec - otherwise a successful update gets reported as a failure.
+function unhealthyVerdict(unhealthySince, now, graceSec) {
+    if (unhealthySince === null) return 'start-grace';
+    return (now - unhealthySince >= graceSec) ? 'fail' : 'wait';
+}
+
 async function fetchContainerLogs(env, endpointId, containerName, lines, emit) {
     emit(`Fetching last ${lines} lines of logs for "${containerName}"...`);
     const list = await api(env, { path: `/endpoints/${endpointId}/docker/containers/json?all=true` });
@@ -235,10 +244,11 @@ async function fetchContainerLogs(env, endpointId, containerName, lines, emit) {
 
 // Wait for the container to reach the target image via the live Docker event
 // stream, with an inspect backstop (events can be missed) and an overall timeout.
-function waitForContainerUpdate(env, { endpointId, containerName, expectedImage, timeoutSec, initialImageId, pollIntervalSec }, emit) {
+function waitForContainerUpdate(env, { endpointId, containerName, expectedImage, timeoutSec, initialImageId, pollIntervalSec, healthGraceSec }, emit) {
     return new Promise((resolve, reject) => {
         const controller = new AbortController();
         let settled = false;
+        let unhealthySince = null;
         const since = nowSec();
         const filters = encodeURIComponent(JSON.stringify({ container: [containerName] }));
 
@@ -268,7 +278,17 @@ function waitForContainerUpdate(env, { endpointId, containerName, expectedImage,
                 emit('  WARNING: running target tag but image ID unchanged - may have already been at target');
                 done('sameimage');
             } else if (st === 'unhealthy') {
-                fail(new Error('container running but health check is unhealthy'));
+                const verdict = unhealthyVerdict(unhealthySince, nowSec(), healthGraceSec);
+                if (verdict === 'start-grace') {
+                    unhealthySince = nowSec();
+                    emit(`  WARNING: target image running but health check is unhealthy; allowing ${healthGraceSec}s to recover...`);
+                } else if (verdict === 'fail') {
+                    fail(new Error(`container running but health check stayed unhealthy for ${healthGraceSec}s`));
+                }
+            } else {
+                // 'waiting' or a recovered check - reset the grace window so a
+                // later flap starts counting fresh.
+                unhealthySince = null;
             }
         };
 
@@ -285,6 +305,11 @@ function waitForContainerUpdate(env, { endpointId, containerName, expectedImage,
             full: true,
         }).then(({ body: stream }) => {
             const rl = readline.createInterface({ input: stream });
+            // Settling aborts the request mid-read, which makes the input stream
+            // emit 'error' (aborted); readline re-emits it on the interface. With
+            // no listener Node treats it as an unhandled 'error' and crashes the
+            // whole process, so swallow it the same way as the stream error.
+            rl.on('error', () => {});
             rl.on('line', (line) => {
                 let ev;
                 try { ev = JSON.parse(line); } catch (err) { return; }
@@ -346,6 +371,9 @@ async function runPortainerUpdate(params, emitLine) {
     const timeoutSec = parseInt(process.env.UPDATE_TIMEOUT, 10)
         || Math.round((params.timeout || 300000) / 1000);
     const pollIntervalSec = parseInt(process.env.POLL_INTERVAL, 10) || params.pollInterval || 5;
+    // Grace given to a freshly-started container that reports 'unhealthy' before
+    // its healthcheck settles; overridable via HEALTH_GRACE (seconds).
+    const healthGraceSec = parseInt(process.env.HEALTH_GRACE, 10) || params.healthGrace || 30;
 
     if (!containerName || !imageName || !currentVersion || !targetVersion || !composeProject) {
         throw new Error(
@@ -439,7 +467,7 @@ async function runPortainerUpdate(params, emitLine) {
     const expectedImage = `${imageName}:${targetVersion}`;
     try {
         await waitForContainerUpdate(env, {
-            endpointId, containerName, expectedImage, timeoutSec, initialImageId, pollIntervalSec,
+            endpointId, containerName, expectedImage, timeoutSec, initialImageId, pollIntervalSec, healthGraceSec,
         }, emit);
     } catch (err) {
         emit(`\nERROR: ${err.message}`);
@@ -457,4 +485,5 @@ async function runPortainerUpdate(params, emitLine) {
 module.exports = runPortainerUpdate;
 module.exports.internals = {
     requireArray, demuxDockerStream, rewriteStackFile, discoverEndpoint, checkContainerState, readEnv,
+    unhealthyVerdict,
 };
