@@ -503,6 +503,16 @@ export default {
 
       } catch (error) {
         console.error('Install error:', error);
+        // Once output is streaming the dialog renders the failure itself, so a
+        // rejected request is a duplicate signal - leave the console in place.
+        const dialog = this.$refs.scriptOutput;
+        const scriptStarted = dialog
+          && (dialog.logs.length > 0 || dialog.isComplete || dialog.scriptExitCode !== null);
+        if (scriptStarted) {
+          return;
+        }
+
+        // Pre-flight failure that never streamed: close the empty console and toast.
         this.updateInProgress = false;
         this.showScriptOutput = false;
         const errorMessage = error.response?.data?.error || error.message || 'Unknown error';
