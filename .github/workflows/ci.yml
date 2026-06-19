@@ -117,14 +117,22 @@ jobs:
     permissions:
       contents: read
     steps:
-      # Supply-chain guard on the dep-install/build jobs: baseline egress + file
-      # integrity monitoring so a malicious dependency install script's network
-      # calls surface. Audit (non-blocking) for now; switch egress-policy to
-      # block with an allowlist to enforce.
+      # Supply-chain guard: block all runner egress except the endpoints this
+      # job needs (checkout, setup-node, npm, actions cache). A compromised
+      # dependency install script can no longer phone home. Allowlist derived
+      # from harden-runner audit telemetry; the *.blob.core.windows.net entry
+      # covers the rotating Actions-cache hostnames.
       - name: Harden runner
         uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411  # v2.19.4
         with:
-          egress-policy: audit
+          egress-policy: block
+          allowed-endpoints: >
+            api.github.com:443
+            github.com:443
+            registry.npmjs.org:443
+            release-assets.githubusercontent.com:443
+            results-receiver.actions.githubusercontent.com:443
+            *.blob.core.windows.net:443
       - name: Checkout
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
         with:
@@ -151,7 +159,14 @@ jobs:
       - name: Harden runner
         uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411  # v2.19.4
         with:
-          egress-policy: audit
+          egress-policy: block
+          allowed-endpoints: >
+            api.github.com:443
+            github.com:443
+            registry.npmjs.org:443
+            release-assets.githubusercontent.com:443
+            results-receiver.actions.githubusercontent.com:443
+            *.blob.core.windows.net:443
       - name: Checkout
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
         with:
@@ -179,7 +194,25 @@ jobs:
       - name: Harden runner
         uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411  # v2.19.4
         with:
-          egress-policy: audit
+          egress-policy: block
+          # Adds the image-build endpoints on top of the install set: Docker Hub
+          # (base images), ghcr + pkg-containers (Trivy DB), Alpine apk mirror,
+          # Trivy version check.
+          allowed-endpoints: >
+            api.github.com:443
+            github.com:443
+            objects.githubusercontent.com:443
+            release-assets.githubusercontent.com:443
+            results-receiver.actions.githubusercontent.com:443
+            *.blob.core.windows.net:443
+            registry.npmjs.org:443
+            registry-1.docker.io:443
+            auth.docker.io:443
+            production.cloudfront.docker.com:443
+            ghcr.io:443
+            pkg-containers.githubusercontent.com:443
+            check.trivy.dev:443
+            dl-cdn.alpinelinux.org:443
       - name: Checkout
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
         with:
