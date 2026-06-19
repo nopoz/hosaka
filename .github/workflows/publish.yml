@@ -26,6 +26,16 @@ jobs:
       attestations: write      # write the attestation
       security-events: write   # upload Trivy SARIF
     steps:
+      # Supply-chain guard on the release build: egress + file-integrity
+      # monitoring. Kept on audit (not block) deliberately: this job runs only
+      # on `release: published`, so an allowlist can't be validated by PR CI the
+      # way the block-mode CI jobs are, and a missing endpoint (Sigstore/OIDC
+      # attestation, ghcr push) would break a real release mid-push. Flip to
+      # block once a release run has baselined its egress set.
+      - name: Harden runner
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411  # v2.19.4
+        with:
+          egress-policy: audit
       - name: Checkout
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
         with:

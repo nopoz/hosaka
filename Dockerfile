@@ -29,8 +29,9 @@ FROM base as dependencies
 # Copy backend package files
 COPY app/package*.json ./
 
-# Install backend dependencies
-RUN npm ci --omit=dev --omit=optional --no-audit --no-fund --no-update-notifier
+# Install backend dependencies. --ignore-scripts blocks dependency lifecycle
+# hooks (the npm supply-chain worm execution vector); no runtime dep needs them.
+RUN npm ci --omit=dev --omit=optional --ignore-scripts --no-audit --no-fund --no-update-notifier
 
 # Frontend Build Stage
 # Vite + vite-plugin-pwa service-worker minification needs a global Web Crypto,
@@ -44,8 +45,9 @@ WORKDIR /home/node/ui
 # Copy UI package files
 COPY ui/package*.json ./
 
-# Install UI dependencies
-RUN npm install
+# Install UI dependencies from the lockfile (npm ci, not install, so the shipped
+# build is pinned), with dependency lifecycle hooks blocked.
+RUN npm ci --ignore-scripts --no-audit --no-fund --no-update-notifier
 
 # Copy all UI source files
 COPY ui/ ./
