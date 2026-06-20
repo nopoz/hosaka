@@ -65,6 +65,7 @@ export default {
       updateAvailableSelected: false,
       sortSelected: "name",
       eventSource: null,
+      streamConnected: false,
       busyKeys: new Set(),
     };
   },
@@ -242,9 +243,14 @@ export default {
     },
     connectStream() {
       this.eventSource = new EventSource("/api/containers/stream");
-      // On (re)connect, resync the full list to recover any missed events.
+      // The initial list is loaded by beforeRouteEnter, so the first open needs
+      // no resync. Only resync on a *re*connect, to recover events missed while
+      // the stream was down.
       this.eventSource.onopen = () => {
-        this.resyncContainers();
+        if (this.streamConnected) {
+          this.resyncContainers();
+        }
+        this.streamConnected = true;
       };
       // A row with an open install dialog is pinned: skip stream-driven churn
       // (the script recreates the container, which would otherwise remove/

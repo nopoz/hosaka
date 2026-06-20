@@ -14,15 +14,6 @@
           >{{ container.watcher }}
         </v-chip>
         /
-        <span v-if="!selfhstContainerIconUrl">
-          <v-chip label color="info" variant="outlined" disabled
-            ><v-icon start>{{
-              registryIcon
-            }}</v-icon
-            >{{ container.image.registry.name }}
-          </v-chip>
-          /
-        </span>
         <v-chip label color="info" variant="outlined" disabled>
           <img
             :src="selfhstContainerIconUrl"
@@ -146,7 +137,7 @@
       </div>
     </div>
     <v-expand-transition>
-      <div v-show="showDetail">
+      <div v-if="showDetail">
         <v-tabs fixed-tabs v-model="tab" ref="tabs">
           <v-tab>
             <span v-if="$vuetify.display.mdAndUp" class="me-2">Container</span>
@@ -280,7 +271,6 @@ import ContainerDetail from "@/components/ContainerDetail";
 import ContainerImage from "@/components/ContainerImage";
 import ContainerUpdate from "@/components/ContainerUpdate";
 import ContainerError from "@/components/ContainerError";
-import { getRegistryProviderIcon } from "@/services/registry";
 import { date, short } from "@/filters";
 import { copyTextToClipboard } from "@/utils/clipboard";
 import ScriptOutputDialog from './ScriptOutputDialog.vue';
@@ -359,10 +349,6 @@ export default {
         .replace("sh-", "")
         .replace("sh:", "");
       return `https://cdn.jsdelivr.net/gh/selfhst/icons/png/${iconName}.png`;
-    },
-
-    registryIcon() {
-      return getRegistryProviderIcon();
     },
 
     osIcon() {
@@ -493,10 +479,7 @@ export default {
     },
 
     collapseDetail() {
-      // Prevent collapse when selecting text only
-      if (window.getSelection().type !== "Range") {
-        this.showDetail = !this.showDetail;
-      }
+      this.showDetail = !this.showDetail;
 
       // Hack because of a render bug on tabs inside a collapsible element
       this.$refs.tabs?.onResize?.();
@@ -526,11 +509,6 @@ export default {
 
       try {
         this.showScriptOutput = true;
-        this.$bus.emit('notify', {
-          message: `Update started for ${this.container.displayName}.`,
-          level: 'info',
-          timeout: 5000,
-        });
 
         await axios.post(`/api/containers/${this.container.id}/install`);
 
@@ -595,6 +573,14 @@ export default {
    tightened row, keeping just a small gap from the edge. */
 .v-toolbar :deep(.v-toolbar__content) {
   padding-inline: 8px;
+}
+/* The row header toggles the detail on click; keep its separators non-selectable
+   so rapid clicks can't catch a text selection on the `/` and `:` glyphs. The
+   expanded detail stays selectable for copying values. */
+.v-toolbar :deep(.v-toolbar__content),
+.mobile-header {
+  -webkit-user-select: none;
+  user-select: none;
 }
 /* Let the title reserve its content width and grow into the leftover space so it
    pushes the right-hand chips to the edge on its own. Without a v-spacer (which
