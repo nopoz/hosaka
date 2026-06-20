@@ -1,6 +1,7 @@
 const fs = require('fs');
 const https = require('https');
 const express = require('express');
+const compression = require('compression');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const log = require('../log').child({ component: 'api' });
@@ -27,6 +28,18 @@ async function init() {
 
         // Trust proxy (helpful to resolve public facing hostname & protocol)
         app.set('trust proxy', true);
+
+        // Compress responses (the UI bundle/CSS dominate first-load transfer).
+        // Skip Server-Sent Events: compression buffers chunks, which would stall
+        // the live container stream and the install-log console.
+        app.use(compression({
+            filter: (req, res) => {
+                if (req.headers.accept && req.headers.accept.includes('text/event-stream')) {
+                    return false;
+                }
+                return compression.filter(req, res);
+            },
+        }));
 
         // Replace undefined values by null to prevent them from being removed from json responses
         app.set('json replacer', (key, value) => (value === undefined ? null : value));
