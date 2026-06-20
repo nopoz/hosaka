@@ -19,6 +19,7 @@
     "body-parser": "1.20.5",
     "bunyan": "1.8.15",
     "capitalize": "2.0.4",
+    "compression": "1.8.1",
     "connect-loki": "1.2.0",
     "cors": "2.8.6",
     "dockerode": "5.0.0",
