@@ -1,7 +1,7 @@
 # Hosaka
 
 <p align="center">
-  <img src="docs/hero.png" alt="Hosaka" width="280">
+  <img src="docs/hero-v2.png" alt="Hosaka" width="280">
 </p>
 
 [![CI](https://github.com/nopoz/hosaka/actions/workflows/ci.yml/badge.svg)](https://github.com/nopoz/hosaka/actions/workflows/ci.yml)
@@ -80,7 +80,7 @@ Hosaka sits in the middle, where most people actually want to be:
 | **Live container state** | manual refresh | list updates in place over SSE, no full-page reload |
 | **Update lifecycle** | trigger fires; output is logged server-side after it exits | tracks the container recreation, confirms the new container is live, and carries the "update complete" state onto the new container ID |
 | **In-app UX** | filter + oldest-first toggle | sort by name, update type, or watcher; distinct color per update type, including prerelease |
-| **Theming** | single look, dark/light toggle | five built-in themes via an in-app picker, on a distinct cyberpunk identity |
+| **Theming** | single look, dark/light toggle | five built-in themes via an in-app picker |
 
 ## How it works
 
