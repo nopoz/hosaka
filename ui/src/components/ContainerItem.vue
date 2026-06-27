@@ -261,6 +261,7 @@
     <update-analysis-dialog
       v-model="showUpdateAnalysis"
       :container="container"
+      @install="handleAnalyzeInstall"
     />
   </v-card>
 </template>
@@ -487,6 +488,11 @@ export default {
 
     normalizeFontawesome(iconString, prefix) {
       return `${prefix} fa-${iconString.replace(`${prefix}:`, "")}`;
+    },
+
+    handleAnalyzeInstall() {
+      this.showUpdateAnalysis = false;
+      this.installContainer();
     },
 
     async installContainer() {

@@ -116,6 +116,14 @@
           No analysis available.
         </div>
       </v-card-text>
+
+      <v-card-actions v-if="canInstall">
+        <v-spacer />
+        <v-chip label color="update" variant="outlined" @click="requestInstall">
+          <v-icon start>ri-arrow-up-circle-line</v-icon>
+          Update
+        </v-chip>
+      </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
@@ -162,6 +170,11 @@ export default {
 
     targetVersion() {
       return this.container.result ? this.container.result.tag : '';
+    },
+
+    canInstall() {
+      return (this.container.install === true || this.container.install === 'multiple')
+        && this.container.updateAvailable;
     },
 
     riskColor() {
@@ -236,6 +249,11 @@ export default {
   },
 
   methods: {
+    requestInstall() {
+      this.$emit('install');
+      this.dialogVisible = false;
+    },
+
     // Host + path of a URL (no protocol/query), used to label a flat changelog
     // source so it doesn't masquerade as a version-specific link.
     urlLabel(url) {
