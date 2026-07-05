@@ -96,6 +96,13 @@ typings/
 
 # End of https://www.gitignore.io/api/node
 
+# OS-generated files
+@eaDir/
+Thumbs.db
+ehthumbs.db
+desktop.ini
+.DS_Store
+
 # Ignore loki file
 .store
 
