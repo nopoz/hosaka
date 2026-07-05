@@ -473,6 +473,52 @@ test('addImageDetailsToContainer should add an image definition to the container
     });
 });
 
+test('addImageDetailsToContainer captures the OCI source label from container labels', async () => {
+    storeContainer.getContainer = () => (undefined);
+    docker.dockerApi = {
+        getContainer: () => ({
+            inspect: () => ({ State: { Status: 'running' } }),
+        }),
+        getImage: () => ({
+            inspect: () => ({ Id: 'image-123456789', Architecture: 'arch', Os: 'os' }),
+        }),
+    };
+    const container = {
+        Id: 'container-123456789',
+        Image: 'organization/image:version',
+        Names: ['/test'],
+        Labels: { 'org.opencontainers.image.source': 'https://github.com/org/repo' },
+    };
+    const containerWithImage = await docker.addImageDetailsToContainer(container);
+    expect(containerWithImage.image.source).toEqual('https://github.com/org/repo');
+});
+
+test('addImageDetailsToContainer backfills image.source onto an existing cached row', async () => {
+    const stored = {
+        id: 'container-123456789',
+        watcher: 'test',
+        status: 'running',
+        image: { name: 'organization/image' },
+    };
+    storeContainer.getContainer = () => (stored);
+    let updated;
+    storeContainer.updateContainer = (c) => { updated = c; return c; };
+    docker.dockerApi = {
+        getContainer: () => ({
+            inspect: () => ({ State: { Status: 'running' } }),
+        }),
+    };
+    const container = {
+        Id: 'container-123456789',
+        Image: 'organization/image:version',
+        Names: ['/test'],
+        Labels: { 'org.opencontainers.image.source': 'https://github.com/org/repo' },
+    };
+    const result = await docker.addImageDetailsToContainer(container);
+    expect(result.image.source).toEqual('https://github.com/org/repo');
+    expect(updated.image.source).toEqual('https://github.com/org/repo');
+});
+
 test('addImageDetailsToContainer should support transforms', async () => {
     storeContainer.getContainer = () => (undefined);
     docker.dockerApi = {

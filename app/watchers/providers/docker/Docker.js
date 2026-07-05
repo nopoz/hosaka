@@ -835,6 +835,10 @@ async watchContainer(container, skipRegistryCheck = false) {
         triggerExclude,
     ) {
         const containerId = container.Id;
+        // Read from the list response's merged labels so it is available before
+        // the cached-row early-return below (image inspect happens after it).
+        const imageSource = (container.Labels
+            && container.Labels['org.opencontainers.image.source']) || undefined;
 
         // First verify container exists and is running
         try {
@@ -863,6 +867,13 @@ async watchContainer(container, skipRegistryCheck = false) {
             containerInStore.watcher === this.name) {
             if (containerInStore.status === 'running') {
                 this.log.debug(`Container ${containerInStore.id} found in store and running`);
+                // Backfill image.source onto rows written before this field
+                // existed; base image details are otherwise cached and never
+                // recomputed for a running container.
+                if (imageSource && containerInStore.image && !containerInStore.image.source) {
+                    containerInStore.image.source = imageSource;
+                    storeContainer.updateContainer(containerInStore);
+                }
                 return containerInStore;
             }
             this.log.debug(`Removing non-running container ${containerId} from store`);
@@ -884,9 +895,6 @@ async watchContainer(container, skipRegistryCheck = false) {
         const created = image.Created;
         const repoDigest = getRepoDigest(image);
         const imageId = image.Id;
-        const imageSource = (image.Config
-            && image.Config.Labels
-            && image.Config.Labels['org.opencontainers.image.source']) || undefined;
 
         // Parse image to get registry, organization...
         let imageNameToParse = container.Image;
