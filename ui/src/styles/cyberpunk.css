@@ -153,12 +153,12 @@ pre,
    inner+outer bloom (little light). The filled `major` anchor emits across its
    whole face -> brighter outer halo, no inner glow (amber-on-amber is moot and
    its text is black). */
-.v-theme--sprawl-terminal .v-card .v-toolbar .v-chip {
+.v-theme--sprawl-terminal .desktop-row .v-chip {
   text-shadow: 0 0 4px rgba(255, 176, 0, 0.45);
   box-shadow: 0 0 5px rgba(255, 176, 0, 0.2),
     inset 0 0 5px rgba(255, 176, 0, 0.13);
 }
-.v-theme--sprawl-terminal .v-card .v-toolbar .v-chip.sev-major {
+.v-theme--sprawl-terminal .desktop-row .v-chip.sev-major {
   text-shadow: none;
   box-shadow: 0 0 10px rgba(255, 176, 0, 0.55), 0 0 4px rgba(255, 176, 0, 0.4);
 }
