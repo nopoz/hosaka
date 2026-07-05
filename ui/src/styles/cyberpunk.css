@@ -129,6 +129,10 @@ pre,
   filter: drop-shadow(0 0 4px rgba(255, 176, 0, 0.55))
     drop-shadow(0 0 10px rgba(255, 176, 0, 0.3));
 }
+.v-theme--mono-chromium .logo-mark {
+  filter: drop-shadow(0 0 4px rgba(166, 198, 238, 0.55))
+    drop-shadow(0 0 10px rgba(166, 198, 238, 0.3));
+}
 
 /* ---- Sprawl Terminal: phosphor glow on the amber elements ----
    Models a monochrome CRT: the bloom tracks how much "light" an element emits.
@@ -153,14 +157,22 @@ pre,
    inner+outer bloom (little light). The filled `major` anchor emits across its
    whole face -> brighter outer halo, no inner glow (amber-on-amber is moot and
    its text is black). */
-.v-theme--sprawl-terminal .v-card .v-toolbar .v-chip {
+.v-theme--sprawl-terminal .desktop-row .v-chip {
   text-shadow: 0 0 4px rgba(255, 176, 0, 0.45);
   box-shadow: 0 0 5px rgba(255, 176, 0, 0.2),
     inset 0 0 5px rgba(255, 176, 0, 0.13);
 }
-.v-theme--sprawl-terminal .v-card .v-toolbar .v-chip.sev-major {
+.v-theme--sprawl-terminal .desktop-row .v-chip.sev-major {
   text-shadow: none;
   box-shadow: 0 0 10px rgba(255, 176, 0, 0.55), 0 0 4px rgba(255, 176, 0, 0.4);
+}
+/* Container-row identity. Pre-#113 the name + its icon were chip content and so
+   glowed with the row's chips; the grid redesign made them a plain span/icon.
+   Give them the same subtle single-layer bloom as the row's chip text. The
+   watcher tag stays a dim secondary label (no glow) by design. */
+.v-theme--sprawl-terminal .desktop-row .row-name,
+.v-theme--sprawl-terminal .desktop-row .cell-container .v-icon {
+  text-shadow: 0 0 4px rgba(255, 176, 0, 0.45);
 }
 
 /* Filter bar. Outlined selects get the thin-border inner+outer bloom. The
