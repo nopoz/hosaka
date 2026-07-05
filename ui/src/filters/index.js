@@ -29,4 +29,21 @@ function date(dateStr) {
   return new Intl.DateTimeFormat([], options).format(date);
 }
 
-export { short, date };
+/**
+ * Derive a release-notes URL from an image's OCI source label. GitHub repos get
+ * their /releases page; other hosts fall back to the source URL as-is.
+ * @param source
+ * @returns {string|null}
+ */
+function sourceReleasesUrl(source) {
+  if (!source || typeof source !== "string") {
+    return null;
+  }
+  const trimmed = source.replace(/\/+$/, "");
+  if (/^https?:\/\/(www\.)?github\.com\//i.test(trimmed)) {
+    return `${trimmed}/releases`;
+  }
+  return trimmed;
+}
+
+export { short, date, sourceReleasesUrl };

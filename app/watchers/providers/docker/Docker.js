@@ -884,6 +884,9 @@ async watchContainer(container, skipRegistryCheck = false) {
         const created = image.Created;
         const repoDigest = getRepoDigest(image);
         const imageId = image.Id;
+        const imageSource = (image.Config
+            && image.Config.Labels
+            && image.Config.Labels['org.opencontainers.image.source']) || undefined;
 
         // Parse image to get registry, organization...
         let imageNameToParse = container.Image;
@@ -940,6 +943,7 @@ async watchContainer(container, skipRegistryCheck = false) {
                 os,
                 variant,
                 created,
+                source: imageSource,
             },
             result: {
                 tag: tagName,
