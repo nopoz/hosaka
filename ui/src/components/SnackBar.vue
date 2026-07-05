@@ -57,3 +57,11 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+/* outlined variant is transparent; give it an opaque surface so content
+   behind the toast can't bleed through the text */
+:deep(.v-snackbar__wrapper) {
+  background-color: rgb(var(--v-theme-surface));
+}
+</style>
