@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid class="px-2 px-md-3 pt-4 pb-2">
+  <v-container fluid class="containers-page px-2 px-md-3 pt-4 pb-2">
     <v-row dense>
       <v-col>
         <container-filter
@@ -21,12 +21,21 @@
       </v-col>
     </v-row>
 
+    <div
+      v-if="$vuetify.display.mdAndUp && containersSorted.length"
+      class="grid-header"
+    >
+      <span>Container</span>
+      <span>Version</span>
+      <span></span>
+    </div>
+
     <v-row
       v-for="container in containersSorted"
       :key="container.id"
       no-gutters
     >
-      <v-col :class="$vuetify.display.smAndDown ? 'py-1' : 'pt-2 pb-2'">
+      <v-col class="py-1">
         <container-item
           :container="container"
           @delete-container="deleteContainer(container)"
@@ -348,3 +357,31 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+/* Published as a custom property so the header and every ContainerItem card
+   share the same tracks. The container track is a viewport-relative clamp, not a
+   fixed width: each card is its own grid, so only a value that computes
+   identically on every row keeps the columns aligned (a content-based minmax/auto
+   track can't). It shrinks as the window narrows, handing space to the version
+   column so its chips aren't crushed by the buttons before the mobile breakpoint;
+   caps at 320px so wide screens still fit long names. */
+.containers-page {
+  --wud-grid-cols: clamp(210px, 25vw, 320px) 1fr 40px;
+  --wud-grid-gap: 8px;
+}
+
+.grid-header {
+  display: grid;
+  grid-template-columns: var(--wud-grid-cols);
+  gap: var(--wud-grid-gap);
+  padding-bottom: 6px;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(var(--v-theme-on-surface), 0.5);
+}
+.grid-header span {
+  padding-inline: 14px;
+}
+</style>

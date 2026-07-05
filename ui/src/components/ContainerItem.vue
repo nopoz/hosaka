@@ -1,77 +1,79 @@
 <template>
-  <v-card>
-    <!-- Desktop: single dense toolbar row with full chip set. -->
-    <v-toolbar
+  <v-card flat color="transparent">
+    <!-- Desktop: aligned grid row; column tracks come from ContainersView
+         (--wud-grid-cols) so every card lines up down the list. -->
+    <div
       v-if="$vuetify.display.mdAndUp"
-      flat
-      density="compact"
+      class="desktop-row"
       @click="collapseDetail()"
-      style="cursor: pointer"
     >
-      <v-toolbar-title class="text-body-3">
-        <v-chip label color="info" variant="outlined" disabled
-          ><v-icon start>ri-server-line</v-icon
-          >{{ container.watcher }}
-        </v-chip>
-        /
-        <v-chip label color="info" variant="outlined" disabled>
-          <img
-            :src="selfhstContainerIconUrl"
-            style="width: 24px; height: 24px"
-            class="v-icon v-icon--start"
-            v-if="isSelfhstContainerIcon"
-          />
-          <v-icon start v-else>
-            {{ containerIcon }}
-          </v-icon>
-          {{ container.displayName }}
-        </v-chip>
-        :
-        <v-chip label variant="outlined" color="info" disabled>
-          {{ container.image.tag.value }}
-        </v-chip>
-      </v-toolbar-title>
-      <v-chip
-        v-if="(container.install === true || container.install === 'multiple') && container.updateAvailable"
-        label
-        color="update"
-        variant="outlined"
-        @click.stop="installContainer"
-        class="mr-1"
-      >
-        <v-icon start>ri-arrow-up-circle-line</v-icon>
-        Update
-      </v-chip>
-      <v-chip
-        v-if="aiEnabled && container.updateAvailable"
-        label
-        color="info"
-        variant="outlined"
-        @click.stop="showUpdateAnalysis = true"
-        class="mr-1"
-      >
-        <v-icon start>ri-search-eye-line</v-icon>
-        Analyze
-      </v-chip>
-      <v-tooltip location="bottom">
-        <template v-slot:activator="{ props }">
-          <v-chip
-            v-if="container.updateAvailable"
-            label
-            :variant="semverChipVariant"
-            :color="newVersionClass"
-            :class="severityClass"
-            v-bind="props"
-            @click.stop="copyToClipboard('container new version', newVersion)"
-          >
-            {{ newVersion }}
-            <v-icon end size="small">ri-file-copy-line</v-icon>
+      <div class="cell-container">
+        <span class="watcher-tag">{{ container.watcher }}</span>
+        <img
+          :src="selfhstContainerIconUrl"
+          class="row-icon"
+          v-if="isSelfhstContainerIcon"
+        />
+        <v-icon color="info" size="small" v-else>{{ containerIcon }}</v-icon>
+        <span class="row-name">{{ container.displayName }}</span>
+      </div>
+
+      <div class="cell-version">
+        <div class="version-cmp">
+          <v-chip label variant="outlined" color="info" disabled class="mono">
+            {{ container.image.tag.value }}
           </v-chip>
-        </template>
-        <span class="text-caption">Copy to clipboard</span>
-      </v-tooltip>
-      <v-icon>{{ showDetail ? "ri-arrow-up-s-line" : "ri-arrow-down-s-line" }}</v-icon>
-    </v-toolbar>
+          <template v-if="container.updateAvailable">
+            <v-icon :color="newVersionClass" size="small">ri-arrow-right-line</v-icon>
+            <v-tooltip location="bottom">
+              <template v-slot:activator="{ props }">
+                <v-chip
+                  label
+                  :variant="semverChipVariant"
+                  :color="newVersionClass"
+                  :class="severityClass"
+                  class="mono"
+                  v-bind="props"
+                  @click.stop="copyToClipboard('container new version', newVersion)"
+                >
+                  {{ newVersion }}
+                  <v-icon end size="small">ri-file-copy-line</v-icon>
+                </v-chip>
+              </template>
+              <span class="text-caption">Copy to clipboard</span>
+            </v-tooltip>
+          </template>
+          <span v-else-if="!container.error" class="up-to-date">up to date</span>
+        </div>
+
+        <div class="version-actions" v-if="hasActions">
+          <v-chip
+            v-if="aiEnabled && container.updateAvailable"
+            label
+            color="info"
+            variant="outlined"
+            @click.stop="showUpdateAnalysis = true"
+          >
+            <v-icon start>ri-search-eye-line</v-icon>
+            Analyze
+          </v-chip>
+          <v-chip
+            v-if="(container.install === true || container.install === 'multiple') && container.updateAvailable"
+            label
+            color="update"
+            variant="outlined"
+            @click.stop="installContainer"
+          >
+            <v-icon start>ri-arrow-up-circle-line</v-icon>
+            Update
+          </v-chip>
+        </div>
+      </div>
+
+      <div class="cell-chevron">
+        <v-icon>{{ showDetail ? "ri-arrow-up-s-line" : "ri-arrow-down-s-line" }}</v-icon>
+      </div>
+    </div>
 
     <!-- Mobile: a purpose-built two-line row. Line 1 (name) toggles the detail;
          line 2 surfaces the target version and a finger-sized Update button kept
@@ -113,17 +115,6 @@
         </span>
         <v-spacer />
         <v-btn
-          v-if="(container.install === true || container.install === 'multiple')"
-          color="update"
-          variant="outlined"
-          size="small"
-          class="ml-2 flex-shrink-0"
-          @click.stop="installContainer"
-        >
-          <v-icon start>ri-arrow-up-circle-line</v-icon>
-          Update
-        </v-btn>
-        <v-btn
           v-if="aiEnabled"
           color="info"
           variant="outlined"
@@ -134,10 +125,21 @@
           <v-icon start>ri-search-eye-line</v-icon>
           Analyze
         </v-btn>
+        <v-btn
+          v-if="(container.install === true || container.install === 'multiple')"
+          color="update"
+          variant="outlined"
+          size="small"
+          class="ml-2 flex-shrink-0"
+          @click.stop="installContainer"
+        >
+          <v-icon start>ri-arrow-up-circle-line</v-icon>
+          Update
+        </v-btn>
       </div>
     </div>
     <v-expand-transition>
-      <div v-if="showDetail">
+      <div v-if="showDetail" class="container-detail-panel">
         <v-tabs fixed-tabs v-model="tab" ref="tabs">
           <v-tab>
             <span v-if="$vuetify.display.mdAndUp" class="me-2">Container</span>
@@ -314,6 +316,13 @@ export default {
 
     aiEnabled() {
       return this.$serverConfig?.ai?.enabled ?? false;
+    },
+
+    hasActions() {
+      if (!this.container.updateAvailable) return false;
+      const installable =
+        this.container.install === true || this.container.install === "multiple";
+      return installable || this.aiEnabled;
     },
 
     containerIcon() {
@@ -573,30 +582,107 @@ export default {
   user-select: none;
 }
 
-/* Trim the desktop toolbar's default 16px side padding so the chips sit closer
-   to the row edges and reclaim horizontal space. The toolbar title also adds a
-   16px start margin by default; trim it too so the left chips align with the
-   tightened row, keeping just a small gap from the edge. */
-.v-toolbar :deep(.v-toolbar__content) {
-  padding-inline: 8px;
-}
-/* The row header toggles the detail on click; keep its separators non-selectable
-   so rapid clicks can't catch a text selection on the `/` and `:` glyphs. The
-   expanded detail stays selectable for copying values. */
-.v-toolbar :deep(.v-toolbar__content),
+/* The row header toggles the detail on click; keep it non-selectable so rapid
+   clicks can't catch a text selection. The expanded detail stays selectable. */
+.desktop-row,
 .mobile-header {
   -webkit-user-select: none;
   user-select: none;
 }
-/* Let the title reserve its content width and grow into the leftover space so it
-   pushes the right-hand chips to the edge on its own. Without a v-spacer (which
-   would otherwise grow alongside a basis-0 title and split the row 50/50,
-   truncating the left chips while a gap sits unused), the title only clips when
-   the chips would genuinely collide with the right-hand cluster. */
-.v-toolbar :deep(.v-toolbar-title) {
-  margin-inline-start: 4px;
-  flex: 1 1 auto !important;
+
+/* Flat card; each column is its own inset tile. Tracks and gap come from
+   --wud-grid-cols / --wud-grid-gap on the ContainersView wrapper so the header
+   and every card share one geometry and align down the list. */
+.desktop-row {
+  display: grid;
+  grid-template-columns: var(--wud-grid-cols, clamp(210px, 25vw, 320px) 1fr 40px);
+  gap: var(--wud-grid-gap, 8px);
+  align-items: stretch;
+  cursor: pointer;
+}
+.desktop-row > * {
+  display: flex;
+  align-items: center;
+  min-height: 46px;
+  padding: 8px 14px;
   min-width: 0;
+  background: rgb(var(--v-theme-surface-light));
+  border-radius: 8px;
+}
+
+.mobile-header {
+  background: rgb(var(--v-theme-surface-light));
+  border-radius: 8px;
+}
+
+/* The card is transparent, so the detail drawer sets its own surface. */
+.container-detail-panel {
+  margin-top: 8px;
+  background: rgb(var(--v-theme-surface));
+  border-radius: 8px;
   overflow: hidden;
+}
+
+.cell-container {
+  gap: 8px;
+}
+.watcher-tag {
+  flex: 0 0 auto;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(var(--v-theme-on-surface), 0.5);
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.18);
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+.row-icon {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+}
+.row-name {
+  color: rgb(var(--v-theme-info));
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Actions sit at the right of the version tile (no separate actions column). */
+.cell-version {
+  gap: 12px;
+}
+.version-cmp {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.version-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  flex: 0 0 auto;
+}
+/* Keep action chips at their natural size so their labels are not squashed. */
+.version-actions :deep(.v-chip) {
+  flex: 0 0 auto;
+}
+.up-to-date {
+  color: rgba(var(--v-theme-on-surface), 0.5);
+  font-style: italic;
+  font-size: 0.8rem;
+}
+
+.cell-chevron {
+  justify-content: center;
+  color: rgba(var(--v-theme-on-surface), 0.6);
+}
+
+.mono {
+  font-family: "JetBrains Mono", monospace;
 }
 </style>
