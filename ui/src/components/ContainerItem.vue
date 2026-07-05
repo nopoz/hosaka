@@ -643,6 +643,10 @@ export default {
   flex: 0 0 auto;
 }
 .row-name {
+  font-family: "JetBrains Mono", monospace;
+  /* Match the version chips: JetBrains Mono runs larger than the UI font, so
+     hold the name at the chip size rather than the 1rem body default. */
+  font-size: 0.875rem;
   color: rgb(var(--v-theme-info));
   font-weight: 700;
   overflow: hidden;
