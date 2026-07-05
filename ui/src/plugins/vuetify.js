@@ -71,6 +71,20 @@ const themes = {
       "on-background": "#FFB000", "on-surface": "#FFB000",
     },
   },
+  "mono-chromium": {
+    dark: true,
+    colors: {
+      primary: "#8FB6E2", secondary: "#B6D0EE", accent: "#DCEBFF",
+      error: "#DCEBFF", warning: "#A8C8EE", success: "#7096C0", info: "#8FB6E2",
+      prerelease: "#566F8C", update: "#B6D5FA",
+      background: "#080B12", surface: "#0F141D",
+      "surface-light": "#151D29", "surface-bright": "#33445E",
+      // Monochromatic steel-blue: severity reads by brightness (error brightest ->
+      // prerelease dimmest), and default text/icons are tinted blue instead of
+      // white so the whole chrome reads as one cool metal.
+      "on-background": "#C2D3E8", "on-surface": "#C2D3E8",
+    },
+  },
   corpo: {
     dark: false,
     colors: {

@@ -43,11 +43,13 @@ import logoNeon from "@/assets/hosaka-logo-dark.svg";
 import logoAcid from "@/assets/hosaka-logo-acid.svg";
 import logoSynthwave from "@/assets/hosaka-logo-synthwave.svg";
 import logoSprawl from "@/assets/hosaka-logo-sprawl.svg";
+import logoMono from "@/assets/hosaka-logo-mono.svg";
 
 const THEME_LOGOS = {
   "acid-matrix": logoAcid,
   synthwave: logoSynthwave,
   "sprawl-terminal": logoSprawl,
+  "mono-chromium": logoMono,
 };
 
 export default {

@@ -129,6 +129,10 @@ pre,
   filter: drop-shadow(0 0 4px rgba(255, 176, 0, 0.55))
     drop-shadow(0 0 10px rgba(255, 176, 0, 0.3));
 }
+.v-theme--mono-chromium .logo-mark {
+  filter: drop-shadow(0 0 4px rgba(166, 198, 238, 0.55))
+    drop-shadow(0 0 10px rgba(166, 198, 238, 0.3));
+}
 
 /* ---- Sprawl Terminal: phosphor glow on the amber elements ----
    Models a monochrome CRT: the bloom tracks how much "light" an element emits.
