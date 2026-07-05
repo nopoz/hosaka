@@ -125,10 +125,20 @@
         ><a :href="container.link" target="_blank">{{ container.link }}</a>
       </v-list-item-subtitle>
     </v-list-item>
+    <v-list-item v-else-if="autoDetectedLink">
+      <template #prepend>
+        <v-icon color="secondary">ri-links-line</v-icon>
+      </template>
+      <v-list-item-title>Link (auto-detected)</v-list-item-title>
+      <v-list-item-subtitle
+        ><a :href="autoDetectedLink" target="_blank">{{ autoDetectedLink }}</a>
+      </v-list-item-subtitle>
+    </v-list-item>
   </v-list>
 </template>
 <script>
 import { copyTextToClipboard } from "@/utils/clipboard";
+import { sourceReleasesUrl } from "@/filters";
 
 export default {
   props: {
@@ -139,6 +149,11 @@ export default {
   },
   data() {
     return {};
+  },
+  computed: {
+    autoDetectedLink() {
+      return sourceReleasesUrl(this.container.image && this.container.image.source);
+    },
   },
 
   methods: {

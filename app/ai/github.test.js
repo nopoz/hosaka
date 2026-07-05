@@ -22,6 +22,32 @@ test('detectRepo fuzzes ghcr image name when no link is present', () => {
     expect(detectRepo(container)).toStrictEqual({ owner: 'nopoz', repo: 'hosaka' });
 });
 
+test('detectRepo prefers the OCI source label over ghcr name fuzzing', () => {
+    const container = {
+        image: {
+            name: 'linuxserver/socket-proxy',
+            registry: { url: 'https://ghcr.io/v2' },
+            source: 'https://github.com/linuxserver/docker-socket-proxy',
+        },
+    };
+    expect(detectRepo(container)).toStrictEqual({
+        owner: 'linuxserver',
+        repo: 'docker-socket-proxy',
+    });
+});
+
+test('detectRepo lets a configured link template win over the OCI source label', () => {
+    const container = {
+        linkTemplate: 'https://github.com/adnanh/webhook/releases/tag/2.8.3',
+        image: {
+            name: 'linuxserver-labs/webhook',
+            registry: { url: 'https://ghcr.io/v2' },
+            source: 'https://github.com/linuxserver-labs/docker-webhook',
+        },
+    };
+    expect(detectRepo(container)).toStrictEqual({ owner: 'adnanh', repo: 'webhook' });
+});
+
 test('detectRepo returns null for a non-github, non-ghcr image', () => {
     const container = {
         image: { name: 'library/nginx', registry: { url: 'registry-1.docker.io' } },
@@ -67,4 +93,21 @@ test('listReleasesBetween adds an auth header when a token is supplied', async (
     request.mockResolvedValue({ statusCode: 200, headers: {}, body: [] });
     await listReleasesBetween({ owner: 'a', repo: 'b' }, 'v1.0.0', 'v2.0.0', 'tok');
     expect(request.mock.calls[0][0].headers.Authorization).toBe('Bearer tok');
+});
+
+test('listReleasesBetween returns [] on a 404 (guessed repo has no releases page)', async () => {
+    const err = new Error('Request failed with status code 404');
+    err.response = { status: 404 };
+    request.mockRejectedValue(err);
+    const result = await listReleasesBetween({ owner: 'nope', repo: 'nope' }, 'v1.0.0', 'v2.0.0', '');
+    expect(result).toStrictEqual([]);
+});
+
+test('listReleasesBetween rethrows non-404 errors', async () => {
+    const err = new Error('boom');
+    err.response = { status: 500 };
+    request.mockRejectedValue(err);
+    await expect(
+        listReleasesBetween({ owner: 'a', repo: 'b' }, 'v1.0.0', 'v2.0.0', ''),
+    ).rejects.toThrow('boom');
 });

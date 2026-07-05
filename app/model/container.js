@@ -40,6 +40,7 @@ const schema = joi.object({
         os: joi.string().min(1).required(),
         variant: joi.string(),
         created: joi.string().isoDate(),
+        source: joi.string(),
     }).required(),
     result: joi.object({
         tag: joi.string().min(1),

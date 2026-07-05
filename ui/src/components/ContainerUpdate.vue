@@ -74,12 +74,23 @@
           ><a :href="result.link" target="_blank">{{ result.link }}</a>
         </v-list-item-subtitle>
       </v-list-item>
+      <v-list-item v-else-if="autoDetectedLink">
+        <template #prepend>
+          <v-icon color="secondary">ri-links-line</v-icon>
+        </template>
+        <v-list-item-title>Link (auto-detected)</v-list-item-title>
+        <v-list-item-subtitle
+          ><a :href="autoDetectedLink" target="_blank">{{ autoDetectedLink }}</a>
+        </v-list-item-subtitle>
+      </v-list-item>
     </v-list>
     <v-card-text v-else>No update available</v-card-text>
   </div>
 </template>
 
 <script>
+import { sourceReleasesUrl } from "@/filters";
+
 export default {
   props: {
     semver: {
@@ -94,8 +105,15 @@ export default {
     updateAvailable: {
       type: Boolean,
     },
+    source: {
+      type: String,
+      default: null,
+    },
   },
   computed: {
+    autoDetectedLink() {
+      return sourceReleasesUrl(this.source);
+    },
     updateKindFormatted() {
       let kind = "Unknown";
       if (this.updateKind) {

@@ -180,6 +180,7 @@
               :semver="container.image.tag.semver"
               :update-kind="container.updateKind"
               :update-available="container.updateAvailable"
+              :source="container.image.source"
             />
           </v-window-item>
           <v-window-item v-if="container.error">
