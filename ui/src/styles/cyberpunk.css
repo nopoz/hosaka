@@ -162,6 +162,14 @@ pre,
   text-shadow: none;
   box-shadow: 0 0 10px rgba(255, 176, 0, 0.55), 0 0 4px rgba(255, 176, 0, 0.4);
 }
+/* Container-row identity. Pre-#113 the name + its icon were chip content and so
+   glowed with the row's chips; the grid redesign made them a plain span/icon.
+   Give them the same subtle single-layer bloom as the row's chip text. The
+   watcher tag stays a dim secondary label (no glow) by design. */
+.v-theme--sprawl-terminal .desktop-row .row-name,
+.v-theme--sprawl-terminal .desktop-row .cell-container .v-icon {
+  text-shadow: 0 0 4px rgba(255, 176, 0, 0.45);
+}
 
 /* Filter bar. Outlined selects get the thin-border inner+outer bloom. The
    labels sit at 0.7 opacity, which dims their glow, so they need a higher alpha
