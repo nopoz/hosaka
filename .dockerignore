@@ -1,6 +1,7 @@
 **/.store/
 **/coverage/
 **/node_modules/
+.dev/
 docs/
 e2e/
 test/
