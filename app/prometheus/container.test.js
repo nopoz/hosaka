@@ -116,6 +116,45 @@ test('gauge must exclude notification fields from labels', () => {
     }, 1);
 });
 
+test('gauge must accept a container carrying image.source', () => {
+    jest.useFakeTimers();
+    const spyLog = jest.spyOn(log, 'warn');
+    spyLog.mockClear();
+    store.getContainers = () => ([
+        {
+            id: 'container-123456789',
+            name: 'test',
+            watcher: 'test',
+            image: {
+                id: 'image-123456789',
+                registry: {
+                    name: 'registry',
+                    url: 'https://hub',
+                },
+                name: 'organization/image',
+                tag: {
+                    value: 'version',
+                    semver: false,
+                },
+                digest: {
+                    watch: false,
+                    repo: undefined,
+                },
+                architecture: 'arch',
+                os: 'os',
+                created: '2021-06-12T05:33:38.440Z',
+                source: 'https://github.com/organization/image',
+            },
+            result: {
+                tag: 'version',
+            },
+        },
+    ]);
+    container.init();
+    jest.runOnlyPendingTimers();
+    expect(spyLog).not.toHaveBeenCalled();
+});
+
 test('gauge must warn when data don\'t match expected labels', () => {
     store.getContainers = () => ([{
         extra: 'extra',

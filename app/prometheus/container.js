@@ -66,6 +66,7 @@ function init() {
             'image_os',
             'image_variant',
             'image_created',
+            'image_source',
             'result_tag',
             'result_digest',
             'result_created',
