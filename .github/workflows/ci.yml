@@ -197,7 +197,8 @@ jobs:
           egress-policy: block
           # Adds the image-build endpoints on top of the install set: Docker Hub
           # (base images), ghcr + pkg-containers (Trivy DB), Alpine apk mirror,
-          # Trivy version check.
+          # Trivy version check + binary download. get.trivy.dev is reached only
+          # on a cold Actions cache, so dropping it breaks the scan weeks later.
           allowed-endpoints: >
             api.github.com:443
             github.com:443
@@ -212,6 +213,7 @@ jobs:
             ghcr.io:443
             pkg-containers.githubusercontent.com:443
             check.trivy.dev:443
+            get.trivy.dev:443
             dl-cdn.alpinelinux.org:443
       - name: Checkout
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
