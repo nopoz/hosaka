@@ -1,9 +1,9 @@
 name: Nightly scan
 
-# Scheduled deep scans that don't fit the per-PR gates. Today: a full-history
-# secret sweep (the PR gitleaks job only sees the diff). A published-image Trivy
-# rescan will be added here once a release is cut under the new name (the ghcr
-# image does not exist yet).
+# Scheduled deep scans that don't fit the per-PR gates: a full-history secret
+# sweep (the PR gitleaks job only sees the diff), and a rescan of the published
+# image. The rescan is the only thing that catches a CVE disclosed *after* a
+# release, since the PR and publish scans both look at build time only.
 
 on:
   schedule:
@@ -36,3 +36,48 @@ jobs:
         uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e  # v3.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  image-rescan:
+    name: Trivy rescan (published image)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write  # upload Trivy SARIF to code scanning
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920  # v2.20.0
+        with:
+          egress-policy: block
+          # Trivy install (get.trivy.dev on a cold cache, check.trivy.dev for
+          # the version probe) plus ghcr for both the DB and the image pull.
+          allowed-endpoints: >
+            api.github.com:443
+            github.com:443
+            objects.githubusercontent.com:443
+            release-assets.githubusercontent.com:443
+            results-receiver.actions.githubusercontent.com:443
+            *.blob.core.windows.net:443
+            ghcr.io:443
+            pkg-containers.githubusercontent.com:443
+            check.trivy.dev:443
+            get.trivy.dev:443
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Scan the published image
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25  # v0.36.0
+        with:
+          image-ref: ghcr.io/${{ github.repository }}:latest
+          format: sarif
+          output: trivy-results.sarif
+          ignore-unfixed: true
+        env:
+          TRIVY_DB_REPOSITORY: ghcr.io/aquasecurity/trivy-db:2
+      - name: Upload Trivy results
+        uses: github/codeql-action/upload-sarif@e4fba868fa4b1b91e1fdab776edc8cfbe6e9fb81  # v4.37.3
+        with:
+          sarif_file: trivy-results.sarif
+          # Distinct from trivy-image (PR) and trivy-release (publish) so the
+          # three scans do not overwrite each other's code-scanning results.
+          category: trivy-nightly
