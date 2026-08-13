@@ -65,7 +65,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Lint Dockerfile
-        uses: hadolint/hadolint-action@2332a7b74a6de0dda2e2221d575162eba76ba5e5  # v3.3.0
+        uses: hadolint/hadolint-action@2a66e89f53d0771bb131a7fa31f3136336094aa6  # v3.4.0
         with:
           dockerfile: Dockerfile
           # DL3018: pinning apk versions is impractical on Alpine; base images
@@ -123,7 +123,7 @@ jobs:
       # from harden-runner audit telemetry; the *.blob.core.windows.net entry
       # covers the rotating Actions-cache hostnames.
       - name: Harden runner
-        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920  # v2.20.0
+        uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40  # v2.20.1
         with:
           egress-policy: block
           allowed-endpoints: >
@@ -157,7 +157,7 @@ jobs:
       contents: read
     steps:
       - name: Harden runner
-        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920  # v2.20.0
+        uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40  # v2.20.1
         with:
           egress-policy: block
           allowed-endpoints: >
@@ -192,7 +192,7 @@ jobs:
       security-events: write  # upload Trivy SARIF to code scanning
     steps:
       - name: Harden runner
-        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920  # v2.20.0
+        uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40  # v2.20.1
         with:
           egress-policy: block
           # Adds the image-build endpoints on top of the install set: Docker Hub
@@ -242,7 +242,7 @@ jobs:
           # Pin DB sources to avoid rate-limited Docker Hub mirrors.
           TRIVY_DB_REPOSITORY: ghcr.io/aquasecurity/trivy-db:2
       - name: Upload Trivy results
-        uses: github/codeql-action/upload-sarif@e4fba868fa4b1b91e1fdab776edc8cfbe6e9fb81  # v4.37.3
+        uses: github/codeql-action/upload-sarif@5595ccaf912efad79be6eef63a5619ff05969be3  # v4.37.6
         with:
           sarif_file: trivy-results.sarif
           category: trivy-image
