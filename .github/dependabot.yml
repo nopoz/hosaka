@@ -1,7 +1,7 @@
 # Dependabot configuration.
 #
 # npm: NO scheduled version updates. We deliberately avoid version-chasing
-# noise. Security coverage for the app/ui/e2e packages comes from Dependabot
+# noise. Security coverage for the app/ui packages comes from Dependabot
 # *security updates* (the repo "Dependabot security updates" setting), which
 # only open a PR when a dependency has a known CVE advisory. Major upgrades are
 # handled deliberately as their own modernization tracks, not automated bumps.
