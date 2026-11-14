@@ -111,3 +111,37 @@ test('listReleasesBetween rethrows non-404 errors', async () => {
         listReleasesBetween({ owner: 'a', repo: 'b' }, 'v1.0.0', 'v2.0.0', ''),
     ).rejects.toThrow('boom');
 });
+
+function githubError(status, message, headers = {}) {
+    const err = new Error(`Request failed with status code ${status}`);
+    err.response = { status, headers, data: { message } };
+    return err;
+}
+
+test('listReleasesBetween explains a rejected token', async () => {
+    request.mockRejectedValue(githubError(401, 'Bad credentials'));
+    await expect(
+        listReleasesBetween({ owner: 'a', repo: 'b' }, 'v1.0.0', 'v2.0.0', 'bad'),
+    ).rejects.toThrow('GitHub rejected HOSAKA_AI_GITHUB_TOKEN (Bad credentials). Check that the token is valid and not expired.');
+});
+
+test('listReleasesBetween explains the rate limit and suggests a token when none is set', async () => {
+    request.mockRejectedValue(githubError(403, 'API rate limit exceeded for 1.2.3.4.', { 'x-ratelimit-remaining': '0' }));
+    await expect(
+        listReleasesBetween({ owner: 'a', repo: 'b' }, 'v1.0.0', 'v2.0.0', ''),
+    ).rejects.toThrow('GitHub API rate limit reached while fetching release notes. Try again later, or set HOSAKA_AI_GITHUB_TOKEN to raise the limit.');
+});
+
+test('listReleasesBetween explains a secondary rate limit without the token hint when a token is set', async () => {
+    request.mockRejectedValue(githubError(429, 'You have exceeded a secondary rate limit.', { 'retry-after': '60' }));
+    await expect(
+        listReleasesBetween({ owner: 'a', repo: 'b' }, 'v1.0.0', 'v2.0.0', 'tok'),
+    ).rejects.toThrow(/^GitHub API rate limit reached while fetching release notes\. Try again later\.$/);
+});
+
+test('listReleasesBetween surfaces the message GitHub returns for other errors', async () => {
+    request.mockRejectedValue(githubError(403, 'Resource not accessible by personal access token'));
+    await expect(
+        listReleasesBetween({ owner: 'a', repo: 'b' }, 'v1.0.0', 'v2.0.0', 'tok'),
+    ).rejects.toThrow('GitHub error (403): Resource not accessible by personal access token');
+});

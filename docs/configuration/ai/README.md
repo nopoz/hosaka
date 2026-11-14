@@ -39,7 +39,7 @@ All of these support the `__FILE` suffix (Docker secrets); see
 
 Create a Google Gemini API key in
 [Google AI Studio](https://aistudio.google.com/apikey) and set it as
-`HOSAKA_AI_GEMINI_APIKEY`. A `GITHUB_TOKEN` is optional: unauthenticated GitHub
+`HOSAKA_AI_GEMINI_APIKEY`. A `HOSAKA_AI_GITHUB_TOKEN` is optional: unauthenticated GitHub
 API calls are rate-limited, so a token helps if you analyze many updates in a
 short window.
 

@@ -200,7 +200,7 @@ async function analyzeUpdateContainer(req, res) {
         if (e.code === 'NO_UPDATE') {
             return res.status(400).json({ error: e.message });
         }
-        return res.status(502).json({ error: `Error analyzing update for ${id} (${e.message})` });
+        return res.status(502).json({ error: `Update analysis failed: ${e.message}` });
     }
 }
 
