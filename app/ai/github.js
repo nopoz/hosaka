@@ -40,6 +40,25 @@ function detectRepo(container) {
     return null;
 }
 
+function friendlyError(error, token) {
+    const response = error.response || {};
+    const { status } = response;
+    const headers = response.headers || {};
+    const detail = response.data && response.data.message;
+    if (status === 401) {
+        return new Error(`GitHub rejected HOSAKA_AI_GITHUB_TOKEN (${detail || 'unauthorized'}). Check that the token is valid and not expired.`);
+    }
+    const rateLimited = headers['x-ratelimit-remaining'] === '0' || headers['retry-after'];
+    if ((status === 403 || status === 429) && rateLimited) {
+        const hint = token ? '' : ', or set HOSAKA_AI_GITHUB_TOKEN to raise the limit';
+        return new Error(`GitHub API rate limit reached while fetching release notes. Try again later${hint}.`);
+    }
+    if (status && detail) {
+        return new Error(`GitHub error (${status}): ${detail}`);
+    }
+    return error;
+}
+
 /**
  * List GitHub releases with current < tag <= target, newest last. Drafts and
  * non-semver tags are skipped. POC fetches up to 100 releases in one page.
@@ -71,7 +90,7 @@ async function listReleasesBetween(repo, current, target, token) {
         if (e.response && e.response.status === 404) {
             return [];
         }
-        throw e;
+        throw friendlyError(e, token);
     }
     const releases = Array.isArray(response.body) ? response.body : [];
     const kept = [];

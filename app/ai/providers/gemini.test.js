@@ -13,9 +13,12 @@ function content(json) {
     return { candidates: [{ content: { parts: [{ text: json }] } }] };
 }
 
-function httpError(status) {
+function httpError(status, message) {
     const error = new Error(`Request failed with status code ${status}`);
     error.response = { status };
+    if (message) {
+        error.response.data = { error: { code: status, message } };
+    }
     return error;
 }
 
@@ -84,4 +87,35 @@ test('generate does not retry a non-transient error', async () => {
         user: 'u', schema: {}, model: 'm', apiKey: 'k',
     })).rejects.toThrow('Request failed with status code 400');
     expect(request).toHaveBeenCalledTimes(1);
+});
+
+test('generate surfaces depleted prepaid credits (402) without retrying', async () => {
+    request.mockRejectedValue(httpError(402, 'Your prepayment credits are depleted. Please go to AI Studio. '));
+    await expect(gemini.generate({
+        user: 'u', schema: {}, model: 'm', apiKey: 'k',
+    })).rejects.toThrow(/^Gemini error \(402\): Your prepayment credits are depleted\. Please go to AI Studio\.$/);
+    expect(request).toHaveBeenCalledTimes(1);
+});
+
+test('generate surfaces the message Gemini returns for other errors', async () => {
+    request.mockRejectedValue(httpError(400, 'API key not valid. Please pass a valid API key.'));
+    await expect(gemini.generate({
+        user: 'u', schema: {}, model: 'm', apiKey: 'k',
+    })).rejects.toThrow('Gemini error (400): API key not valid. Please pass a valid API key.');
+    expect(request).toHaveBeenCalledTimes(1);
+});
+
+test('generate keeps the friendly overload message when a 503 carries a body', async () => {
+    request.mockRejectedValue(httpError(503, 'The model is overloaded. Please try again later.'));
+    await expect(gemini.generate({
+        user: 'u', schema: {}, model: 'm', apiKey: 'k',
+    })).rejects.toThrow('The AI service is busy right now. Please try again in a moment.');
+});
+
+test('generate surfaces the quota message on a 429 after retrying', async () => {
+    request.mockRejectedValue(httpError(429, 'You exceeded your current quota.'));
+    await expect(gemini.generate({
+        user: 'u', schema: {}, model: 'm', apiKey: 'k',
+    })).rejects.toThrow('Gemini error (429): You exceeded your current quota.');
+    expect(request).toHaveBeenCalledTimes(3);
 });

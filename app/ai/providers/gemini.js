@@ -35,11 +35,15 @@ function isRetryable(error) {
  */
 function friendlyError(error) {
     const status = error.response && error.response.status;
-    if (status === 503 || status === 429) {
+    if (status === 503) {
         return new Error('The AI service is busy right now. Please try again in a moment.');
     }
     if (isTimeout(error)) {
         return new Error('The AI service took too long to respond. Please try again.');
+    }
+    const detail = error.response?.data?.error?.message;
+    if (status && typeof detail === 'string' && detail.trim()) {
+        return new Error(`Gemini error (${status}): ${detail.trim()}`);
     }
     return error;
 }
