@@ -1129,12 +1129,15 @@ const storedRow = {
     status: 'running',
 };
 
-test('addImageDetailsToContainer keeps the stored row when inspect fails transiently', async () => {
+test.each([
+    ['a network error', dockerError('connect ETIMEDOUT 10.0.0.1:2375')],
+    ['an HTTP 500', dockerError('server error', 500)],
+])('addImageDetailsToContainer keeps the stored row when inspect fails with %s', async (_, error) => {
     storeContainer.getContainer = () => storedRow;
     const spyDelete = jest.spyOn(storeContainer, 'deleteContainer').mockImplementation(() => {});
     docker.dockerApi = {
         getContainer: () => ({
-            inspect: () => Promise.reject(dockerError('connect ETIMEDOUT 10.0.0.1:2375')),
+            inspect: () => Promise.reject(error),
         }),
     };
     const result = await docker.addImageDetailsToContainer({
@@ -1192,14 +1195,31 @@ test('addImageDetailsToContainer keeps the stored row when the image cannot be i
     );
 });
 
-test('watch still reports the other containers when one image cannot be inspected', async () => {
-    storeContainer.getContainer = () => (undefined);
+test('watch keeps the row of a container whose image cannot be inspected through reconciliation', async () => {
+    const badRow = {
+        id: 'bad',
+        name: 'bad',
+        watcher: 'test',
+        status: 'running',
+        error: { message: 'previous failure' },
+        image: {
+            id: 'image-bad',
+            registry: { name: 'hub' },
+            name: 'organization/bad',
+            tag: { value: '1.0.0', semver: true },
+            digest: { watch: false },
+        },
+    };
+    storeContainer.getContainer = (id) => (id === 'bad' ? badRow : undefined);
     storeContainer.insertContainer = (containerWithResult) => (containerWithResult);
+    jest.spyOn(storeContainer, 'getContainers').mockReturnValue([badRow]);
+    const spyDelete = jest.spyOn(storeContainer, 'deleteContainer').mockImplementation(() => {});
     const listed = (id, image) => ({
         Id: id,
         Image: image,
         Names: [`/${id}`],
         Labels: {},
+        State: 'running',
     });
     docker.dockerApi = {
         listContainers: () => Promise.resolve([
@@ -1222,7 +1242,24 @@ test('watch still reports the other containers when one image cannot be inspecte
         }),
     };
     const reports = await docker.watch();
-    expect(reports.map((report) => report.container.id)).toStrictEqual(['good']);
+    expect(reports.map((report) => report.container.id)).toStrictEqual(['good', 'bad']);
+    expect(storeContainer.getContainers).toHaveBeenCalledWith({ watcher: 'test' });
+    expect(spyDelete).not.toHaveBeenCalled();
+});
+
+test.each([
+    ['its own row', storedRow, true],
+    ["another watcher's row", { ...storedRow, watcher: 'other' }, false],
+])('addImageDetailsToContainer drops a container Docker reports as not running, deleting %s only if owned', async (_, row, deleted) => {
+    storeContainer.getContainer = () => row;
+    const spyDelete = jest.spyOn(storeContainer, 'deleteContainer').mockImplementation(() => {});
+    docker.dockerApi = {
+        getContainer: () => ({ inspect: () => ({ State: { Status: 'exited' } }) }),
+    };
+    await expect(docker.addImageDetailsToContainer({
+        Id: 'container-123456789', Image: 'organization/image:version', Names: ['/test'], Labels: {},
+    })).resolves.toBeUndefined();
+    expect(spyDelete).toHaveBeenCalledTimes(deleted ? 1 : 0);
 });
 
 const otherWatcherRow = { ...storedRow, watcher: 'other' };
@@ -1300,7 +1337,9 @@ test('addImageDetailsToContainer keeps the stored row when the image has no tag 
             }),
         }),
     };
+    const spyWarn = jest.spyOn(docker.log, 'warn');
     await expect(docker.addImageDetailsToContainer({
         Id: 'container-123456789', Image: 'sha256:abc', Names: ['/test'], Labels: {},
     })).resolves.toBe(erroredRow);
+    expect(spyWarn).toHaveBeenCalledWith('Cannot get a reliable tag for this image [sha256:abc]');
 });
