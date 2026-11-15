@@ -1113,3 +1113,108 @@ test('findNewVersion (exclude only) skips excluded tags but keeps current', asyn
     expect(counter.tags).toContain('8.0.0');
     expect(new Set(counter.tags)).toEqual(new Set(['8.2.0', '8.1.0', '8.0.0']));
 });
+
+function dockerError(message, statusCode) {
+    const error = new Error(message);
+    if (statusCode) {
+        error.statusCode = statusCode;
+    }
+    return error;
+}
+
+const storedRow = {
+    id: 'container-123456789',
+    name: 'test',
+    watcher: 'test',
+    status: 'running',
+};
+
+test('addImageDetailsToContainer keeps the stored row when inspect fails transiently', async () => {
+    storeContainer.getContainer = () => storedRow;
+    const spyDelete = jest.spyOn(storeContainer, 'deleteContainer').mockImplementation(() => {});
+    docker.dockerApi = {
+        getContainer: () => ({
+            inspect: () => Promise.reject(dockerError('connect ETIMEDOUT 10.0.0.1:2375')),
+        }),
+    };
+    const result = await docker.addImageDetailsToContainer({
+        Id: 'container-123456789', Image: 'organization/image:version', Names: ['/test'], Labels: {},
+    });
+    expect(result).toBe(storedRow);
+    expect(spyDelete).not.toHaveBeenCalled();
+});
+
+test('addImageDetailsToContainer skips an unknown container when inspect fails transiently', async () => {
+    storeContainer.getContainer = () => undefined;
+    docker.dockerApi = {
+        getContainer: () => ({
+            inspect: () => Promise.reject(dockerError('socket hang up')),
+        }),
+    };
+    await expect(docker.addImageDetailsToContainer({
+        Id: 'container-123456789', Image: 'organization/image:version', Names: ['/test'], Labels: {},
+    })).resolves.toBeUndefined();
+});
+
+test('addImageDetailsToContainer drops the stored row when the container no longer exists', async () => {
+    storeContainer.getContainer = () => storedRow;
+    const spyDelete = jest.spyOn(storeContainer, 'deleteContainer').mockImplementation(() => {});
+    docker.dockerApi = {
+        getContainer: () => ({
+            inspect: () => Promise.reject(dockerError('no such container', 404)),
+        }),
+    };
+    await expect(docker.addImageDetailsToContainer({
+        Id: 'container-123456789', Image: 'organization/image:version', Names: ['/test'], Labels: {},
+    })).resolves.toBeUndefined();
+    expect(spyDelete).toHaveBeenCalledWith('container-123456789');
+});
+
+test('addImageDetailsToContainer keeps the stored row when the image cannot be inspected', async () => {
+    const erroredRow = { ...storedRow, error: { message: 'previous failure' } };
+    storeContainer.getContainer = () => erroredRow;
+    docker.dockerApi = {
+        getContainer: () => ({
+            inspect: () => ({ State: { Status: 'running' } }),
+        }),
+        getImage: () => ({
+            inspect: () => Promise.reject(dockerError('no such image', 404)),
+        }),
+    };
+    await expect(docker.addImageDetailsToContainer({
+        Id: 'container-123456789', Image: 'organization/image:version', Names: ['/test'], Labels: {},
+    })).resolves.toBe(erroredRow);
+});
+
+test('watch still reports the other containers when one image cannot be inspected', async () => {
+    storeContainer.getContainer = () => (undefined);
+    storeContainer.insertContainer = (containerWithResult) => (containerWithResult);
+    const listed = (id, image) => ({
+        Id: id,
+        Image: image,
+        Names: [`/${id}`],
+        Labels: {},
+    });
+    docker.dockerApi = {
+        listContainers: () => Promise.resolve([
+            listed('good', 'organization/good:1.0.0'),
+            listed('bad', 'organization/bad:1.0.0'),
+        ]),
+        getContainer: () => ({
+            inspect: () => ({ State: { Status: 'running' } }),
+        }),
+        getImage: (name) => ({
+            inspect: () => (name === 'organization/bad:1.0.0'
+                ? Promise.reject(dockerError('no such image', 404))
+                : {
+                    Id: 'image-good',
+                    Architecture: 'arch',
+                    Os: 'os',
+                    Created: '2021-06-12T05:33:38.440Z',
+                    RepoDigests: [],
+                }),
+        }),
+    };
+    const reports = await docker.watch();
+    expect(reports.map((report) => report.container.id)).toStrictEqual(['good']);
+});

@@ -888,7 +888,16 @@ async watchContainer(container, skipRegistryCheck = false) {
             }
         } catch (e) {
             const containerInStore = storeContainer.getContainer(containerId);
-            if (containerInStore && containerInStore.watcher === this.name) {
+            const ownRow = containerInStore && containerInStore.watcher === this.name
+                ? containerInStore
+                : undefined;
+            // Only a 404 proves the container is gone; anything else (timeout,
+            // proxy error) must not drop its row and the state stored with it.
+            if (e.statusCode !== 404) {
+                this.log.warn(`Unable to inspect container ${containerId}, keeping its last known state (${e.message})`);
+                return ownRow;
+            }
+            if (ownRow) {
                 this.log.debug(`Removing non-existent container ${containerId} from store`);
                 storeContainer.deleteContainer(containerId);
             }
@@ -916,7 +925,14 @@ async watchContainer(container, skipRegistryCheck = false) {
         }
 
         // Get container image details
-        const image = await this.dockerApi.getImage(container.Image).inspect();
+        let image;
+        try {
+            image = await this.dockerApi.getImage(container.Image).inspect();
+        } catch (e) {
+            this.log.warn(`Unable to inspect image ${container.Image} of container ${containerId} (${e.message})`);
+            const row = storeContainer.getContainer(containerId);
+            return row && row.watcher === this.name ? row : undefined;
+        }
         
         // Get project label dynamically
         const projectLabel = container.Labels['com.docker.compose.project'] || null;
