@@ -590,10 +590,8 @@ class Docker extends Component {
         // List images to watch
         try {
             containers = await this.getContainers();
-            this.updateReachability();
         } catch (e) {
             this.log.warn(`Error when trying to get the list of the containers to watch (${e.message})`);
-            this.updateReachability(e);
         }
         try {
             const containerReports = await Promise.all(
@@ -686,7 +684,14 @@ async watchContainer(container, skipRegistryCheck = false) {
         if (this.configuration.watchall) {
             listContainersOptions.all = true;
         }
-        const containers = await this.dockerApi.listContainers(listContainersOptions);
+        let containers;
+        try {
+            containers = await this.dockerApi.listContainers(listContainersOptions);
+        } catch (e) {
+            this.updateReachability(e);
+            throw e;
+        }
+        this.updateReachability();
 
         // Filter on containers to watch
         const filteredContainers = containers

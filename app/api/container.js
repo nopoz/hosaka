@@ -13,6 +13,7 @@ const HttpTrigger = require('../triggers/providers/http/Http');
 const ScriptTrigger = require('../triggers/providers/script/Script');
 const { scriptOutputEmitter } = ScriptTrigger;
 const ai = require('../ai');
+const { getUnreachableWatcherNames } = require('./watcher');
 
 const router = express.Router();
 
@@ -85,9 +86,7 @@ function getInstallEnabled() {
  */
 function getContainers(req, res) {
     const { query } = req;
-    const unreachable = new Set(Object.values(getWatchers())
-        .filter((watcher) => watcher.getStatus && !watcher.getStatus().reachable)
-        .map((watcher) => watcher.name));
+    const unreachable = getUnreachableWatcherNames();
     const containers = getContainersFromStore(query)
         .filter((container) => !unreachable.has(container.watcher));
 

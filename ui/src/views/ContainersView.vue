@@ -133,6 +133,7 @@ export default {
     },
     containersFiltered() {
       return this.containers
+        .filter((container) => !this.isWatcherUnreachable(container.watcher))
         .filter((container) =>
           this.registrySelected
             ? this.registrySelected === container.image.registry.name
@@ -192,6 +193,9 @@ export default {
       return new Date(iso).toLocaleString();
     },
     setWatcherStatuses(watchers) {
+      if (!Array.isArray(watchers)) {
+        return;
+      }
       this.watcherStatuses = Object.fromEntries(
         watchers.map((watcher) => [watcher.name, watcher.status]),
       );
@@ -277,7 +281,7 @@ export default {
       try {
         const [fresh, watchers] = await Promise.all([
           getAllContainers(),
-          getAllWatchers(),
+          getAllWatchers().catch(() => null),
         ]);
         this.setWatcherStatuses(watchers);
         const prevById = new Map(this.containers.map((c) => [c.id, c]));
@@ -306,10 +310,7 @@ export default {
       // the dialog closes (onContainerIdle).
       const onUpsert = (event) => {
         const container = JSON.parse(event.data);
-        if (
-          this.busyKeys.has(this.containerKey(container)) ||
-          this.isWatcherUnreachable(container.watcher)
-        ) {
+        if (this.busyKeys.has(this.containerKey(container))) {
           return;
         }
         this.upsertContainer(container);
@@ -377,7 +378,7 @@ export default {
     try {
       const [containers, watchers] = await Promise.all([
         getAllContainers(),
-        getAllWatchers(),
+        getAllWatchers().catch(() => null),
       ]);
       next((vm) => {
         vm.setWatcherStatuses(watchers);
