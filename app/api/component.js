@@ -10,12 +10,16 @@ const nocache = require('nocache');
  * @returns {{id: *}}
  */
 function mapComponentToItem(key, component) {
-    return {
+    const item = {
         id: key,
         type: component.type,
         name: component.name,
         configuration: component.maskConfiguration(),
     };
+    if (typeof component.getStatus === 'function') {
+        item.status = component.getStatus();
+    }
+    return item;
 }
 
 /**

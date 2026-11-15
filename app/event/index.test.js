@@ -22,6 +22,9 @@ const eventTestCases = [
     }, {
         emitter: event.emitWatcherStop,
         register: event.registerWatcherStop,
+    }, {
+        emitter: event.emitWatcherStatus,
+        register: event.registerWatcherStatus,
     },
 ];
 test.each(eventTestCases)(

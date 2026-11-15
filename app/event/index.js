@@ -13,6 +13,7 @@ const HOSAKA_CONTAINER_REPORTS = 'hosaka:container-reports';
 // Watcher related events
 const HOSAKA_WATCHER_START = 'hosaka:watcher-start';
 const HOSAKA_WATCHER_STOP = 'hosaka:watcher-stop';
+const HOSAKA_WATCHER_STATUS = 'hosaka:watcher-status';
 
 // New event constant
 const HOSAKA_TRIGGER_WATCH = 'hosaka:trigger-watch';
@@ -113,6 +114,14 @@ function registerWatcherStop(handler) {
     eventEmitter.on(HOSAKA_WATCHER_STOP, handler);
 }
 
+function emitWatcherStatus(watcher) {
+    eventEmitter.emit(HOSAKA_WATCHER_STATUS, watcher);
+}
+
+function registerWatcherStatus(handler) {
+    eventEmitter.on(HOSAKA_WATCHER_STATUS, handler);
+}
+
 // New function to emit trigger_watch
 function emitTriggerWatch() {
     eventEmitter.emit(HOSAKA_TRIGGER_WATCH);
@@ -148,6 +157,8 @@ module.exports = {
     registerWatcherStart,
     emitWatcherStop,
     registerWatcherStop,
+    emitWatcherStatus,
+    registerWatcherStatus,
     // New exports
     emitTriggerWatch,
     registerTriggerWatch,

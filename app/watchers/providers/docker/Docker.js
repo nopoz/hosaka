@@ -590,8 +590,10 @@ class Docker extends Component {
         // List images to watch
         try {
             containers = await this.getContainers();
+            this.updateReachability();
         } catch (e) {
             this.log.warn(`Error when trying to get the list of the containers to watch (${e.message})`);
+            this.updateReachability(e);
         }
         try {
             const containerReports = await Promise.all(
@@ -649,6 +651,31 @@ async watchContainer(container, skipRegistryCheck = false) {
         return { container: containerWithResult, changed: false };
     }
 }
+
+    getStatus() {
+        if (!this.unreachableSince) {
+            return { reachable: true };
+        }
+        return {
+            reachable: false,
+            unreachableSince: this.unreachableSince,
+            error: this.unreachableError,
+        };
+    }
+
+    updateReachability(error) {
+        const wasReachable = !this.unreachableSince;
+        if (error) {
+            this.unreachableSince = this.unreachableSince || new Date().toISOString();
+            this.unreachableError = error.message;
+        } else {
+            this.unreachableSince = undefined;
+            this.unreachableError = undefined;
+        }
+        if (wasReachable !== !this.unreachableSince) {
+            event.emitWatcherStatus(this);
+        }
+    }
 
     /**
      * Get all containers to watch.
