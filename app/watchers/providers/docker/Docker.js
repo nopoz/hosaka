@@ -650,6 +650,31 @@ async watchContainer(container, skipRegistryCheck = false) {
     }
 }
 
+    getStatus() {
+        if (!this.unreachableSince) {
+            return { reachable: true };
+        }
+        return {
+            reachable: false,
+            unreachableSince: this.unreachableSince,
+            error: this.unreachableError,
+        };
+    }
+
+    updateReachability(error) {
+        const wasReachable = !this.unreachableSince;
+        if (error) {
+            this.unreachableSince = this.unreachableSince || new Date().toISOString();
+            this.unreachableError = error.message;
+        } else {
+            this.unreachableSince = undefined;
+            this.unreachableError = undefined;
+        }
+        if (wasReachable !== !this.unreachableSince) {
+            event.emitWatcherStatus(this);
+        }
+    }
+
     /**
      * Get all containers to watch.
      * @returns {Promise<unknown[]>}
@@ -659,7 +684,14 @@ async watchContainer(container, skipRegistryCheck = false) {
         if (this.configuration.watchall) {
             listContainersOptions.all = true;
         }
-        const containers = await this.dockerApi.listContainers(listContainersOptions);
+        let containers;
+        try {
+            containers = await this.dockerApi.listContainers(listContainersOptions);
+        } catch (e) {
+            this.updateReachability(e);
+            throw e;
+        }
+        this.updateReachability();
 
         // Filter on containers to watch
         const filteredContainers = containers

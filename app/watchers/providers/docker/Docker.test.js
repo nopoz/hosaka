@@ -6,6 +6,7 @@ jest.mock('../../../event');
 jest.mock('../../../log');
 
 const storeContainer = require('../../../store/container');
+const event = require('../../../event');
 
 const Docker = require('./Docker');
 const Hub = require('../../../registries/providers/hub/Hub');
@@ -748,6 +749,75 @@ test('watch should log error when an error occurs when listing containers fails'
     const spylog = jest.spyOn(docker.log, 'warn');
     expect(await docker.watch()).toEqual([]);
     expect(spylog).toHaveBeenCalledWith('Error when trying to get the list of the containers to watch (Failure!!!)');
+});
+
+function failListing(message) {
+    docker.dockerApi = {
+        listContainers: () => Promise.reject(new Error(message)),
+    };
+}
+
+test('watch marks the watcher unreachable when listing containers fails', async () => {
+    failListing('connect ETIMEDOUT 10.0.0.1:2375');
+    expect(docker.getStatus()).toStrictEqual({ reachable: true });
+    await docker.watch();
+    const { unreachableSince } = docker.getStatus();
+    expect(Number.isNaN(Date.parse(unreachableSince))).toBe(false);
+    expect(docker.getStatus()).toStrictEqual({
+        reachable: false, unreachableSince, error: 'connect ETIMEDOUT 10.0.0.1:2375',
+    });
+    expect(event.emitWatcherStatus).toHaveBeenCalledTimes(1);
+    expect(event.emitWatcherStatus).toHaveBeenCalledWith(docker);
+});
+
+test('watch keeps the original unreachableSince and does not re-emit on repeated failures', async () => {
+    failListing('first');
+    await docker.watch();
+    const { unreachableSince } = docker.getStatus();
+    failListing('second');
+    await docker.watch();
+    expect(docker.getStatus()).toStrictEqual({
+        reachable: false, unreachableSince, error: 'second',
+    });
+    expect(event.emitWatcherStatus).toHaveBeenCalledTimes(1);
+});
+
+test('watch marks the watcher reachable again once listing succeeds', async () => {
+    failListing('down');
+    await docker.watch();
+    docker.dockerApi = { listContainers: () => Promise.resolve([]) };
+    await docker.watch();
+    expect(docker.getStatus()).toStrictEqual({ reachable: true });
+    expect(event.emitWatcherStatus).toHaveBeenCalledTimes(2);
+});
+
+test('watch does not emit a status event while the host stays reachable', async () => {
+    docker.dockerApi = { listContainers: () => Promise.resolve([]) };
+    await docker.watch();
+    await docker.watch();
+    expect(docker.getStatus()).toStrictEqual({ reachable: true });
+    expect(event.emitWatcherStatus).not.toHaveBeenCalled();
+});
+
+test('watch keeps the watcher reachable when one container fails after a successful listing', async () => {
+    storeContainer.getContainer = () => (undefined);
+    docker.dockerApi = {
+        listContainers: () => Promise.resolve([{
+            Id: 'container-123456789',
+            Image: 'organization/image:version',
+            Names: ['/test'],
+            Labels: {},
+        }]),
+        getContainer: () => ({
+            inspect: () => ({ State: { Status: 'running' }, Image: 'image-123456789' }),
+        }),
+        getImage: () => ({
+            inspect: () => Promise.reject(new Error('no such image')),
+        }),
+    };
+    await docker.watch();
+    expect(docker.getStatus()).toStrictEqual({ reachable: true });
+    expect(event.emitWatcherStatus).not.toHaveBeenCalled();
 });
 
 const stubLogger = { info: () => {}, debug: () => {}, warn: () => {} };

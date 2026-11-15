@@ -21,6 +21,22 @@
       </v-col>
     </v-row>
 
+    <v-alert
+      v-for="watcher in unreachableWatchers"
+      :key="watcher.name"
+      type="warning"
+      variant="tonal"
+      density="compact"
+      class="my-2"
+    >
+      The <strong>{{ watcher.name }}</strong> watcher can't reach its Docker
+      host (since {{ formatTime(watcher.status.unreachableSince) }}), so its
+      containers are hidden until it responds.
+      <span v-if="watcher.status.error"
+        >Last error: {{ watcher.status.error }}</span
+      >
+    </v-alert>
+
     <div
       v-if="$vuetify.display.mdAndUp && containersSorted.length"
       class="grid-header"
@@ -53,6 +69,7 @@
 import ContainerItem from "@/components/ContainerItem";
 import ContainerFilter from "@/components/ContainerFilter";
 import { deleteContainer, getAllContainers } from "@/services/container";
+import { getAllWatchers } from "@/services/watcher";
 import bus from "@/event-bus";
 
 // Remember the filter/sort selection for the browser session so it survives
@@ -68,6 +85,7 @@ export default {
   data() {
     return {
       containers: [],
+      watcherStatuses: {},
       registrySelected: "",
       watcherSelected: "",
       updateKindSelected: "",
@@ -80,6 +98,11 @@ export default {
   },
 
   computed: {
+    unreachableWatchers() {
+      return Object.entries(this.watcherStatuses)
+        .filter(([, status]) => status && !status.reachable)
+        .map(([name, status]) => ({ name, status }));
+    },
     registries() {
       return [
         ...new Set(
@@ -110,6 +133,7 @@ export default {
     },
     containersFiltered() {
       return this.containers
+        .filter((container) => !this.isWatcherUnreachable(container.watcher))
         .filter((container) =>
           this.registrySelected
             ? this.registrySelected === container.image.registry.name
@@ -165,6 +189,21 @@ export default {
   },
 
   methods: {
+    formatTime(iso) {
+      return new Date(iso).toLocaleString();
+    },
+    setWatcherStatuses(watchers) {
+      if (!Array.isArray(watchers)) {
+        return;
+      }
+      this.watcherStatuses = Object.fromEntries(
+        watchers.map((watcher) => [watcher.name, watcher.status]),
+      );
+    },
+    isWatcherUnreachable(name) {
+      const status = this.watcherStatuses[name];
+      return Boolean(status && !status.reachable);
+    },
     onRegistryChanged(registrySelected) {
       this.registrySelected = registrySelected;
       this.persistFilters();
@@ -240,7 +279,11 @@ export default {
     // means only genuinely-changed rows re-render.
     async resyncContainers() {
       try {
-        const fresh = await getAllContainers();
+        const [fresh, watchers] = await Promise.all([
+          getAllContainers(),
+          getAllWatchers().catch(() => null),
+        ]);
+        this.setWatcherStatuses(watchers);
         const prevById = new Map(this.containers.map((c) => [c.id, c]));
         this.containers = fresh.map((f) => {
           const prev = prevById.get(f.id);
@@ -280,6 +323,11 @@ export default {
           return;
         }
         this.removeContainerFromList(container);
+      });
+      this.eventSource.addEventListener("watcher", (event) => {
+        const { name, status } = JSON.parse(event.data);
+        this.watcherStatuses = { ...this.watcherStatuses, [name]: status };
+        this.resyncContainers();
       });
     },
     disconnectStream() {
@@ -328,8 +376,12 @@ export default {
     // truth (no query params), so there is nothing to contradict it.
     const stored = JSON.parse(sessionStorage.getItem(FILTERS_KEY) || "{}");
     try {
-      const containers = await getAllContainers();
+      const [containers, watchers] = await Promise.all([
+        getAllContainers(),
+        getAllWatchers().catch(() => null),
+      ]);
       next((vm) => {
+        vm.setWatcherStatuses(watchers);
         if (stored.registrySelected) {
           vm.registrySelected = stored.registrySelected;
         }

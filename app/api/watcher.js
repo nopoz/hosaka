@@ -9,6 +9,12 @@ function getWatchers() {
     return registry.getState().watcher;
 }
 
+function getUnreachableWatcherNames() {
+    return new Set(Object.values(getWatchers())
+        .filter((watcher) => watcher.getStatus && !watcher.getStatus().reachable)
+        .map((watcher) => watcher.name));
+}
+
 /**
  * Init Router.
  * @returns {*}
@@ -28,4 +34,5 @@ function getAllWatchers() {
 module.exports = {
     init,
     getAllWatchers,
+    getUnreachableWatcherNames,
 };
