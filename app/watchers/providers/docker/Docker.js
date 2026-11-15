@@ -950,7 +950,16 @@ async watchContainer(container, skipRegistryCheck = false) {
         let imageNameToParse = container.Image;
         if (imageNameToParse.includes('sha256:')) {
             if (!image.RepoTags || image.RepoTags.length === 0) {
-                this.log.warn(`Cannot get a reliable tag for this image [${imageNameToParse}]`);
+                const message = `Cannot get a reliable tag for image [${imageNameToParse}] (pinned by digest or untagged), so it is not watched`;
+                if (!this.untaggedImagesReported) {
+                    this.untaggedImagesReported = new Set();
+                }
+                if (this.untaggedImagesReported.has(imageNameToParse)) {
+                    this.log.debug(message);
+                } else {
+                    this.untaggedImagesReported.add(imageNameToParse);
+                    this.log.warn(message);
+                }
                 return getOwnStoredRow(containerId, this.name);
             }
             [imageNameToParse] = image.RepoTags;

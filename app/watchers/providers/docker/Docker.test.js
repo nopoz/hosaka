@@ -1341,5 +1341,28 @@ test('addImageDetailsToContainer keeps the stored row when the image has no tag 
     await expect(docker.addImageDetailsToContainer({
         Id: 'container-123456789', Image: 'sha256:abc', Names: ['/test'], Labels: {},
     })).resolves.toBe(erroredRow);
-    expect(spyWarn).toHaveBeenCalledWith('Cannot get a reliable tag for this image [sha256:abc]');
+    expect(spyWarn).toHaveBeenCalledWith('Cannot get a reliable tag for image [sha256:abc] (pinned by digest or untagged), so it is not watched');
+});
+
+test('addImageDetailsToContainer warns about an image without a reliable tag only once', async () => {
+    storeContainer.getContainer = () => undefined;
+    const spyWarn = jest.spyOn(docker.log, 'warn');
+    const spyDebug = jest.spyOn(docker.log, 'debug');
+    const pinned = 'docker.io/valkey/valkey:9@sha256:8e8d64b405ce18f41b8e5ee20aa4687a8ed0022d1298f2ce31cdcf3a76e09411';
+    docker.dockerApi = {
+        getContainer: () => ({ inspect: () => ({ State: { Status: 'running' } }) }),
+        getImage: () => ({
+            inspect: () => ({
+                Id: 'sha256:abc', Architecture: 'arch', Os: 'os', RepoTags: [], RepoDigests: [],
+            }),
+        }),
+    };
+    const container = {
+        Id: 'container-123456789', Image: pinned, Names: ['/valkey'], Labels: {}, State: 'running',
+    };
+    await expect(docker.addImageDetailsToContainer(container)).resolves.toBeUndefined();
+    await expect(docker.addImageDetailsToContainer(container)).resolves.toBeUndefined();
+    const message = `Cannot get a reliable tag for image [${pinned}] (pinned by digest or untagged), so it is not watched`;
+    expect(spyWarn.mock.calls.filter(([m]) => m === message)).toHaveLength(1);
+    expect(spyDebug).toHaveBeenCalledWith(message);
 });
