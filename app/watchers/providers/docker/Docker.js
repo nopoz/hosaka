@@ -235,6 +235,11 @@ function reconcileStore(watcherName, liveContainers, logger) {
     });
 }
 
+function getOwnStoredRow(containerId, watcherName) {
+    const row = storeContainer.getContainer(containerId);
+    return row && row.watcher === watcherName ? row : undefined;
+}
+
 function getContainerName(container) {
     let containerName;
     const names = container.Names;
@@ -887,10 +892,7 @@ async watchContainer(container, skipRegistryCheck = false) {
                 return undefined;
             }
         } catch (e) {
-            const containerInStore = storeContainer.getContainer(containerId);
-            const ownRow = containerInStore && containerInStore.watcher === this.name
-                ? containerInStore
-                : undefined;
+            const ownRow = getOwnStoredRow(containerId, this.name);
             // Only a 404 proves the container is gone; anything else (timeout,
             // proxy error) must not drop its row and the state stored with it.
             if (e.statusCode !== 404) {
@@ -920,8 +922,6 @@ async watchContainer(container, skipRegistryCheck = false) {
                 }
                 return containerInStore;
             }
-            this.log.debug(`Removing non-running container ${containerId} from store`);
-            storeContainer.deleteContainer(containerId);
         }
 
         // Get container image details
@@ -930,8 +930,7 @@ async watchContainer(container, skipRegistryCheck = false) {
             image = await this.dockerApi.getImage(container.Image).inspect();
         } catch (e) {
             this.log.warn(`Unable to inspect image ${container.Image} of container ${containerId} (${e.message})`);
-            const row = storeContainer.getContainer(containerId);
-            return row && row.watcher === this.name ? row : undefined;
+            return getOwnStoredRow(containerId, this.name);
         }
         
         // Get project label dynamically
@@ -952,7 +951,7 @@ async watchContainer(container, skipRegistryCheck = false) {
         if (imageNameToParse.includes('sha256:')) {
             if (!image.RepoTags || image.RepoTags.length === 0) {
                 this.log.warn(`Cannot get a reliable tag for this image [${imageNameToParse}]`);
-                return Promise.resolve();
+                return getOwnStoredRow(containerId, this.name);
             }
             [imageNameToParse] = image.RepoTags;
         }

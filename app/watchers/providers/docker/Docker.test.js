@@ -1173,6 +1173,8 @@ test('addImageDetailsToContainer drops the stored row when the container no long
 test('addImageDetailsToContainer keeps the stored row when the image cannot be inspected', async () => {
     const erroredRow = { ...storedRow, error: { message: 'previous failure' } };
     storeContainer.getContainer = () => erroredRow;
+    const spyDelete = jest.spyOn(storeContainer, 'deleteContainer').mockImplementation(() => {});
+    const spyWarn = jest.spyOn(docker.log, 'warn');
     docker.dockerApi = {
         getContainer: () => ({
             inspect: () => ({ State: { Status: 'running' } }),
@@ -1184,6 +1186,10 @@ test('addImageDetailsToContainer keeps the stored row when the image cannot be i
     await expect(docker.addImageDetailsToContainer({
         Id: 'container-123456789', Image: 'organization/image:version', Names: ['/test'], Labels: {},
     })).resolves.toBe(erroredRow);
+    expect(spyDelete).not.toHaveBeenCalled();
+    expect(spyWarn).toHaveBeenCalledWith(
+        'Unable to inspect image organization/image:version of container container-123456789 (no such image)',
+    );
 });
 
 test('watch still reports the other containers when one image cannot be inspected', async () => {
@@ -1217,4 +1223,84 @@ test('watch still reports the other containers when one image cannot be inspecte
     };
     const reports = await docker.watch();
     expect(reports.map((report) => report.container.id)).toStrictEqual(['good']);
+});
+
+const otherWatcherRow = { ...storedRow, watcher: 'other' };
+
+test.each([
+    ['a transient error', dockerError('socket hang up')],
+    ['a 404', dockerError('no such container', 404)],
+])('addImageDetailsToContainer never returns or deletes another watcher\'s row on %s', async (_, error) => {
+    storeContainer.getContainer = () => otherWatcherRow;
+    const spyDelete = jest.spyOn(storeContainer, 'deleteContainer').mockImplementation(() => {});
+    docker.dockerApi = {
+        getContainer: () => ({ inspect: () => Promise.reject(error) }),
+    };
+    await expect(docker.addImageDetailsToContainer({
+        Id: 'container-123456789', Image: 'organization/image:version', Names: ['/test'], Labels: {},
+    })).resolves.toBeUndefined();
+    expect(spyDelete).not.toHaveBeenCalled();
+});
+
+test('addImageDetailsToContainer does not return another watcher\'s row when the image cannot be inspected', async () => {
+    storeContainer.getContainer = () => otherWatcherRow;
+    docker.dockerApi = {
+        getContainer: () => ({ inspect: () => ({ State: { Status: 'running' } }) }),
+        getImage: () => ({ inspect: () => Promise.reject(dockerError('no such image', 404)) }),
+    };
+    await expect(docker.addImageDetailsToContainer({
+        Id: 'container-123456789', Image: 'organization/image:version', Names: ['/test'], Labels: {},
+    })).resolves.toBeUndefined();
+});
+
+test('addImageDetailsToContainer logs a warning when it keeps a row after a failed inspect', async () => {
+    storeContainer.getContainer = () => storedRow;
+    const spyWarn = jest.spyOn(docker.log, 'warn');
+    docker.dockerApi = {
+        getContainer: () => ({ inspect: () => Promise.reject(dockerError('socket hang up')) }),
+    };
+    await docker.addImageDetailsToContainer({
+        Id: 'container-123456789', Image: 'organization/image:version', Names: ['/test'], Labels: {},
+    });
+    expect(spyWarn).toHaveBeenCalledWith(
+        'Unable to inspect container container-123456789, keeping its last known state (socket hang up)',
+    );
+});
+
+test('addImageDetailsToContainer rebuilds a running container whose stored status is stale without deleting its row', async () => {
+    storeContainer.getContainer = () => ({ ...storedRow, status: 'exited' });
+    const spyDelete = jest.spyOn(storeContainer, 'deleteContainer').mockImplementation(() => {});
+    docker.dockerApi = {
+        getContainer: () => ({ inspect: () => ({ State: { Status: 'running' } }) }),
+        getImage: () => ({
+            inspect: () => ({
+                Id: 'image-123456789',
+                Architecture: 'arch',
+                Os: 'os',
+                Created: '2021-06-12T05:33:38.440Z',
+                RepoDigests: [],
+            }),
+        }),
+    };
+    const result = await docker.addImageDetailsToContainer({
+        Id: 'container-123456789', Image: 'organization/image:version', Names: ['/test'], Labels: {}, State: 'running',
+    });
+    expect(result).toMatchObject({ id: 'container-123456789', status: 'running' });
+    expect(spyDelete).not.toHaveBeenCalled();
+});
+
+test('addImageDetailsToContainer keeps the stored row when the image has no tag to resolve', async () => {
+    const erroredRow = { ...storedRow, error: { message: 'previous failure' } };
+    storeContainer.getContainer = () => erroredRow;
+    docker.dockerApi = {
+        getContainer: () => ({ inspect: () => ({ State: { Status: 'running' } }) }),
+        getImage: () => ({
+            inspect: () => ({
+                Id: 'sha256:abc', Architecture: 'arch', Os: 'os', RepoTags: [], RepoDigests: [],
+            }),
+        }),
+    };
+    await expect(docker.addImageDetailsToContainer({
+        Id: 'container-123456789', Image: 'sha256:abc', Names: ['/test'], Labels: {},
+    })).resolves.toBe(erroredRow);
 });
