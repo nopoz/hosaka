@@ -6,12 +6,14 @@ const {
     registerContainerAdded,
     registerContainerUpdated,
     registerContainerRemoved,
+    registerWatcherStatus,
 } = require('../event');
 const { getServerConfiguration, getTriggerConfigurations } = require('../configuration');
 const HttpTrigger = require('../triggers/providers/http/Http');
 const ScriptTrigger = require('../triggers/providers/script/Script');
 const { scriptOutputEmitter } = ScriptTrigger;
 const ai = require('../ai');
+const { getUnreachableWatcherNames } = require('./watcher');
 
 const router = express.Router();
 
@@ -84,7 +86,9 @@ function getInstallEnabled() {
  */
 function getContainers(req, res) {
     const { query } = req;
-    const containers = getContainersFromStore(query);
+    const unreachable = getUnreachableWatcherNames();
+    const containers = getContainersFromStore(query)
+        .filter((container) => !unreachable.has(container.watcher));
 
     // Add cache control headers
     res.set({
@@ -200,7 +204,7 @@ async function analyzeUpdateContainer(req, res) {
         if (e.code === 'NO_UPDATE') {
             return res.status(400).json({ error: e.message });
         }
-        return res.status(502).json({ error: `Error analyzing update for ${id} (${e.message})` });
+        return res.status(502).json({ error: `Update analysis failed: ${e.message}` });
     }
 }
 
@@ -479,6 +483,17 @@ function broadcastContainerEvent(eventName, container) {
     });
 }
 
+function broadcastWatcherStatus(watcher) {
+    const payload = JSON.stringify({ name: watcher.name, status: watcher.getStatus() });
+    streamClients.forEach((client) => {
+        try {
+            client.write(`event: watcher\ndata: ${payload}\n\n`);
+        } catch (e) {
+            console.warn(`Error writing to container stream: ${e.message}`);
+        }
+    });
+}
+
 /**
  * SSE endpoint streaming live container add/update/remove events. The client
  * keeps its list in sync without polling or full-page reloads; on (re)connect it
@@ -559,6 +574,7 @@ function init() {
     registerContainerAdded((container) => broadcastContainerEvent('added', container));
     registerContainerUpdated((container) => broadcastContainerEvent('updated', container));
     registerContainerRemoved((container) => broadcastContainerEvent('removed', container));
+    registerWatcherStatus(broadcastWatcherStatus);
 
     router.use(nocache());
     router.get('/', getContainers);

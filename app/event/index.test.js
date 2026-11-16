@@ -22,6 +22,9 @@ const eventTestCases = [
     }, {
         emitter: event.emitWatcherStop,
         register: event.registerWatcherStop,
+    }, {
+        emitter: event.emitWatcherStatus,
+        register: event.registerWatcherStatus,
     },
 ];
 test.each(eventTestCases)(
@@ -32,9 +35,10 @@ test.each(eventTestCases)(
         register(handlerMock);
 
         // Emit the event
-        emitter();
+        emitter('payload');
 
         // Ensure handler is called
-        expect(handlerMock.mock.calls.length === 1);
+        expect(handlerMock).toHaveBeenCalledTimes(1);
+        expect(handlerMock).toHaveBeenCalledWith('payload');
     },
 );
